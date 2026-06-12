@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
 import styles from "./page.module.css";
+import Link from "next/link";
 
 const fadeUp = {
     hidden: { opacity: 0, y: 40 },
@@ -75,12 +76,18 @@ export default function Home() {
                             variants={fadeUp}
                             className="mb-12 flex flex-col items-center justify-center gap-4 sm:flex-row"
                         >
-                            <button className="flex w-full items-center gap-2 rounded-lg bg-accent px-8 py-3 font-semibold text-white transition hover:opacity-90 sm:w-auto justify-center">
+                            <Link
+                                href={"/plan"}
+                                className="flex w-full items-center gap-2 rounded-lg bg-accent px-8 py-3 font-semibold text-white transition hover:opacity-90 sm:w-auto justify-center"
+                            >
                                 {t("hero_start")} <ArrowRight size={20} />
-                            </button>
-                            <button className="flex w-full items-center gap-2 rounded-lg bg-muted px-8 py-3 font-semibold text-foreground transition hover:opacity-80 sm:w-auto justify-center">
+                            </Link>
+                            <Link
+                                href={"/explore"}
+                                className="flex w-full items-center gap-2 rounded-lg bg-muted px-8 py-3 font-semibold text-foreground transition hover:opacity-80 sm:w-auto justify-center"
+                            >
                                 {t("hero_demo")}
-                            </button>
+                            </Link>
                         </motion.div>
 
                         <motion.p
@@ -212,9 +219,12 @@ export default function Home() {
                     </div>
 
                     <motion.div variants={fadeUp} className="mt-16 text-center">
-                        <button className="mx-auto flex items-center gap-2 rounded-lg bg-accent px-8 py-3 font-semibold text-white transition hover:opacity-90">
+                        <Link
+                            href={"/plan"}
+                            className="mx-auto flex items-center gap-2 rounded-lg bg-accent px-8 py-3 font-semibold text-white transition hover:opacity-90"
+                        >
                             {t("solution_cta")} <ArrowRight size={20} />
-                        </button>
+                        </Link>
                     </motion.div>
                 </div>
             </motion.section>
@@ -323,12 +333,13 @@ export default function Home() {
                         {t("cta_desc")}
                     </motion.p>
 
-                    <motion.button
+                    <motion.a
+                        href={"/plan"}
                         variants={fadeUp}
                         className="inline-flex items-center gap-2 rounded-lg bg-accent px-10 py-4 text-lg font-semibold text-white transition hover:opacity-90"
                     >
                         {t("cta_btn")} <ArrowRight size={24} />
-                    </motion.button>
+                    </motion.a>
 
                     <motion.p
                         variants={fadeUp}
