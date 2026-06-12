@@ -1,0 +1,243 @@
+.container {
+    display: grid;
+    gap: 1rem;
+    background-color: var(--dim-bg);
+    padding: calc(clamp(56px, 6vh, 72px) + 0.5rem) 2rem 2rem 2rem;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--background);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+
+    padding: 1rem;
+}
+
+.title h1 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--foreground);
+}
+
+.title p {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--light-fg);
+}
+
+.actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.actions button {
+    padding: 0.5rem 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: var(--background);
+    cursor: pointer;
+    color: var(--foreground);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    transition: all 0.3s ease-in-out;
+    &:hover {
+        background-color: var(--dim-bg);
+    }
+
+    &:last-child {
+        background-color: var(--primary-clr);
+        border-color: var(--primary-clr);
+        color: white;
+    }
+    &:last-child:hover {
+        background-color: var(--light-primary);
+    }
+}
+
+.main {
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem 0;
+}
+
+.start {
+    width: 70%;
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.days {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.day {
+    height: 70px;
+    width: 70px;
+    padding: 1rem;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--background);
+    color: var(--foreground);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    cursor: pointer;
+
+    & p {
+        color: var(--light-fg);
+    }
+
+    &:last-child {
+        border-style: dashed;
+        color: var(--light-fg);
+    }
+
+    &:hover,
+    &:hover p {
+        border-color: var(--light-primary);
+        color: var(--primary-clr);
+    }
+
+    &.active,
+    &.active:hover,
+    &.active p {
+        background-color: var(--primary-clr);
+        color: white;
+        border-color: var(--primary-clr);
+    }
+}
+
+.day h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.itenerary {
+    width: fit-content;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    flex-grow: 1;
+}
+
+.iteneraryItem {
+    width: 100%;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 1rem;
+    background-color: var(--background);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+}
+
+.iteneraryItem.dragging {
+    opacity: 0.35;
+}
+
+.dragHandle {
+    display: flex;
+    align-items: center;
+    cursor: grab;
+    color: var(--light-fg);
+    touch-action: none;
+}
+
+.dragHandle:active {
+    cursor: grabbing;
+}
+
+.imageContainer {
+    width: 200px;
+    height: 120px;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.iteneraryItem .details {
+    height: 120px;
+    align-self: flex-start;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+}
+
+.iteneraryItem .details h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--foreground);
+}
+
+.iteneraryItem .details p {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--light-fg);
+
+    &:last-child {
+        padding-block: 0.5rem;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+}
+
+.itenerary .addOne {
+    width: 100%;
+    height: 140px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border: 3px dashed var(--border);
+    border-radius: 12px;
+    color: var(--light-fg);
+}
+
+.end {
+    width: 29%;
+    height: fit-content;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background-color: var(--background);
+    color: var(--foreground);
+}
+
+.recoms {
+    width: 100%;
+    height: 200px;
+    background-color: var(--border);
+    border-radius: 6px;
+    color: var(--light-fg);
+    padding: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.fullLoader {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

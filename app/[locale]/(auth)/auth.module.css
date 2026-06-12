@@ -1,0 +1,513 @@
+.container * {
+    font-family: inherit;
+}
+
+.container {
+    display: flex;
+    height: 100vh;
+}
+
+/* LEFT */
+.left {
+    height: 100%;
+    flex: 1;
+    background: url("../../../public/p2.jpg") center/cover no-repeat;
+    position: relative;
+}
+
+.overlay {
+    padding: 2rem 1rem;
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    color: white;
+    font-size: 1.5rem;
+    text-align: center;
+    background: #e9934463;
+    backdrop-filter: blur(5px);
+}
+
+/* RIGHT */
+.right {
+    height: 100%;
+    overflow: auto;
+    padding: 2rem 1rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* FORM */
+.formBox {
+    width: 100%;
+    max-width: 400px;
+}
+
+.title {
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+}
+
+.subtitle {
+    margin-bottom: 1.5rem;
+    color: #666;
+}
+
+.roleSwitch {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 1rem;
+}
+
+.roleBtn {
+    flex: 1;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    cursor: pointer;
+    background: white;
+}
+
+.active {
+    background: #ff6b2c;
+    color: white;
+    border: none;
+}
+
+.input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+
+.button {
+    width: 100%;
+    padding: 12px;
+    background: #ff6b2c;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.link {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+}
+
+.card {
+    width: 100%;
+    max-width: 420px;
+}
+
+.stripe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #eb662b, #f08455);
+    border-radius: 2px 2px 0 0;
+}
+
+/* Header */
+.header {
+    margin-bottom: 2rem;
+}
+
+.eyebrow {
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #eb662b;
+    margin-bottom: 0.5rem;
+}
+
+.title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #1a1714;
+    line-height: 1.2;
+}
+
+.title em {
+    font-style: italic;
+    color: #eb662b;
+}
+
+/* Alert */
+.alert {
+    border-radius: 2px;
+    padding: 0.85rem 1rem;
+    font-size: 0.82rem;
+    margin-bottom: 1.25rem;
+    border: 1px solid;
+}
+
+.alertError {
+    background: #fdf2f2;
+    border-color: #f5c6c6;
+    color: #8b1a1a;
+}
+.alertSuccess {
+    background: #f2fdf5;
+    border-color: #b6e8c4;
+    color: #1a5c2a;
+}
+
+/* Fields */
+.field {
+    margin-bottom: 1.25rem;
+    padding: 0 1rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    transition:
+        border-color 0.2s,
+        background 0.2s;
+    -webkit-appearance: none;
+}
+
+/* Override Chrome/Edge autofill background */
+.field input:-webkit-autofill,
+.field input:-webkit-autofill:hover,
+.field input:-webkit-autofill:focus,
+.field input:-webkit-autofill:active {
+    -webkit-box-shadow: none;
+    box-shadow: none;
+    background-color: transparent !important;
+    background: transparent !important;
+}
+
+/* For Firefox */
+.field input:autofill {
+    background-color: transparent !important;
+    color: inherit !important;
+}
+
+.field label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #4a4540;
+    margin-bottom: 0.45rem;
+}
+
+.field input {
+    width: 100%;
+    height: 48px;
+    padding: 0 1rem;
+    font-family: inherit;
+    font-size: 0.95rem;
+    color: #1a1714;
+    outline: none;
+}
+
+.field:focus-within {
+    border-color: var(--primary-clr);
+    background: #ffffff;
+}
+
+.inputError {
+    border-color: #c0392b !important;
+}
+
+.fieldError {
+    display: block;
+    font-size: 0.72rem;
+    color: #c0392b;
+    margin-top: 0.3rem;
+}
+
+/* Forgot */
+.forgot {
+    text-align: right;
+    margin-top: -0.75rem;
+    margin-bottom: 1.25rem;
+}
+
+.forgot a {
+    font-size: 0.75rem;
+    color: #4a4540;
+    text-decoration: none;
+    border-bottom: 1px solid #d4ccbc;
+    padding-bottom: 1px;
+    transition:
+        color 0.2s,
+        border-color 0.2s;
+}
+
+.forgot a:hover {
+    color: #eb662b;
+    border-color: #eb662b;
+}
+
+/* Role selector */
+.roleFieldset {
+    border: none;
+    padding: 0;
+    margin-bottom: 1.25rem;
+}
+
+.roleLabel {
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #4a4540;
+    margin-bottom: 0.6rem;
+    display: block;
+}
+
+.roleCards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+}
+
+.roleCard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    border: 1.5px solid #d4ccbc;
+    border-radius: 8px;
+    padding: 0.85rem 0.75rem;
+    cursor: pointer;
+    background: #f5f0e8;
+    transition:
+        border-color 0.2s,
+        background 0.2s;
+    user-select: none;
+}
+
+.roleCard:hover {
+    border-color: #b9b5b0;
+}
+
+.roleCardActive {
+    border-color: #eb662b !important;
+    background: #fff3ee;
+}
+
+.roleRadio {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.roleIcon {
+    font-size: 1.4rem;
+    margin-bottom: 0.3rem;
+}
+
+.roleName {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #1a1714;
+}
+
+.roleDesc {
+    font-size: 0.7rem;
+    color: #4a4540;
+    margin-top: 0.15rem;
+    line-height: 1.4;
+}
+
+/* Submit */
+.btnSubmit {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+    height: 48px;
+    border: none;
+    border-radius: 8px;
+    background: #1a1714;
+    color: #ffffff;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition:
+        background 0.2s,
+        transform 0.1s;
+    margin-top: 0.5rem;
+}
+
+.btnSubmit:hover {
+    background: #2d2820;
+}
+.btnSubmit:active {
+    transform: scale(0.99);
+}
+.btnSubmit.loading {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+/* Note */
+.note {
+    text-align: center;
+    margin-top: 1.5rem;
+    font-size: 0.8rem;
+    color: #4a4540;
+}
+
+.note a {
+    color: #eb662b;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.note a:hover {
+    text-decoration: underline;
+}
+
+.options {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.rememberLabel {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    user-select: none;
+    margin-bottom: 1.25rem;
+    width: fit-content;
+}
+
+.rememberCheckbox {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    min-width: 16px;
+    border: 1.5px solid #d4ccbc;
+    border-radius: 2px;
+    background: #f5f0e8;
+    cursor: pointer;
+    transition:
+        border-color 0.2s,
+        background 0.2s;
+    position: relative;
+}
+
+.rememberCheckbox:checked {
+    background: #eb662b;
+    border-color: #eb662b;
+}
+
+/* Checkmark */
+.rememberCheckbox:checked::after {
+    content: "";
+    position: absolute;
+    top: 1px;
+    left: 4px;
+    width: 5px;
+    height: 9px;
+    border: 2px solid #ffffff;
+    border-top: none;
+    border-left: none;
+    transform: rotate(45deg);
+}
+
+.rememberCheckbox:focus-visible {
+    outline: 2px solid #eb662b;
+    outline-offset: 2px;
+}
+
+.rememberText {
+    font-size: 0.82rem;
+    color: #4a4540;
+    transition: color 0.2s;
+}
+
+.rememberLabel:has(.rememberCheckbox:checked) .rememberText {
+    color: #eb662b;
+}
+
+.rememberNote {
+    font-size: 0.72rem;
+    color: #4a4540;
+    margin-top: -0.85rem;
+    margin-bottom: 1.25rem;
+    padding-left: 1.5rem;
+    border-left: 2px solid #eb662b;
+    line-height: 1.5;
+}
+
+.passwordField {
+    margin-bottom: 1.5rem;
+    width: 100%;
+}
+
+.passwordWrapper {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.passwordWrapper input {
+    width: 100%;
+    padding-right: 2.5rem; /* Make room for the eye button */
+}
+
+.eyeButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6b7280;
+    transition: color 0.2s ease;
+    border-radius: 0.375rem;
+}
+
+.eyeButton:hover {
+    color: #374151;
+}
+
+.eyeButton:focus {
+    outline: none;
+    ring: 2px solid var(--primary-clr);
+}
+
+/* If you want the eye button to be visible on hover only (optional) */
+.passwordWrapper:not(:hover) .eyeButton {
+    opacity: 0.7;
+}
+
+.passwordWrapper:hover .eyeButton {
+    opacity: 1;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+    .eyeButton {
+        right: 0.5rem;
+    }
+
+    .eyeButton svg {
+        width: 16px;
+        height: 16px;
+    }
+}

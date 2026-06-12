@@ -1,0 +1,75 @@
+.searchContainer {
+    position: relative;
+    width: 300px;
+    max-width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0, 0, 0, 0.03);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.5rem 1rem;
+    transition: all 0.2s ease;
+}
+
+.searchContainer.focused {
+    background: var(--background);
+    border-color: var(--primary-clr);
+    box-shadow: 0 0 0 2px rgba(246, 149, 59, 0.1);
+}
+.searchInput {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-family: inherit;
+    font-size: 1rem;
+    color: var(--light-fg);
+    padding: 0;
+}
+
+.searchInput::placeholder {
+    color: var(--light-fg);
+}
+
+.searchInput:focus {
+    outline: none;
+}
+
+.clearButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 30px;
+    font-weight: 600;
+    border-radius: 50%;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--primary-clr);
+    padding: 0;
+    margin-left: 4px;
+    flex-shrink: 0;
+    transition: color 0.2s ease;
+}
+
+.clearButton:hover {
+    background-color: #00000023;
+}
+
+.clearButton:focus {
+    outline: 2px solid var(--primary-clr);
+    outline-offset: 2px;
+}
+
+.clearButton svg {
+    width: 16px;
+    height: 16px;
+}
+
+@media (max-width: 768px) {
+    .searchContainer {
+        width: 200px;
+    }
+}

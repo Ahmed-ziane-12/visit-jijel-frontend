@@ -1,0 +1,146 @@
+.container {
+    display: flex;
+    margin: 0;
+    justify-content: center;
+    align-items: center;
+    gap: 0;
+    height: 100%;
+    width: 100%;
+}
+
+.left {
+    padding: 4rem;
+    width: 50%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.left h1 {
+    font-family: inherit;
+    font-size: 4rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+
+.left h1 span {
+    color: var(--primary-clr);
+}
+
+.left p {
+    font-family: inherit;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+.right {
+    width: 50%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.problems {
+    width: 80%;
+    height: 90%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.row {
+    width: 100%;
+    height: 40%;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 1rem;
+}
+
+.row:first-child {
+    justify-content: flex-start;
+}
+
+.problems .row .problem {
+    width: 200px;
+    height: 100%;
+    border: 2px solid var(--primary-clr);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.problem .icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: var(--light-primary);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.problem p {
+    font-family: inherit;
+    width: 60%;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+        gap: 2rem;
+        padding: 1rem;
+    }
+
+    .left {
+        width: 100%;
+        padding: 1rem;
+        align-items: center;
+        text-align: center;
+    }
+
+    .left h1 {
+        font-size: 2.2rem;
+        text-align: center;
+    }
+
+    .left p {
+        text-align: center;
+    }
+
+    .right {
+        width: 100%;
+    }
+
+    .problems {
+        width: 100%;
+        gap: 1rem;
+    }
+
+    .row {
+        height: auto;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .row:first-child {
+        justify-content: center;
+    }
+
+    .problems .row .problem {
+        width: 160px;
+        height: 140px;
+    }
+}

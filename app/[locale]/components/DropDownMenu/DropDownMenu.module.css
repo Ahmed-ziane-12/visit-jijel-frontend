@@ -1,0 +1,197 @@
+/* ─── Variables ─────────────────────────────────────────────────────────────── */
+.wrapper {
+    --dd-bg: var(--background);
+    --dd-border: var(--border);
+    --dd-shadow:
+        0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 10px 24px -4px rgba(0, 0, 0, 0.1);
+    --dd-radius: 10px;
+    --dd-item-radius: 6px;
+    --dd-font-size: 0.875rem;
+    --dd-title-size: 0.75rem;
+
+    /* item colours */
+    --dd-default-color: var(--foreground);
+    --dd-default-hover: var(--dim-bg);
+    --dd-danger-color: #dc2626;
+    --dd-danger-hover: var(--dim-bg);
+    --dd-warning-color: var(--primary-clr);
+    --dd-warning-hover: var(--dim-bg);
+    --dd-success-color: #16a34a;
+    --dd-success-hover: var(--dim-bg);
+    --dd-disabled-color: var(--dim-bg);
+
+    position: relative;
+    display: inline-block;
+}
+
+/* ─── Trigger ────────────────────────────────────────────────────────────────── */
+.trigger {
+    display: inline-flex;
+    cursor: pointer;
+    user-select: none;
+}
+
+/* ─── Menu panel ─────────────────────────────────────────────────────────────── */
+.menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    z-index: 9999;
+    background: var(--dd-bg);
+    border: 1px solid var(--dd-border);
+    border-radius: var(--dd-radius);
+    box-shadow: var(--dd-shadow);
+    padding: 4px;
+    font-size: var(--dd-font-size);
+    color: var(--dd-default-color);
+    animation: ddOpen 0.15s cubic-bezier(0.16, 1, 0.3, 1) both;
+    transform-origin: top right;
+}
+
+/* LTR — align to the right edge of the trigger */
+.menu.right {
+    right: 0;
+    left: auto;
+}
+
+.menu.left {
+    left: 0;
+    right: auto;
+}
+
+/* RTL — flip alignment */
+:dir(rtl) .menu.right,
+[dir="rtl"] .menu.right {
+    right: auto;
+    left: 0;
+    transform-origin: top left;
+}
+
+:dir(rtl) .menu.left,
+[dir="rtl"] .menu.left {
+    left: auto;
+    right: 0;
+    transform-origin: top right;
+}
+
+/* RTL — flip the entrance animation origin */
+:dir(rtl) .menu,
+[dir="rtl"] .menu {
+    transform-origin: top left;
+}
+@keyframes ddOpen {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* ─── Title ──────────────────────────────────────────────────────────────────── */
+.title {
+    padding: 8px 10px 6px;
+    font-size: var(--dd-title-size);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #71717a;
+}
+
+/* ─── Divider ────────────────────────────────────────────────────────────────── */
+.divider {
+    height: 1px;
+    background: var(--dd-border);
+    margin: 4px 0;
+}
+
+/* ─── Items ──────────────────────────────────────────────────────────────────── */
+.item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 7px 10px;
+    border: none;
+    background: transparent;
+    border-radius: var(--dd-item-radius);
+    font-family: var(--dd-font);
+    font-size: var(--dd-font-size);
+    font-weight: 450;
+    text-align: left;
+    cursor: pointer;
+    transition:
+        background 0.1s ease,
+        color 0.1s ease;
+    white-space: nowrap;
+}
+
+:dir(rtl) .item,
+[dir="rtl"] .item {
+    text-align: right;
+    flex-direction: row-reverse;
+}
+/* variants */
+.item.default {
+    color: var(--dd-default-color);
+}
+.item.default:hover:not(.disabled) {
+    background: var(--dd-default-hover);
+}
+
+.item.danger {
+    color: var(--dd-danger-color);
+}
+.item.danger:hover:not(.disabled) {
+    background: var(--dd-danger-hover);
+}
+
+.item.warning {
+    color: var(--dd-warning-color);
+}
+.item.warning:hover:not(.disabled) {
+    background: var(--dd-warning-hover);
+}
+
+.item.success {
+    color: var(--dd-success-color);
+}
+.item.success:hover:not(.disabled) {
+    background: var(--dd-success-hover);
+}
+
+/* disabled state */
+.item.disabled {
+    color: var(--dd-disabled-color);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* ─── Icon ───────────────────────────────────────────────────────────────────── */
+.icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 15px;
+    flex-shrink: 0;
+}
+
+.icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 2px; /* optional, looks nicer */
+}
+
+/* ─── Label ──────────────────────────────────────────────────────────────────── */
+.label {
+    flex: 1;
+    line-height: 1.4;
+}
+
+/* ─── Bottom section ─────────────────────────────────────────────────────────── */
+.bottom {
+    padding: 6px 4px 2px;
+}

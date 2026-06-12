@@ -1,0 +1,93 @@
+/* components/SortBy/SortBy.module.css */
+
+.sortContainer {
+    position: relative;
+    display: inline-block;
+}
+
+.sortButton {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background-color: var(--background);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--foreground);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.sortButton:hover {
+    background-color: var(--dim-bg);
+}
+
+.sortLabel {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 40;
+}
+
+.dropdown {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    right: 0;
+    min-width: 180px;
+    background-color: var(--dim-bg);
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    z-index: 50;
+    overflow: hidden;
+}
+
+.sortOption {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.625rem 1rem;
+    background: none;
+    border: none;
+    font-size: 0.875rem;
+    color: var(--light-fg);
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+    text-align: left;
+}
+
+.sortOption:hover {
+    background-color: var(--border);
+}
+
+.sortOption.active {
+    background-color: var(--lighter-primary);
+    color: var(--primary-clr);
+}
+
+.optionIcon {
+    display: flex;
+    align-items: center;
+    width: 20px;
+    color: #64748b;
+}
+
+.active .optionIcon {
+    color: var(--primary-clr);
+}
+
+.checkmark {
+    margin-left: auto;
+    font-weight: bold;
+}

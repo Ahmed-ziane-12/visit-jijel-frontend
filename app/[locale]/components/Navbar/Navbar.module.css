@@ -1,0 +1,445 @@
+.container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: 0.5rem 2rem;
+    height: clamp(56px, 6vh, 72px);
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+    background-color: #00000000;
+    color: var(--foreground);
+    z-index: 4000;
+    transition: all 0.5s ease-in-out;
+
+    &.scrolled {
+        background-color: var(--background);
+        color: var(--foreground);
+    }
+}
+
+.logo {
+    height: 100%;
+    width: 10vw;
+    min-width: 100px;
+    transition: all 0.3s ease-in-out;
+}
+
+.logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+/* Desktop Navigation */
+.menu {
+    height: 100%;
+    margin-inline-end: auto;
+}
+
+.links {
+    height: 100%;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.links li {
+    padding: 0.5rem;
+    position: relative;
+
+    &:hover {
+        color: var(--primary-clr);
+        &::after {
+            width: 100%;
+        }
+    }
+
+    &.active {
+        color: var(--primary-clr);
+        &::after {
+            width: 100%;
+        }
+    }
+
+    &::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0;
+        height: 1px;
+        transition: all 0.3s ease-in-out;
+        background: var(--primary-clr);
+    }
+}
+
+/* Desktop Right Section */
+.desktopRight {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.themeToggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    cursor: pointer;
+    padding: 0.45rem;
+    color: var(--foreground);
+    transition: all 0.2s;
+    line-height: 0;
+}
+
+.themeToggle:hover {
+    background: var(--dim-bg);
+    border-color: var(--primary-clr);
+    color: var(--primary-clr);
+}
+
+.auth {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.login {
+    color: var(--primary-clr);
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--primary-clr);
+    border-radius: var(--radius);
+    transition: all 0.3s ease-in;
+    text-wrap: nowrap;
+
+    &:hover {
+        background: var(--primary-clr);
+        color: white;
+    }
+}
+
+.link {
+    width: 100%;
+    height: 100%;
+    transition: all 0.3s ease-in;
+}
+
+/* Mobile Menu Button */
+.mobileMenuButton {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    transition: all 0.3s ease;
+    color: inherit;
+
+    &:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+}
+
+/* Mobile Overlay */
+.mobileOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 8999;
+    animation: fadeIn 0.3s ease;
+}
+
+/* Mobile Menu */
+.mobileMenu {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 80%;
+    max-width: 320px;
+    height: 100vh;
+    background-color: var(--background, white);
+    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+    z-index: 9000;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    overflow-y: auto;
+    animation: slideIn 0.3s ease;
+}
+
+.mobileSearch {
+    width: 100%;
+}
+
+.mobileLinks {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.mobileLinks li {
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    transition: all 0.3s ease;
+
+    &:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+        color: var(--primary-clr);
+    }
+
+    &.active {
+        background-color: rgba(235, 102, 43, 0.1);
+        color: var(--primary-clr);
+    }
+}
+
+.mobileLinks li .link {
+    display: block;
+    width: 100%;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.mobileFooter {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.mobileLanguage {
+    width: 100%;
+}
+
+.mobileAuth {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.mobileLink {
+    padding: 0.75rem 1rem;
+    text-align: center;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    background-color: rgba(0, 0, 0, 0.05);
+
+    &:hover {
+        background-color: rgba(0, 0, 0, 0.1);
+    }
+}
+
+.mobileLogin {
+    padding: 0.75rem 1rem;
+    text-align: center;
+    background-color: var(--primary-clr);
+    color: white;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+
+    &:hover {
+        opacity: 0.9;
+        transform: translateY(-2px);
+    }
+}
+
+/* Skeletons */
+.avatarSkeleton {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(90deg, #f0ece4 25%, #e8e3d9 50%, #f0ece4 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.2s infinite;
+}
+
+.linkSkeleton {
+    width: 8ch;
+    height: 40px;
+    border-radius: 8px;
+    background: linear-gradient(90deg, #f0ece4 25%, #e8e3d9 50%, #f0ece4 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.2s infinite;
+}
+
+/* Animations */
+@keyframes shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
+
+/* Media Queries */
+@media (max-width: 1200px) {
+    .container {
+        gap: 1.5rem;
+    }
+}
+
+@media (max-width: 1024px) {
+    .container {
+        gap: 1rem;
+        padding: 0.5rem 1rem;
+    }
+
+    .logo {
+        width: 15vw;
+        min-width: 80px;
+    }
+}
+
+/* Breakpoint at 965px - hide desktop navigation, show menu icon, keep searchbar */
+@media (max-width: 965px) {
+    .menu {
+        display: none;
+    }
+
+    .mobileMenuButton {
+        display: flex;
+    }
+
+    /* Keep only search bar visible on the right */
+    .desktopRight {
+        display: flex;
+        gap: 0.75rem;
+    }
+
+    /* Hide language dropdown and auth section on desktop right */
+    .desktopRight .auth,
+    .desktopRight .login {
+        display: none;
+    }
+
+    /* Hide language dropdown */
+    .desktopRight :global(.languageDropdown),
+    .desktopRight > div:has(.languageDropdown) {
+        display: none;
+    }
+
+    /* But keep search bar visible */
+    .desktopRight .searchWrapper {
+        display: block;
+    }
+}
+
+/* Breakpoint at 768px - adjust spacing */
+@media (max-width: 768px) {
+    .container {
+        padding: 0.5rem 1rem;
+        gap: 0.75rem;
+    }
+
+    .logo {
+        width: 20vw;
+        min-width: 60px;
+    }
+
+    .desktopRight {
+        gap: 0.5rem;
+    }
+}
+
+/* Breakpoint at 600px - make search bar smaller */
+@media (max-width: 600px) {
+    .desktopRight .searchWrapper :global(input) {
+        width: 150px;
+    }
+}
+
+/* Breakpoint at 555px - HIDE SEARCHBAR */
+@media (max-width: 555px) {
+    .desktopRight .searchWrapper {
+        display: none;
+    }
+
+    /* Adjust container padding */
+    .container {
+        padding: 0.5rem 1rem;
+        justify-content: space-between;
+    }
+
+    /* Make logo a bit larger to fill space */
+    .logo {
+        width: 30vw;
+        min-width: 70px;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 0.5rem 0.75rem;
+    }
+
+    .logo {
+        width: 35vw;
+        min-width: 60px;
+    }
+
+    .mobileMenu {
+        width: 85%;
+        padding: 1rem;
+    }
+}
+
+/* Large screens - ensure everything shows normally */
+@media (min-width: 966px) {
+    .mobileMenuButton,
+    .mobileOverlay,
+    .mobileMenu {
+        display: none;
+    }
+
+    .desktopRight {
+        display: flex;
+    }
+
+    .desktopRight .auth,
+    .desktopRight .login {
+        display: flex;
+    }
+
+    .desktopRight .searchWrapper {
+        display: block;
+    }
+}

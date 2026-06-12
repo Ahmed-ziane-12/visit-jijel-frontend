@@ -1,0 +1,20 @@
+.stepContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+}
+
+.title {
+    font-family: inherit;
+    font-size: 24px;
+    font-weight: 700;
+}
+.description {
+    font-size: 16px;
+    color: var(--text-secondary);
+}
+.stepContent {
+    position: relative;
+    z-index: 0;
+}

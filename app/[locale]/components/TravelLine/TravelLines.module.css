@@ -1,0 +1,34 @@
+/* components/AnimatedBackground.module.css */
+
+.svg {
+    pointer-events: none;
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
+
+.trail1 {
+    animation: trail 12s ease-in-out infinite;
+}
+
+.trail2 {
+    animation: trail 16s 2s ease-in-out infinite;
+}
+
+@keyframes trail {
+    from {
+        stroke-dashoffset: 2400;
+    }
+    to {
+        stroke-dashoffset: -2400;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .trail1,
+    .trail2 {
+        animation: none;
+    }
+}
