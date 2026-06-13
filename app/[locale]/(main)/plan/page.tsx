@@ -79,6 +79,7 @@ export default function PlanPage() {
                 setNextError(t("preview.dates_required"));
                 return;
             }
+            sessionStorage.setItem("plan", JSON.stringify(plan));
             router.push("/trip/1");
             return;
         }

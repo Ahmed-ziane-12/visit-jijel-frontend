@@ -244,7 +244,8 @@
         "no_recommendations": "Aucune recommandation disponible pour ce voyage",
         "map_view": "Vue carte",
         "share_trip": "Partager le voyage",
-        "day_label": "Jour"
+        "day_label": "Jour",
+        "building": "Génération de votre itinéraire..."
     },
     "dashboard": {
         "title": "Tableau de bord",

@@ -244,7 +244,8 @@
         "no_recommendations": "لا توجد توصيات متاحة لهذه الرحلة",
         "map_view": "عرض الخريطة",
         "share_trip": "مشاركة الرحلة",
-        "day_label": "اليوم"
+        "day_label": "اليوم",
+        "building": "جاري إنشاء خط سير الرحلة..."
     },
     "dashboard": {
         "title": "لوحة التحكم",
