@@ -130,6 +130,15 @@ function MapViewPopup({
         let cancelled = false;
 
         (async () => {
+            if (!document.getElementById("leaflet-css")) {
+                const link = document.createElement("link");
+                link.id = "leaflet-css";
+                link.rel = "stylesheet";
+                link.href =
+                    "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
+                document.head.appendChild(link);
+            }
+
             const L = (await import("leaflet")).default;
             if (cancelled || !containerRef.current) return;
 
@@ -159,6 +168,9 @@ function MapViewPopup({
             ).addTo(map);
 
             mapRef.current = map;
+
+            // Fix tile positioning for maps rendered in a popup
+            requestAnimationFrame(() => map.invalidateSize());
         })();
 
         return () => {

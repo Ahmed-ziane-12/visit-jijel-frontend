@@ -125,8 +125,8 @@ export default function ProfilePage() {
                 email: user.email,
                 phone: user.profile?.phone || "",
                 bio: user.profile?.bio || "",
-                coverImage: "/p2.jpg",
-                profileImage: "/profile.jpeg",
+                coverImage: "https://placehold.net/8-800x600.png",
+                profileImage: "https://placehold.net/avatar-5.png",
             });
             setEditForm({
                 name: user.name,
