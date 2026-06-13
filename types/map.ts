@@ -85,4 +85,6 @@ export interface IteneraryItem {
     end_time: string;
     item_type: "destination" | "listing" | "event" | (string & {});
     image_url?: string;
+    latitude?: number;
+    longitude?: number;
 }

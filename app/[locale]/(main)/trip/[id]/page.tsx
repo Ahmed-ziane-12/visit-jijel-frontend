@@ -3,7 +3,7 @@ import { useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
 import styles from "./trip.module.css";
 import type { Itenirary, IteneraryItem, IteneraryDay, Destination } from "@/types/map";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
     AlarmClock,
     CalendarDays,
@@ -13,6 +13,7 @@ import {
     Map,
     Plus,
     Share2,
+    X,
 } from "lucide-react";
 import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
@@ -109,6 +110,135 @@ function SortableItem({ item }: { item: IteneraryItem }) {
     );
 }
 
+function MapViewPopup({
+    days,
+    onClose,
+}: {
+    days: IteneraryDay[];
+    onClose: () => void;
+}) {
+    const [activeDayId, setActiveDayId] = useState(days[0]?.id);
+    const containerRef = useRef<HTMLDivElement>(null);
+    const mapRef = useRef<any>(null);
+    const markersRef = useRef<any[]>([]);
+    const polylineRef = useRef<any>(null);
+
+    const activeDay = days.find((d) => d.id === activeDayId);
+
+    useEffect(() => {
+        if (!containerRef.current || mapRef.current) return;
+        let cancelled = false;
+
+        (async () => {
+            const L = (await import("leaflet")).default;
+            if (cancelled || !containerRef.current) return;
+
+            delete (L.Icon.Default.prototype as any)._getIconUrl;
+            L.Icon.Default.mergeOptions({
+                iconRetinaUrl:
+                    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+                iconUrl:
+                    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+                shadowUrl:
+                    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+            });
+
+            const map = L.map(containerRef.current, {
+                center: [36.8233, 5.7667],
+                zoom: 12,
+                zoomControl: true,
+            });
+
+            L.tileLayer(
+                "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                {
+                    attribution:
+                        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+                    maxZoom: 19,
+                },
+            ).addTo(map);
+
+            mapRef.current = map;
+        })();
+
+        return () => {
+            cancelled = true;
+        };
+    }, []);
+
+    useEffect(() => {
+        const map = mapRef.current;
+        const items = activeDay?.items;
+        if (!map || !items) return;
+
+        (async () => {
+            const L = (await import("leaflet")).default;
+            if (!mapRef.current) return;
+
+            markersRef.current.forEach((m) => m.remove());
+            markersRef.current = [];
+            polylineRef.current?.remove();
+
+            const coords: [number, number][] = [];
+
+            for (const item of items) {
+                if (item.latitude && item.longitude) {
+                    coords.push([item.latitude, item.longitude]);
+
+                    const marker = L.marker([item.latitude, item.longitude])
+                        .addTo(map)
+                        .bindPopup(
+                            `<b>${item.title}</b><br/>${item.start_time} - ${item.end_time}`,
+                        );
+
+                    markersRef.current.push(marker);
+                }
+            }
+
+            if (coords.length >= 2) {
+                polylineRef.current = L.polyline(coords, {
+                    color: "#4f46e5",
+                    weight: 3,
+                    opacity: 0.7,
+                }).addTo(map);
+            }
+
+            if (coords.length > 0) {
+                map.fitBounds(L.latLngBounds(coords), { padding: [50, 50] });
+            }
+        })();
+    }, [activeDay]);
+
+    return (
+        <div className={styles.mapPopup}>
+            <div className={styles.mapPopupContent}>
+                <button
+                    className={styles.mapPopupClose}
+                    onClick={onClose}
+                    aria-label="Close"
+                >
+                    <X size={24} />
+                </button>
+
+                <div className={styles.mapPopupTabs}>
+                    {days.map((day) => (
+                        <button
+                            key={day.id}
+                            className={`${styles.mapPopupTab} ${activeDayId === day.id ? styles.mapPopupTabActive : ""}`}
+                            onClick={() => setActiveDayId(day.id)}
+                        >
+                            Day {day.day_number}
+                            <span>{day.day_date}</span>
+                        </button>
+                    ))}
+                </div>
+
+                <div ref={containerRef} className={styles.mapPopupMap} />
+            </div>
+        </div>
+    );
+}
+
 const TripPage = () => {
     const t = useTranslations("trip");
     const params = useParams();
@@ -120,6 +250,7 @@ const TripPage = () => {
     const [itenirary, setItenirary] = useState<Itenirary | null>(null);
     const [saving, setSaving] = useState(false);
     const [selectedDayId, setSelectedDayId] = useState<number | null>(null);
+    const [showMap, setShowMap] = useState(false);
 
     useEffect(() => {
         // 1. Try localStorage first
@@ -213,6 +344,8 @@ const TripPage = () => {
                             end_time: TIME_SLOTS[idx].end,
                             item_type: "destination",
                             image_url: d.media?.[0]?.secure_url,
+                            latitude: d.latitude,
+                            longitude: d.longitude,
                         })),
                     });
                 }
@@ -341,7 +474,7 @@ const TripPage = () => {
                 </div>
 
                 <div className={styles.actions}>
-                    <button>
+                    <button onClick={() => setShowMap(true)}>
                         <Map />
                         {t("map_view")}
                     </button>
@@ -477,6 +610,13 @@ const TripPage = () => {
                     </div>
                 </div>
             </div>
+
+            {showMap && itenirary.days && (
+                <MapViewPopup
+                    days={itenirary.days}
+                    onClose={() => setShowMap(false)}
+                />
+            )}
         </motion.div>
     );
 };
