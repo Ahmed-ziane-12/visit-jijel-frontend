@@ -36,7 +36,8 @@ import { CSS } from "@dnd-kit/utilities";
 import { addDays, differenceInDays, format } from "date-fns";
 import axios from "@/lib/axios";
 
-// ── Haversine distance (km) ───────────────────────────────────
+const STORAGE_PREFIX = "trip_";
+
 function haversineKm(
     lat1: number,
     lng1: number,
@@ -54,7 +55,6 @@ function haversineKm(
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-// ── Sortable item component ───────────────────────────────────
 function SortableItem({ item }: { item: IteneraryItem }) {
     const {
         attributes,
@@ -107,31 +107,38 @@ const TripPage = () => {
     const t = useTranslations("trip");
     const params = useParams();
     const tripId = params.id as string;
+    const storageKey = STORAGE_PREFIX + tripId;
+
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-
     const [itenirary, setItenirary] = useState<Itenirary | null>(null);
+    const [saving, setSaving] = useState(false);
+    const [selectedDayId, setSelectedDayId] = useState<number | null>(null);
 
-    // Generate itinerary on mount
     useEffect(() => {
-        const raw = sessionStorage.getItem("plan");
+        // 1. Try localStorage first
+        const stored = localStorage.getItem(storageKey);
+        if (stored) {
+            try {
+                const parsed: Itenirary = JSON.parse(stored);
+                setItenirary(parsed);
+                setLoading(false);
+                return;
+            } catch {
+                localStorage.removeItem(storageKey);
+            }
+        }
 
+        // 2. Try sessionStorage (fresh from plan page)
+        const raw = sessionStorage.getItem("plan");
         if (!raw) {
-            // No plan — try to fetch existing itinerary from backend
-            axios
-                .get<Itenirary>(`/api/v1/itineraries/${tripId}`)
-                .then((res) => {
-                    setItenirary(res.data);
-                    setLoading(false);
-                })
-                .catch(() => {
-                    setError("Itinerary not found");
-                    setLoading(false);
-                });
+            setError("Trip not found");
+            setLoading(false);
             return;
         }
 
         sessionStorage.removeItem("plan");
+        setSaving(true);
 
         const build = async () => {
             try {
@@ -140,7 +147,6 @@ const TripPage = () => {
                 const to = plan.dates.to ? new Date(plan.dates.to) : from;
                 const numDays = differenceInDays(to, from) + 1;
 
-                // Fetch all destinations
                 const destRes = await axios.get<Destination[]>("/api/v1/destinations");
                 const allDests = destRes.data.filter(
                     (d) => d.latitude != null && d.longitude != null,
@@ -156,16 +162,13 @@ const TripPage = () => {
                 const days: IteneraryDay[] = [];
 
                 for (let i = 0; i < numDays; i++) {
-                    // Available destinations (not yet used)
                     const available = allDests.filter((d) => !used.has(d.id));
                     if (available.length < 3) break;
 
-                    // Pick a random first destination
                     const firstIdx = Math.floor(Math.random() * available.length);
                     const first = available[firstIdx];
                     used.add(first.id);
 
-                    // Find 2 closest to first
                     const sorted = available
                         .filter((d) => d.id !== first.id)
                         .map((d) => ({
@@ -185,13 +188,12 @@ const TripPage = () => {
                     used.add(third.id);
 
                     const dateStr = format(addDays(from, i), "yyyy-MM-dd");
-                    // Temporary IDs (negative) for drag-and-drop before server save
                     const dayId = -(i + 1);
                     const baseItemId = i * 3;
 
                     days.push({
                         id: dayId,
-                        itinerary_id: 0,
+                        itinerary_id: Number(tripId),
                         day_date: dateStr,
                         day_number: i + 1,
                         items: [
@@ -232,71 +234,37 @@ const TripPage = () => {
                     });
                 }
 
-                // Save to backend
-                const itinRes = await axios.post<Itenirary>("/api/v1/itineraries", {
+                const itinerary: Itenirary = {
+                    id: Number(tripId),
+                    user_id: 0,
                     title: plan.title || "My Trip",
+                    notes: "",
                     start_date: format(from, "yyyy-MM-dd"),
                     end_date: format(to, "yyyy-MM-dd"),
-                });
-
-                const savedItin = itinRes.data;
-
-                for (const day of days) {
-                    const dayRes = await axios.post<IteneraryDay>(
-                        `/api/v1/itineraries/${savedItin.id}/days`,
-                        {
-                            day_date: day.day_date,
-                            day_number: day.day_number,
-                        },
-                    );
-                    const savedDay = dayRes.data;
-
-                    for (const item of day.items!) {
-                        const itemRes = await axios.post<IteneraryItem>(
-                            `/api/v1/itineraries/${savedItin.id}/days/${savedDay.id}/items`,
-                            {
-                                destination_id: item.destination_id,
-                                title: item.title,
-                                notes: item.description,
-                                start_time: item.start_time,
-                                end_time: item.end_time,
-                                sort_order: day.items!.indexOf(item),
-                                item_type: "destination",
-                            },
-                        );
-                        // Update the item ID with the server-assigned one
-                        item.id = itemRes.data.id;
-                        item.itinerary_day_id = itemRes.data.itinerary_day_id;
-                    }
-
-                    // Update day ID with server-assigned one
-                    day.id = savedDay.id;
-                    day.itinerary_id = savedDay.itinerary_id;
-                }
-
-                setItenirary({
-                    ...savedItin,
+                    visibility: "private",
+                    created_at: new Date().toISOString(),
                     days,
-                });
+                };
+
+                localStorage.setItem(storageKey, JSON.stringify(itinerary));
+                setItenirary(itinerary);
             } catch (err) {
                 console.error("Failed to build itinerary:", err);
                 setError("Failed to generate itinerary. Please try again.");
             } finally {
                 setLoading(false);
+                setSaving(false);
             }
         };
 
         build();
-    }, [tripId]);
-
-    const [selectedDayId, setSelectedDayId] = useState<number | null>(null);
+    }, [tripId, storageKey]);
 
     const selectedDay = useMemo(() => {
         if (!itenirary?.days) return null;
         return itenirary.days.find((day) => day.id === selectedDayId) ?? itenirary.days[0];
     }, [itenirary?.days, selectedDayId]);
 
-    // Auto-select first day when data loads
     useEffect(() => {
         if (itenirary?.days?.length && selectedDayId === null) {
             setSelectedDayId(itenirary.days[0].id);
@@ -309,7 +277,6 @@ const TripPage = () => {
 
     const [activeItem, setActiveItem] = useState<IteneraryItem | null>(null);
 
-    // ── Loading state ───────────────────────────────────────────
     if (loading) {
         const MotionLoader = motion(Loader2);
         return (
@@ -325,12 +292,12 @@ const TripPage = () => {
                     }}
                 />
                 <p className="mt-4 text-(--light-fg) font-medium">
-                    {t("building")}
+                    {saving ? t("building") : "Loading..."}
                 </p>
             </div>
         );
     }
-    // ── Error state ─────────────────────────────────────────────
+
     if (error || !itenirary) {
         return (
             <div className={styles.fullLoader}>
@@ -361,7 +328,9 @@ const TripPage = () => {
                     items: arrayMove(day.items, oldIndex, newIndex),
                 };
             });
-            return { ...prev, days: updatedDays };
+            const updated = { ...prev, days: updatedDays };
+            localStorage.setItem(storageKey, JSON.stringify(updated));
+            return updated;
         });
     };
 
