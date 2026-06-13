@@ -38,6 +38,12 @@ import axios from "@/lib/axios";
 
 const STORAGE_PREFIX = "trip_";
 
+const TIME_SLOTS = [
+    { start: "08:30", end: "10:30" },
+    { start: "11:00", end: "13:00" },
+    { start: "13:30", end: "15:30" },
+];
+
 function haversineKm(
     lat1: number,
     lng1: number,
@@ -191,46 +197,23 @@ const TripPage = () => {
                     const dayId = -(i + 1);
                     const baseItemId = i * 3;
 
+                    const dests = [first, second, third];
                     days.push({
                         id: dayId,
                         itinerary_id: Number(tripId),
                         day_date: dateStr,
                         day_number: i + 1,
-                        items: [
-                            {
-                                id: -(baseItemId + 1),
-                                itinerary_day_id: dayId,
-                                destination_id: first.id,
-                                title: first.name,
-                                description: first.description,
-                                start_time: "08:30",
-                                end_time: "10:30",
-                                item_type: "destination",
-                                image_url: first.media?.[0]?.secure_url,
-                            },
-                            {
-                                id: -(baseItemId + 2),
-                                itinerary_day_id: dayId,
-                                destination_id: second.id,
-                                title: second.name,
-                                description: second.description,
-                                start_time: "11:00",
-                                end_time: "13:00",
-                                item_type: "destination",
-                                image_url: second.media?.[0]?.secure_url,
-                            },
-                            {
-                                id: -(baseItemId + 3),
-                                itinerary_day_id: dayId,
-                                destination_id: third.id,
-                                title: third.name,
-                                description: third.description,
-                                start_time: "13:30",
-                                end_time: "15:30",
-                                item_type: "destination",
-                                image_url: third.media?.[0]?.secure_url,
-                            },
-                        ],
+                        items: dests.map((d, idx) => ({
+                            id: -(baseItemId + idx + 1),
+                            itinerary_day_id: dayId,
+                            destination_id: d.id,
+                            title: d.name,
+                            description: d.description,
+                            start_time: TIME_SLOTS[idx].start,
+                            end_time: TIME_SLOTS[idx].end,
+                            item_type: "destination",
+                            image_url: d.media?.[0]?.secure_url,
+                        })),
                     });
                 }
 
@@ -323,9 +306,14 @@ const TripPage = () => {
                 const oldIndex = day.items.findIndex((i) => i.id === active.id);
                 const newIndex = day.items.findIndex((i) => i.id === over.id);
                 if (oldIndex === -1 || newIndex === -1) return day;
+                const reordered = arrayMove(day.items, oldIndex, newIndex);
                 return {
                     ...day,
-                    items: arrayMove(day.items, oldIndex, newIndex),
+                    items: reordered.map((item, idx) => ({
+                        ...item,
+                        start_time: TIME_SLOTS[idx].start,
+                        end_time: TIME_SLOTS[idx].end,
+                    })),
                 };
             });
             const updated = { ...prev, days: updatedDays };
