@@ -6,12 +6,19 @@ import {
     Wallet,
     House,
     Heart,
+    AlertTriangle,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { PlanState } from "@/types/quiz";
 import styles from "./preview.module.css";
 
-const PreviewStep = ({ data }: { data: PlanState }) => {
+const PreviewStep = ({
+    data,
+    datesMissing,
+}: {
+    data: PlanState;
+    datesMissing?: boolean;
+}) => {
     const t = useTranslations("quiz.preview");
     const tv = useTranslations("quiz.vibe");
     const tb = useTranslations("quiz.budget");
@@ -38,8 +45,16 @@ const PreviewStep = ({ data }: { data: PlanState }) => {
         luxury: tb("luxury_label"),
         custom: tb("custom_budget"),
     };
+
     return (
         <div className={styles.container}>
+            {datesMissing && (
+                <div className={styles.missingBanner}>
+                    <AlertTriangle size={20} />
+                    <span>{t("dates_required")}</span>
+                </div>
+            )}
+
             {/* Dates & Travelers */}
             <div className={styles.section}>
                 <h2 className={styles.sectionTitle}>{t("dates_title")}</h2>

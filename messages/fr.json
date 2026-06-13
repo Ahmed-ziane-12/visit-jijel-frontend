@@ -409,7 +409,8 @@
             "accommodation_need": "Besoin d'aide",
             "preferences_label": "Préférences",
             "not_set": "Non défini",
-            "none_selected": "Aucun sélectionné"
+            "none_selected": "Aucun sélectionné",
+            "dates_required": "Veuillez définir vos dates de voyage à l'étape 1 avant de finaliser."
         }
     },
     "filter": {

@@ -267,3 +267,22 @@
         gap: 0.4rem;
     }
 }
+
+.errorBanner {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.75rem;
+    border-radius: 12px;
+    background-color: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #dc2626;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-align: center;
+}
+
+.nextDisabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}

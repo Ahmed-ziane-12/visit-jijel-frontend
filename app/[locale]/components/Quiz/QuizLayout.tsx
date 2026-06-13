@@ -18,6 +18,8 @@ type QuizLayoutProps = {
     isLastStep: boolean;
     onNext: () => void;
     onBack: () => void;
+    nextDisabled?: boolean;
+    nextErrorMessage?: string | null;
 };
 
 export default function QuizLayout({
@@ -32,6 +34,8 @@ export default function QuizLayout({
     isLastStep,
     onNext,
     onBack,
+    nextDisabled,
+    nextErrorMessage,
 }: QuizLayoutProps) {
     const t = useTranslations("plan");
 
@@ -64,6 +68,11 @@ export default function QuizLayout({
 
                 {/* BOTTOM */}
                 <footer className={styles.footer}>
+                    {nextErrorMessage && (
+                        <div className={styles.errorBanner}>
+                            {nextErrorMessage}
+                        </div>
+                    )}
                     <div className={styles.footerContent}>
                         <button
                             onClick={onBack}
@@ -123,7 +132,8 @@ export default function QuizLayout({
 
                             <button
                                 onClick={onNext}
-                                className={`${styles.nextButton} flex items-center gap-1`}
+                                disabled={nextDisabled}
+                                className={`${styles.nextButton} flex items-center gap-1 ${nextDisabled ? styles.nextDisabled : ""}`}
                             >
                                 {nextLabel}
                                 <ChevronRight size={16} />

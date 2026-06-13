@@ -409,7 +409,8 @@
             "accommodation_need": "Need help finding",
             "preferences_label": "Preferences",
             "not_set": "Not set",
-            "none_selected": "None selected"
+            "none_selected": "None selected",
+            "dates_required": "Please set your travel dates in Step 1 before finalizing."
         }
     },
     "filter": {

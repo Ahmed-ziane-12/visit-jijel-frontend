@@ -29,10 +29,13 @@ const INITIAL_PLAN: PlanState = {
 export default function PlanPage() {
     const [currentStep, setCurrentStep] = useState(0);
     const [plan, setPlan] = useState<PlanState>(INITIAL_PLAN);
+    const [nextError, setNextError] = useState<string | null>(null);
     const router = useRouter();
+    const t = useTranslations("plan");
 
     const updatePlan = (partial: Partial<PlanState>) => {
         setPlan((prev) => ({ ...prev, ...partial }));
+        setNextError(null);
     };
 
     const steps = [
@@ -67,20 +70,30 @@ export default function PlanPage() {
     ] as const;
 
     const activeStep = steps[currentStep];
+    const isLastStep = currentStep === steps.length - 1;
+    const datesMissing = isLastStep && !plan.dates?.from;
 
     const goNext = () => {
-        if (currentStep == steps.length - 1) router.push("/trip/1");
+        if (isLastStep) {
+            if (!plan.dates?.from) {
+                setNextError(t("preview.dates_required"));
+                return;
+            }
+            router.push("/trip/1");
+            return;
+        }
         if (currentStep >= steps.length - 1) return;
         setCurrentStep((prev) => prev + 1);
+        setNextError(null);
     };
 
     const goBack = () => {
         if (currentStep <= 0) return;
         setCurrentStep((prev) => prev - 1);
+        setNextError(null);
     };
 
     const progress = ((currentStep + 1) / steps.length) * 100;
-    const t = useTranslations("plan");
 
     return (
         <QuizLayout
@@ -91,9 +104,11 @@ export default function PlanPage() {
             progress={progress}
             nextLabel={t(activeStep.nextLabel)}
             canGoBack={currentStep > 0}
-            isLastStep={currentStep === steps.length - 1}
+            isLastStep={isLastStep}
             onNext={goNext}
             onBack={goBack}
+            nextDisabled={datesMissing}
+            nextErrorMessage={nextError}
         >
             <div className={styles.stepContainer}>
                 <AnimatePresence mode="wait">
@@ -132,7 +147,12 @@ export default function PlanPage() {
                         {currentStep === 2 && (
                             <Budget value={plan} onChange={setPlan} />
                         )}
-                        {currentStep === 3 && <PreviewStep data={plan} />}
+                        {currentStep === 3 && (
+                            <PreviewStep
+                                data={plan}
+                                datesMissing={!plan.dates?.from}
+                            />
+                        )}
                     </motion.div>
                 </AnimatePresence>
             </div>

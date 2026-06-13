@@ -409,7 +409,8 @@
             "accommodation_need": "أحتاج مساعدة في الإيجاد",
             "preferences_label": "التفضيلات",
             "not_set": "لم يتم التحديد",
-            "none_selected": "لم يتم اختيار أي شيء"
+            "none_selected": "لم يتم اختيار أي شيء",
+            "dates_required": "يرجى تحديد تواريخ سفرك في الخطوة 1 قبل إنهاء التخطيط."
         }
     },
     "filter": {
