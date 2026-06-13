@@ -20,7 +20,7 @@ const VibeCard = ({
     return (
         <div
             className={`
-        relative w-[220px] h-[300px] rounded-xl overflow-hidden cursor-pointer font-[inherit]
+        relative w-full sm:w-[220px] h-[280px] sm:h-[300px] rounded-xl overflow-hidden cursor-pointer font-[inherit]
         border-2 transition-all duration-250 ease-in-out
         ${selected ? "border-[#eb662b]" : "border-transparent"}
         group

@@ -5,6 +5,12 @@
     padding: 2rem;
 }
 
+@media (max-width: 768px) {
+    .stepContainer {
+        padding: 1rem;
+    }
+}
+
 .title {
     font-family: inherit;
     font-size: 24px;

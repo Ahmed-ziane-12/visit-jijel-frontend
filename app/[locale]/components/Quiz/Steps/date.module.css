@@ -26,11 +26,12 @@
 .travelersInput {
     width: 100%;
     display: flex;
-    justify-content: space-between;
+    gap: 1rem;
 }
 
 .adults,
 .children {
+    flex: 1;
     padding: 0.7rem 1rem;
     display: flex;
     align-items: center;
@@ -40,5 +41,11 @@
 
     &:focus-within {
         border-color: var(--primary-clr);
+    }
+}
+
+@media (max-width: 768px) {
+    .travelersInput {
+        flex-direction: column;
     }
 }
