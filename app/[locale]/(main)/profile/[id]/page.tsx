@@ -23,6 +23,7 @@ import axios from "@/lib/axios";
 import UploadModal from "@/app/[locale]/components/UploadModal/UploadModal";
 import dynamic from "next/dynamic";
 import { CalendarEvent } from "../../../components/Calendar/Calendar";
+import { Media } from "@/types/map";
 
 // Dynamically import Calendar to avoid SSR issues
 // const Calendar = dynamic(
@@ -52,7 +53,7 @@ interface UserProfile {
 export default function ProfilePage() {
     const t = useTranslations("profile");
     const tc = useTranslations("common");
-    const { user, loading } = useAuth();
+    const { user, loading, refreshUser } = useAuth();
     const params = useParams();
     const router = useRouter();
     const profileId = params?.id as string;
@@ -119,14 +120,21 @@ export default function ProfilePage() {
 
     useEffect(() => {
         if (user) {
+            const media = user.profile?.media ?? [];
             setProfile({
                 id: user.id,
                 name: user.name,
                 email: user.email,
                 phone: user.profile?.phone || "",
                 bio: user.profile?.bio || "",
-                coverImage: "https://placehold.net/8-800x600.png",
-                profileImage: "https://placehold.net/avatar-5.png",
+                coverImage:
+                    media.find((m: Media) => m.collection === "covers")
+                        ?.secure_url ??
+                    "https://placehold.net/8-800x600.png",
+                profileImage:
+                    media.find((m: Media) => m.collection === "profiles")
+                        ?.secure_url ??
+                    "https://placehold.net/avatar-5.png",
             });
             setEditForm({
                 name: user.name,
@@ -497,6 +505,7 @@ export default function ProfilePage() {
                     setProfile((prev) =>
                         prev ? { ...prev, coverImage: url } : null,
                     );
+                    refreshUser();
                 }}
             />
 
@@ -506,11 +515,12 @@ export default function ProfilePage() {
                 modelType="profile"
                 modelId={user?.profile?.id ?? profile.id}
                 collection="profiles"
-                isCover={true}
+                isCover={false}
                 onUploadSuccess={(url) => {
                     setProfile((prev) =>
                         prev ? { ...prev, profileImage: url } : null,
                     );
+                    refreshUser();
                 }}
             />
         </>

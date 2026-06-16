@@ -61,7 +61,7 @@ export default function Reviews({ reviews, onSubmit }: ReviewsProps) {
                 <div className="flex items-center gap-2 text-lg font-semibold">
                     <MessageSquareText
                         size={20}
-                        className="text-[var(--primary-clr)]"
+                        className="text-(--primary-clr)"
                     />
                     {t("title")}
                 </div>
@@ -83,7 +83,7 @@ export default function Reviews({ reviews, onSubmit }: ReviewsProps) {
                         {Array.from({ length: 3 }).map((_, i) => (
                             <div
                                 key={i}
-                                className="border border-[var(--border)] rounded-lg p-3 animate-pulse"
+                                className="border border-(--border) rounded-lg p-3 animate-pulse"
                             >
                                 <div className="flex items-center gap-3">
                                     <div className="w-10 h-10 rounded-full bg-gray-200" />
@@ -112,13 +112,17 @@ export default function Reviews({ reviews, onSubmit }: ReviewsProps) {
                         {reviews!.map((r) => (
                             <div
                                 key={r.id}
-                                className="flex flex-col gap-4 border border-[var(--border)] bg-white rounded-lg p-3"
+                                className="flex flex-col gap-4 border border-(--border) bg-white rounded-lg p-3"
                             >
                                 <div className="flex items-start justify-between">
                                     <div className="flex items-center gap-3">
                                         {/* AVATAR */}
                                         <img
-                                            src={r.user.profile?.media?.[0]?.secure_url || "https://placehold.net/avatar.png"}
+                                            src={
+                                                r.user.profile?.media?.[0]
+                                                    ?.secure_url ||
+                                                "https://placehold.net/avatar.png"
+                                            }
                                             className="w-10 h-10 rounded-full object-cover"
                                             alt={t("avatar_alt")}
                                         />
@@ -215,7 +219,7 @@ export default function Reviews({ reviews, onSubmit }: ReviewsProps) {
                                 value={body}
                                 onChange={(e) => setBody(e.target.value)}
                                 placeholder={t("placeholder")}
-                                className="w-full border border-[var(--border)] rounded-md p-2 text-sm h-24 resize-none"
+                                className="w-full border border-(--border) rounded-md p-2 text-sm h-24 resize-none"
                                 disabled={loading}
                             />
 

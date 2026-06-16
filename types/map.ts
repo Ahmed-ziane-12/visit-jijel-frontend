@@ -1,4 +1,4 @@
-import { Profile } from "./auth";
+import { AuthUser, Profile } from "./auth";
 
 export type LocationCategory =
     | "beach"
@@ -43,7 +43,7 @@ export interface Review {
     id: number;
     rating: number;
     body: string;
-    user: { id: number; name: string; profile: Profile };
+    user: AuthUser;
     created_at: string;
 }
 
