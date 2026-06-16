@@ -221,7 +221,7 @@ export default function Home() {
                     <motion.div variants={fadeUp} className="mt-16 text-center">
                         <Link
                             href={"/plan"}
-                            className="mx-auto flex items-center gap-2 rounded-lg bg-accent px-8 py-3 font-semibold text-white transition hover:opacity-90"
+                            className=" w-50 mx-auto flex items-center gap-2 rounded-lg bg-accent px-8 py-3 font-semibold text-white transition hover:opacity-90"
                         >
                             {t("solution_cta")} <ArrowRight size={20} />
                         </Link>
