@@ -1,3 +1,5 @@
+import { Profile } from "./auth";
+
 export type LocationCategory =
     | "beach"
     | "hotel"
@@ -41,7 +43,7 @@ export interface Review {
     id: number;
     rating: number;
     body: string;
-    user: { id: number; name: string };
+    user: { id: number; name: string; profile: Profile };
     created_at: string;
 }
 

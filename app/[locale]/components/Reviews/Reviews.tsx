@@ -118,7 +118,7 @@ export default function Reviews({ reviews, onSubmit }: ReviewsProps) {
                                     <div className="flex items-center gap-3">
                                         {/* AVATAR */}
                                         <img
-                                            src="https://placehold.net/avatar.png"
+                                            src={r.user.profile?.media?.[0]?.secure_url || "https://placehold.net/avatar.png"}
                                             className="w-10 h-10 rounded-full object-cover"
                                             alt={t("avatar_alt")}
                                         />

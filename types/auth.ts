@@ -1,4 +1,6 @@
-export type Role = 'client' | 'business_owner' | 'admin';
+import { Media } from "./map";
+
+export type Role = "client" | "business_owner" | "admin";
 
 export interface Profile {
     id: number;
@@ -9,6 +11,7 @@ export interface Profile {
     bio: string | null;
     wilaya: string | null;
     commune: string | null;
+    media: Media[];
 }
 
 export interface AuthUser {
@@ -33,7 +36,7 @@ export interface RegisterCredentials {
     email: string;
     password: string;
     password_confirmation: string;
-    role: 'client' | 'business_owner';
+    role: "client" | "business_owner";
 }
 
 export interface LoginResponse {
