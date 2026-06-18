@@ -175,11 +175,11 @@ function HoverPreview({ destination, x, y }: PreviewState) {
 
     return (
         <div className={styles.preview} style={style} role="tooltip">
-            {hasImages && (
+            {hasImages && destination.media && (
                 <div className={styles.imageStrip}>
                     <img
                         key={imgIdx}
-                        src={images[imgIdx]}
+                        src={destination.media[0].secure_url}
                         alt={`${destination.name} image ${imgIdx + 1}`}
                         className={styles.image}
                     />
