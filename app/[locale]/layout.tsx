@@ -10,6 +10,8 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
     icons: "/logo_s.svg",
+    title: "visit Jijel",
+    description: "Best Trip Planning App For Jijel",
 };
 
 export function generateStaticParams() {

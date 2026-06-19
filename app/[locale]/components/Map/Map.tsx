@@ -9,8 +9,7 @@ import {
     type CSSProperties,
 } from "react";
 import styles from "./Map.module.css";
-import { CategoryConfig, MapProps } from "@/types/map";
-import { Destination } from "@/types/map";
+import { CategoryConfig, Destination } from "@/types/map";
 import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 
