@@ -1,3 +1,134 @@
-.hero {
-    height: 100dvh;
+/* ─── Hero ─── */
+.heroBg {
+  position: absolute;
+  inset: 0;
+  background-image: url("/phare.jpg");
+  background-size: cover;
+  background-position: center 30%;
+  z-index: 0;
+}
+
+/* ─── Carousel ─── */
+.track {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.track::-webkit-scrollbar {
+  display: none;
+}
+
+.card {
+  min-width: 280px;
+  width: 280px;
+  flex-shrink: 0;
+  scroll-snap-align: start;
+}
+
+/* ─── Laptop mockup ─── */
+.laptop {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  aspect-ratio: 16/10;
+  border-radius: 12px;
+  overflow: hidden;
+  background: linear-gradient(135deg, #1a2332, #2a3a52);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.4);
+}
+
+.laptopScreen {
+  position: absolute;
+  inset: 0;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.laptopHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.laptopDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.laptopDot:nth-child(1) {
+  background: #ff5f57;
+}
+.laptopDot:nth-child(2) {
+  background: #ffbd2e;
+}
+.laptopDot:nth-child(3) {
+  background: #28c840;
+}
+
+.laptopBody {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 12px;
+}
+
+.laptopSidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.laptopSidebarItem {
+  height: 24px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.laptopSidebarActive {
+  height: 24px;
+  border-radius: 6px;
+  background: rgba(26, 115, 232, 0.3);
+}
+
+.laptopMain {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.laptopRow {
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.laptopRowSm {
+  height: 24px;
+  border-radius: 6px;
+  width: 60%;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.laptopRowAccent {
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(26, 115, 232, 0.2);
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 640px) {
+  .card {
+    min-width: 240px;
+    width: 240px;
+  }
 }

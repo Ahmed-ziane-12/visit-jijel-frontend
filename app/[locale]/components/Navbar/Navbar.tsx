@@ -58,21 +58,12 @@ const Navbar = () => {
             className={`${styles.container} ${isScrolled || isExploreRoute ? styles.scrolled : ""}`}
         >
             <Link className={styles.logo} href={"/"}>
-                {theme === "light" ? (
-                    <Image
-                        src={"/logo.svg"}
-                        alt={""}
-                        width={1000}
-                        height={1000}
-                    />
-                ) : (
-                    <Image
-                        src={"/logo_dark.svg"}
-                        alt={""}
-                        width={1000}
-                        height={1000}
-                    />
-                )}
+                <Image
+                    src={"/logo_dark.svg"}
+                    alt={""}
+                    width={1000}
+                    height={1000}
+                />
             </Link>
 
             {/* Desktop Navigation */}
