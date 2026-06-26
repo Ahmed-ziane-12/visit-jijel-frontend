@@ -210,6 +210,8 @@ export default function Home() {
     }, []);
 
     const featured = dests.filter((d) => (d as any).is_featured);
+    console.log(featured.length >= 3);
+
     const display = featured.length >= 3 ? featured : dests;
     const main = display[0];
     const sides = display.slice(1, 3);
