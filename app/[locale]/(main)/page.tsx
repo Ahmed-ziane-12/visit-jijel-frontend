@@ -1,7 +1,14 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import { ArrowRight, ChevronRight, Star } from "lucide-react";
+import {
+    ArrowRight,
+    ChevronRight,
+    Star,
+    MapPin,
+    Compass,
+    Map,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
@@ -9,17 +16,65 @@ import { motion } from "framer-motion";
 import axios from "@/lib/axios";
 import styles from "./page.module.css";
 import type { Destination } from "@/types/map";
-import { HeroGalleryScroll } from "@/components/HeroGalleryScroll/HeroGalleryScroll";
+
+const HERO_IMAGES = ["/phare.jpg", "/zoo.jpg", "/g.jpg", "/p2.jpg"];
+
+function FloatingImage({ src, index }: { src: string; index: number }) {
+    const positions = [
+        { top: "5%", left: "2%", w: 200, h: 260 },
+        { top: "10%", right: "3%", w: 180, h: 240 },
+        { bottom: "8%", left: "6%", w: 220, h: 280 },
+        { bottom: "5%", right: "5%", w: 160, h: 210 },
+        { top: "35%", left: "50%", w: 140, h: 190 },
+    ] as const;
+    const p = positions[index];
+
+    return (
+        <motion.div
+            className="absolute rounded-2xl overflow-hidden shadow-lg hidden md:block"
+            style={{
+                width: p.w,
+                height: p.h,
+                top: "top" in p ? p.top : undefined,
+                bottom: "bottom" in p ? p.bottom : undefined,
+                left: "left" in p ? p.left : undefined,
+                right: "right" in p ? p.right : undefined,
+            }}
+            animate={{ y: [0, -12, 0] }}
+            transition={{
+                duration: 3 + index * 0.5,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: index * 0.4,
+            }}
+        >
+            <Image
+                src={src}
+                alt=""
+                fill
+                className="object-cover"
+                sizes={`${p.w}px`}
+            />
+            <div className="absolute inset-0 ring-1 ring-inset ring-black/10 rounded-2xl" />
+        </motion.div>
+    );
+}
 
 /* ─── Helpers ─── */
 
-const BLUR =
-  typeof btoa === "function"
-    ? "data:image/svg+xml;base64," +
-      btoa(
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"><rect width="1" height="1" fill="#334155"/></svg>',
-      )
-    : "";
+function DestinationsSkeleton() {
+    return (
+        <div className="grid md:grid-cols-3 gap-6">
+            <div className="md:col-span-2 rounded-2xl overflow-hidden bg-(--dim-bg) animate-pulse">
+                <div className="aspect-16/10" />
+            </div>
+            <div className="flex flex-col gap-6">
+                <div className="flex-1 rounded-2xl bg-(--dim-bg) animate-pulse min-h-45" />
+                <div className="flex-1 rounded-2xl bg-(--dim-bg) animate-pulse min-h-45" />
+            </div>
+        </div>
+    );
+}
 
 /* ─── Types ─── */
 
@@ -60,7 +115,7 @@ function StarRating({ rating = 4 }: { rating?: number }) {
                     key={i}
                     size={14}
                     className={
-                        i < rating ? "text-amber-400" : "text-[var(--border)]"
+                        i < rating ? "text-amber-400" : "text-(--border)"
                     }
                     fill={i < rating ? "currentColor" : "none"}
                 />
@@ -85,7 +140,7 @@ const stagger = {
 
 function SectionTag({ label }: { label: string }) {
     return (
-        <span className="inline-block px-3 py-1 rounded-full border border-[var(--border)] text-xs font-medium uppercase tracking-wider text-[var(--light-fg)] mb-4">
+        <span className="inline-block px-3 py-1 rounded-full border border-(--border) text-xs font-medium uppercase tracking-wider text-(--light-fg) mb-4">
             {label}
         </span>
     );
@@ -97,6 +152,7 @@ export default function Home() {
     const t = useTranslations("home");
 
     /* data */
+    const [loading, setLoading] = useState(true);
     const [dests, setDests] = useState<Destination[]>([]);
     const [biz, setBiz] = useState<BizItem[]>([]);
     const [evts, setEvts] = useState<EvtItem[]>([]);
@@ -139,9 +195,7 @@ export default function Home() {
             try {
                 const [dr, br, er] = await Promise.all([
                     axios.get("/api/v1/destinations"),
-                    axios.get("/api/v1/businesses", {
-                        params: { type: "restaurant,hotel" },
-                    }),
+                    axios.get("/api/v1/businesses"),
                     axios.get("/api/v1/events"),
                 ]);
                 setDests(dr.data ?? []);
@@ -149,6 +203,8 @@ export default function Home() {
                 setEvts(er.data?.data ?? er.data ?? []);
             } catch {
                 /* silent */
+            } finally {
+                setLoading(false);
             }
         })();
     }, []);
@@ -160,36 +216,89 @@ export default function Home() {
 
     return (
         <div>
-            {/* ══════ HERO (X100-style scroll gallery) ══════ */}
-            <HeroGalleryScroll />
+            {/* ══════ HERO (floating images + text) ══════ */}
+            <section className="relative min-h-[60vh] flex flex-col items-center justify-center text-center px-4 py-24 overflow-hidden pt-50">
+                {HERO_IMAGES.map((src, i) => (
+                    <FloatingImage key={src} src={src} index={i} />
+                ))}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6 }}
+                >
+                    <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-(--primary-clr) bg-(--background)/80 text-(--primary-clr) text-sm font-medium mb-6">
+                        <MapPin size={14} />
+                        {t("hero_badge")}
+                    </span>
+                </motion.div>
+
+                <motion.h1
+                    className="text-(--foreground) font-bold leading-[1.1] mb-5 text-balance max-w-4xl"
+                    style={{ fontSize: "clamp(2.25rem, 6vw, 4rem)" }}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: 0.1 }}
+                >
+                    {t("hero_title")}
+                </motion.h1>
+
+                <motion.p
+                    className="text-(--light-fg) text-lg md:text-xl max-w-2xl mx-auto mb-10 text-balance"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: 0.2 }}
+                >
+                    {t("hero_desc")}
+                </motion.p>
+
+                <motion.div
+                    className="flex flex-col sm:flex-row items-center justify-center gap-4"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: 0.3 }}
+                >
+                    <Link
+                        href="/explore"
+                        className="text-white inline-flex items-center gap-2 rounded-full px-7 py-3.5 font-semibold text-sm bg-(--primary-clr) hover:opacity-90 transition-all"
+                    >
+                        <Compass size={16} color="white" />
+                        Explore
+                        <ArrowRight size={16} />
+                    </Link>
+                    <Link
+                        href="/plan"
+                        className="inline-flex items-center gap-2 rounded-full px-7 py-3.5 font-semibold text-sm border border-(--border) text-(--foreground) hover:bg-(--dim-bg) transition-colors"
+                    >
+                        <Map size={16} />
+                        {t("hero_plan") ?? "Plan Your Trip"}
+                        <ArrowRight size={16} />
+                    </Link>
+                </motion.div>
+            </section>
 
             {/* ══════ DESTINATIONS ══════ */}
-            <motion.section
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, margin: "-80px" }}
-                variants={stagger}
-                className="py-20 md:py-28 px-4 md:px-8"
-            >
+            <section className="py-20 md:py-28 px-4 md:px-8">
                 <div className="max-w-7xl mx-auto">
-                    <motion.div variants={fadeUp}>
+                    <div className="mb-12">
                         <SectionTag
                             label={t("explore_tag") ?? "Explore Nature"}
                         />
-                        <h2 className="text-3xl md:text-4xl font-bold text-(--foreground) mb-12">
+                        <h2 className="text-3xl md:text-4xl font-bold text-(--foreground)">
                             {t("section_recommended")}
                         </h2>
-                    </motion.div>
+                    </div>
 
-                    <div className="grid md:grid-cols-3 gap-6">
-                        {/* Feature card — 2 cols */}
-                        {main && (
-                            <motion.div
-                                variants={fadeUp}
-                                className="md:col-span-2 group relative rounded-2xl overflow-hidden bg-[var(--dim-bg)]"
-                            >
-                                <Link href={`/explore/${main.id}`}>
-                                    <div className="relative aspect-[16/10]">
+                    {loading && dests.length === 0 ? (
+                        <DestinationsSkeleton />
+                    ) : (
+                        <div className="grid md:grid-cols-3 gap-6">
+                            {/* Feature card — 2 cols */}
+                            {main && (
+                                <Link
+                                    href={`/explore/${main.id}`}
+                                    className="md:col-span-2 group relative rounded-2xl overflow-hidden bg-(--dim-bg)"
+                                >
+                                    <div className="relative aspect-16/10">
                                         <Image
                                             src={
                                                 ((main as any)
@@ -201,11 +310,10 @@ export default function Home() {
                                             alt={main.name}
                                             fill
                                             className="object-cover transition-transform duration-700 group-hover:scale-105"
-                                            sizes="(max-width:768px) 100vw, 66vw"
-                                            placeholder="blur"
-                                            blurDataURL={BLUR}
+                                            sizes="(max-width:768px) 100vw, 640px"
+                                            loading="eager"
                                         />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                                        <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent" />
                                     </div>
                                     <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
                                         <span className="inline-block px-3 py-1 rounded-full bg-white/20 backdrop-blur-sm text-white text-xs font-semibold uppercase tracking-wider mb-3">
@@ -219,19 +327,17 @@ export default function Home() {
                                         </p>
                                     </div>
                                 </Link>
-                            </motion.div>
-                        )}
+                            )}
 
-                        {/* Side stack */}
-                        <div className="flex flex-col gap-6">
-                            {sides.map((dest) => (
-                                <motion.div
-                                    key={dest.id}
-                                    variants={fadeUp}
-                                    className="group relative flex-1 rounded-2xl overflow-hidden bg-[var(--dim-bg)]"
-                                >
-                                    <Link href={`/explore/${dest.id}`}>
-                                        <div className="relative h-full min-h-[180px]">
+                            {/* Side stack */}
+                            <div className="flex flex-col gap-6">
+                                {sides.map((dest) => (
+                                    <Link
+                                        key={dest.id}
+                                        href={`/explore/${dest.id}`}
+                                        className="group relative flex-1 rounded-2xl overflow-hidden bg-(--dim-bg) min-h-45"
+                                    >
+                                        <div className="absolute inset-0">
                                             <Image
                                                 src={
                                                     ((dest as any)
@@ -243,13 +349,11 @@ export default function Home() {
                                                 alt={dest.name}
                                                 fill
                                                 className="object-cover transition-transform duration-700 group-hover:scale-105"
-                                                sizes="(max-width:768px) 100vw, 33vw"
-                                                placeholder="blur"
-                                                blurDataURL={BLUR}
+                                                sizes="(max-width:768px) 100vw, 280px"
                                             />
-                                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                                         </div>
-                                        <div className="absolute bottom-0 left-0 right-0 p-5">
+                                        <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent" />
+                                        <div className="absolute bottom-0 left-0 right-0 p-5 z-10">
                                             <span className="inline-block px-2.5 py-0.5 rounded-full bg-white/20 backdrop-blur-sm text-white text-[0.65rem] font-semibold uppercase tracking-wider mb-2">
                                                 {dest.category ?? "Nature"}
                                             </span>
@@ -258,12 +362,12 @@ export default function Home() {
                                             </h3>
                                         </div>
                                     </Link>
-                                </motion.div>
-                            ))}
+                                ))}
+                            </div>
                         </div>
-                    </div>
+                    )}
                 </div>
-            </motion.section>
+            </section>
 
             {/* ══════ PARTNER HUB ══════ */}
             <motion.section
@@ -299,7 +403,7 @@ export default function Home() {
                                     key={i}
                                     className="flex items-start gap-3 text-white/70 text-sm"
                                 >
-                                    <span className="mt-0.5 w-5 h-5 rounded-full bg-[var(--primary-clr)] flex items-center justify-center shrink-0">
+                                    <span className="mt-0.5 w-5 h-5 rounded-full bg-(--primary-clr) flex items-center justify-center shrink-0">
                                         <svg
                                             width="10"
                                             height="10"
@@ -321,7 +425,7 @@ export default function Home() {
                         </div>
                         <Link
                             href="/register?role=business_owner"
-                            className="inline-flex items-center gap-2 rounded-full px-7 py-3.5 font-semibold text-sm bg-[var(--primary-clr)] text-white hover:opacity-90 transition"
+                            className="inline-flex items-center gap-2 rounded-full px-7 py-3.5 font-semibold text-sm bg-(--primary-clr) text-white hover:opacity-90 transition"
                         >
                             {t("partner_cta") ?? "Start Your Free Trial"}
                             <ArrowRight size={16} />
@@ -379,7 +483,7 @@ export default function Home() {
                 whileInView="visible"
                 viewport={{ once: true, margin: "-80px" }}
                 variants={stagger}
-                className="py-20 md:py-28 px-4 md:px-8 bg-[var(--dim-bg)]"
+                className="py-20 md:py-28 px-4 md:px-8 bg-(--dim-bg)"
             >
                 <div className="max-w-7xl mx-auto">
                     <motion.div
@@ -390,7 +494,7 @@ export default function Home() {
                             <SectionTag
                                 label={t("essentials_tag") ?? "Stay & Dine"}
                             />
-                            <h2 className="text-3xl md:text-4xl font-bold text-[var(--foreground)]">
+                            <h2 className="text-3xl md:text-4xl font-bold text-(--foreground)">
                                 {t("section_popular")}
                             </h2>
                         </div>
@@ -398,7 +502,7 @@ export default function Home() {
                             <button
                                 onClick={() => scrollTrack("left")}
                                 disabled={!canScrollL}
-                                className="w-11 h-11 rounded-full border border-[var(--border)] bg-[var(--background)] flex items-center justify-center text-[var(--foreground)] disabled:opacity-30 hover:bg-[var(--primary-clr)] hover:text-white hover:border-[var(--primary-clr)] transition cursor-pointer disabled:cursor-default"
+                                className="w-11 h-11 rounded-full border border-(--border) bg-(--background) flex items-center justify-center text-(--foreground) disabled:opacity-30 hover:bg-(--primary-clr) hover:text-white hover:border-(--primary-clr) transition cursor-pointer disabled:cursor-default"
                                 aria-label="Scroll left"
                             >
                                 <svg
@@ -417,7 +521,7 @@ export default function Home() {
                             <button
                                 onClick={() => scrollTrack("right")}
                                 disabled={!canScrollR}
-                                className="w-11 h-11 rounded-full border border-[var(--border)] bg-[var(--background)] flex items-center justify-center text-[var(--foreground)] disabled:opacity-30 hover:bg-[var(--primary-clr)] hover:text-white hover:border-[var(--primary-clr)] transition cursor-pointer disabled:cursor-default"
+                                className="w-11 h-11 rounded-full border border-(--border) bg-(--background) flex items-center justify-center text-(--foreground) disabled:opacity-30 hover:bg-(--primary-clr) hover:text-white hover:border-(--primary-clr) transition cursor-pointer disabled:cursor-default"
                                 aria-label="Scroll right"
                             >
                                 <svg
@@ -442,7 +546,7 @@ export default function Home() {
                         className={styles.track}
                     >
                         {biz.length === 0 && (
-                            <p className="text-[var(--light-fg)] py-10">
+                            <p className="text-(--light-fg) py-10">
                                 No businesses yet
                             </p>
                         )}
@@ -452,8 +556,8 @@ export default function Home() {
                                 className={`${styles.card} group`}
                             >
                                 <Link href={`/explore?type=${item.type}`}>
-                                    <div className="rounded-2xl overflow-hidden bg-[var(--background)] border border-[var(--border)] transition-shadow hover:shadow-lg">
-                                        <div className="relative aspect-[4/3] overflow-hidden">
+                                    <div className="rounded-2xl overflow-hidden bg-(--background) border border-(--border) transition-shadow hover:shadow-lg">
+                                        <div className="relative aspect-4/3 overflow-hidden">
                                             <Image
                                                 src={
                                                     item.media?.[0]
@@ -469,17 +573,17 @@ export default function Home() {
                                             />
                                         </div>
                                         <div className="p-4">
-                                            <h3 className="font-semibold text-[var(--foreground)] truncate mb-1.5">
+                                            <h3 className="font-semibold text-(--foreground) truncate mb-1.5">
                                                 {item.name}
                                             </h3>
                                             <StarRating rating={4} />
-                                            <p className="text-sm text-[var(--light-fg)] mt-1.5 mb-3">
+                                            <p className="text-sm text-(--light-fg) mt-1.5 mb-3">
                                                 {item.wilaya ?? "Jijel"}
                                                 {item.listings_count
                                                     ? ` · ${item.listings_count} offers`
                                                     : ""}
                                             </p>
-                                            <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--primary-clr)] group-hover:gap-2.5 transition-all">
+                                            <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-(--primary-clr) group-hover:gap-2.5 transition-all">
                                                 {item.type === "hotel"
                                                     ? "Book Now"
                                                     : "Details"}
@@ -507,14 +611,14 @@ export default function Home() {
                         <SectionTag
                             label={t("events_tag") ?? "Happening in Jijel"}
                         />
-                        <h2 className="text-3xl md:text-4xl font-bold text-[var(--foreground)]">
+                        <h2 className="text-3xl md:text-4xl font-bold text-(--foreground)">
                             {t("section_events")}
                         </h2>
                     </motion.div>
 
                     <div>
                         {evts.length === 0 && (
-                            <p className="text-center text-[var(--light-fg)] py-10">
+                            <p className="text-center text-(--light-fg) py-10">
                                 No upcoming events
                             </p>
                         )}
@@ -527,9 +631,9 @@ export default function Home() {
                                 >
                                     <Link
                                         href={`/explore?event=${evt.id}`}
-                                        className="flex items-center gap-4 px-5 py-4 rounded-xl hover:bg-[var(--dim-bg)] transition-colors group"
+                                        className="flex items-center gap-4 px-5 py-4 rounded-xl hover:bg-(--dim-bg) transition-colors group"
                                     >
-                                        <div className="w-16 h-[66px] shrink-0 rounded-xl bg-[var(--primary-clr)] text-white flex flex-col items-center justify-center leading-none">
+                                        <div className="w-16 h-16.5 shrink-0 rounded-xl bg-(--primary-clr) text-white flex flex-col items-center justify-center leading-none">
                                             <span className="text-xl font-bold">
                                                 {day}
                                             </span>
@@ -538,10 +642,10 @@ export default function Home() {
                                             </span>
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <h4 className="font-semibold text-[var(--foreground)] truncate">
+                                            <h4 className="font-semibold text-(--foreground) truncate">
                                                 {evt.title}
                                             </h4>
-                                            <p className="text-sm text-[var(--light-fg)] truncate mt-0.5">
+                                            <p className="text-sm text-(--light-fg) truncate mt-0.5">
                                                 {evt.location ??
                                                     evt.destination?.name ??
                                                     "Jijel"}
@@ -552,7 +656,7 @@ export default function Home() {
                                         </div>
                                         <ChevronRight
                                             size={18}
-                                            className="text-[var(--light-fg)] shrink-0 transition-all group-hover:translate-x-1 group-hover:text-[var(--primary-clr)]"
+                                            className="text-(--light-fg) shrink-0 transition-all group-hover:translate-x-1 group-hover:text-(--primary-clr)"
                                         />
                                     </Link>
                                 </motion.div>
@@ -563,7 +667,7 @@ export default function Home() {
                     <motion.div variants={fadeUp} className="text-center mt-12">
                         <Link
                             href="/explore"
-                            className="inline-flex items-center gap-2 rounded-full px-7 py-3 font-semibold text-sm border border-[var(--border)] text-[var(--foreground)] hover:border-[var(--primary-clr)] hover:text-[var(--primary-clr)] transition-colors"
+                            className="inline-flex items-center gap-2 rounded-full px-7 py-3 font-semibold text-sm border border-(--border) text-(--foreground) hover:border-(--primary-clr) hover:text-(--primary-clr) transition-colors"
                         >
                             {t("see_all") ?? "Full Events Calendar"}
                             <ArrowRight size={15} />
@@ -583,11 +687,11 @@ export default function Home() {
                 <div className="max-w-7xl mx-auto">
                     <motion.div
                         variants={fadeUp}
-                        className="rounded-3xl border border-[var(--border)] bg-gradient-to-r from-[var(--primary-clr)]/20 to-[var(--primary-clr)]/10 p-12 md:p-16 text-center"
+                        className="rounded-3xl border border-(--border) bg-linear-to-r from-(--primary-clr)/20 to-(--primary-clr)/10 p-12 md:p-16 text-center"
                     >
-                        <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full border border-[var(--primary-clr)]/50 bg-[var(--primary-clr)]/30">
+                        <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full border border-(--primary-clr)/50 bg-(--primary-clr)/30">
                             <svg
-                                className="text-[var(--primary-clr)]"
+                                className="text-(--primary-clr)"
                                 width="32"
                                 height="32"
                                 viewBox="0 0 24 24"
@@ -608,21 +712,21 @@ export default function Home() {
                                 <line x1="12" y1="18" x2="12.01" y2="18" />
                             </svg>
                         </div>
-                        <h2 className="mb-4 text-3xl md:text-4xl font-bold text-[var(--foreground)]">
+                        <h2 className="mb-4 text-3xl md:text-4xl font-bold text-(--foreground)">
                             {t("mobile_title")}
                         </h2>
-                        <p className="mx-auto mb-8 max-w-2xl text-base text-[var(--light-fg)]">
+                        <p className="mx-auto mb-8 max-w-2xl text-base text-(--light-fg)">
                             {t("mobile_desc")}
                         </p>
                         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                            <button className="rounded-full px-7 py-3.5 font-semibold text-sm bg-[var(--primary-clr)] text-white hover:opacity-90 transition">
+                            <button className="rounded-full px-7 py-3.5 font-semibold text-sm bg-(--primary-clr) text-white hover:opacity-90 transition">
                                 {t("mobile_notify")}
                             </button>
-                            <button className="rounded-full px-7 py-3.5 font-semibold text-sm border border-[var(--border)] text-[var(--foreground)] hover:bg-[var(--dim-bg)] transition">
+                            <button className="rounded-full px-7 py-3.5 font-semibold text-sm border border-(--border) text-(--foreground) hover:bg-(--dim-bg) transition">
                                 {t("mobile_learn")}
                             </button>
                         </div>
-                        <p className="mt-6 text-xs text-[var(--light-fg)]">
+                        <p className="mt-6 text-xs text-(--light-fg)">
                             {t("mobile_stats")}
                         </p>
                     </motion.div>
@@ -635,25 +739,25 @@ export default function Home() {
                 whileInView="visible"
                 viewport={{ once: true, margin: "-80px" }}
                 variants={stagger}
-                className="min-w-[90%] justify-self-center mr-4 ml-4 py-20 my-20 rounded-3xl border border-[var(--border)] px-4 md:px-8"
+                className="min-w-[90%] justify-self-center mr-4 ml-4 py-20 my-20 rounded-3xl border border-(--border) px-4 md:px-8"
             >
                 <div className="max-w-3xl mx-auto text-center">
                     <motion.h2
                         variants={fadeUp}
-                        className="mb-5 text-3xl md:text-4xl font-bold text-[var(--foreground)] text-balance"
+                        className="mb-5 text-3xl md:text-4xl font-bold text-(--foreground) text-balance"
                     >
                         {t("cta_title")}
                     </motion.h2>
                     <motion.p
                         variants={fadeUp}
-                        className="mx-auto mb-8 max-w-xl text-base text-[var(--light-fg)]"
+                        className="mx-auto mb-8 max-w-xl text-base text-(--light-fg)"
                     >
                         {t("cta_desc")}
                     </motion.p>
                     <motion.div variants={fadeUp}>
                         <Link
                             href="/plan"
-                            className="inline-flex items-center gap-2 rounded-full px-9 py-4 font-semibold bg-[var(--primary-clr)] text-white hover:opacity-90 transition"
+                            className="inline-flex items-center gap-2 rounded-full px-9 py-4 font-semibold bg-(--primary-clr) text-white hover:opacity-90 transition"
                         >
                             {t("cta_btn")}
                             <ArrowRight size={18} />
@@ -661,7 +765,7 @@ export default function Home() {
                     </motion.div>
                     <motion.p
                         variants={fadeUp}
-                        className="mt-5 text-xs text-[var(--light-fg)]"
+                        className="mt-5 text-xs text-(--light-fg)"
                     >
                         {t("cta_footnote")}
                     </motion.p>

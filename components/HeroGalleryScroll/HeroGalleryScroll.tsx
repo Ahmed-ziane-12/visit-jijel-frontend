@@ -49,7 +49,7 @@ export function HeroGalleryScroll() {
                 </motion.div>
 
                 <motion.h1
-                    className="text-[var(--foreground)] font-bold leading-[1.1] mb-5 text-balance"
+                    className="text-(--foreground) font-bold leading-[1.1] mb-5 text-balance"
                     style={{ fontSize: "clamp(2.25rem, 6vw, 4rem)" }}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -59,7 +59,7 @@ export function HeroGalleryScroll() {
                 </motion.h1>
 
                 <motion.p
-                    className="text-[var(--light-fg)] text-lg md:text-xl max-w-2xl mx-auto mb-10 text-balance"
+                    className="text-(--light-fg) text-lg md:text-xl max-w-2xl mx-auto mb-10 text-balance"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: 0.35 }}
@@ -84,7 +84,7 @@ export function HeroGalleryScroll() {
                     </Link>
                     <Link
                         href="/plan"
-                        className="inline-flex items-center gap-2 rounded-full px-7 py-3.5 font-semibold text-sm border border-[var(--border)] text-[var(--foreground)] hover:bg-[var(--dim-bg)] transition-colors"
+                        className="inline-flex items-center gap-2 rounded-full px-7 py-3.5 font-semibold text-sm border border-(--border) text-(--foreground) hover:bg-(--dim-bg) transition-colors"
                     >
                         <Map size={16} />
                         {t("hero_plan") ?? "Plan Your Trip"}
