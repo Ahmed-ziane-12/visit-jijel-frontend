@@ -1,8 +1,8 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useRef, useCallback, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-import axios, { initCsrf } from '@/lib/axios';
+import axios, { initCsrf, setUnauthorizedHandler } from '@/lib/axios';
 import {
     AuthUser,
     LoginCredentials,
@@ -38,6 +38,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const [user, setUser] = useState<AuthUser | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
+
+    const userRef = useRef<AuthUser | null>(null);
+
+    // Keep a ref of the current user so the 401 handler only redirects when a
+    // previously valid session expires — not for anonymous visitors.
+    useEffect(() => {
+        userRef.current = user;
+    }, [user]);
+
+    // Session expired → clear state and go back to the login page.
+    useEffect(() => {
+        setUnauthorizedHandler(() => {
+            if (userRef.current) {
+                setUser(null);
+                router.push('/login');
+            }
+        });
+        return () => setUnauthorizedHandler(null);
+    }, [router]);
 
     // Fetch the current user — authenticated via Sanctum session cookies
     const refreshUser = useCallback(async (): Promise<void> => {

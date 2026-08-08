@@ -18,12 +18,15 @@ const axios = Axios.create({
     },
 });
 
-// In-memory token (source of truth while the page is open)
-let authToken: string | null = null;
+// ── Session-expiry handling ─────────────────────────────────
 
-/** Set or clear the Bearer token attached to every request. */
-export function setupToken(token: string | null): void {
-    authToken = token;
+type UnauthorizedHandler = () => void;
+
+let unauthorizedHandler: UnauthorizedHandler | null = null;
+
+/** Register a callback invoked when the session expires (HTTP 401). */
+export function setUnauthorizedHandler(handler: UnauthorizedHandler | null): void {
+    unauthorizedHandler = handler;
 }
 
 // ── Interceptors ────────────────────────────────────────────
@@ -38,23 +41,27 @@ export async function initCsrf(): Promise<void> {
     }
 }
 
-/** Attach the Bearer token to every outgoing request. */
-axios.interceptors.request.use((config) => {
-    if (authToken) {
-        config.headers.Authorization = `Bearer ${authToken}`;
-    }
-    return config;
-});
-
-/** Handle 419 CSRF expiry — only relevant in cookie mode. */
+/** Handle 419 CSRF expiry and 401 session expiry. */
 axios.interceptors.response.use(
     (response) => response,
     async (error) => {
+        // Re-fetch the CSRF cookie once, then retry the original request.
         if (USE_COOKIES && error.response?.status === 419 && !error.config._retry) {
             error.config._retry = true;
             await axios.get('/sanctum/csrf-cookie');
             return axios(error.config);
         }
+
+        // Session expired → let the auth context sign the user out. Auth
+        // entrypoints also return 401 for bad credentials, so those are excluded.
+        if (error.response?.status === 401 && typeof window !== 'undefined') {
+            const url = String(error.config?.url ?? '');
+            const isAuthEndpoint = url.includes('/login') || url.includes('/register');
+            if (!isAuthEndpoint) {
+                unauthorizedHandler?.();
+            }
+        }
+
         return Promise.reject(error);
     },
 );
