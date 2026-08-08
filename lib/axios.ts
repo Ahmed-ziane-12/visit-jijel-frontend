@@ -8,8 +8,13 @@ import Axios from 'axios';
 const USE_COOKIES = true;
 
 const axios = Axios.create({
-    // Empty in production → same-origin requests go through the Vercel rewrites.
-    baseURL: process.env.NEXT_PUBLIC_BACKEND_URL || '',
+    // Same-origin in production: next.config.ts rewrites proxy /api, /admin and
+    // /sanctum to the Laravel backend, so the Sanctum session/XSRF cookies stay
+    // first-party. NEXT_PUBLIC_BACKEND_URL is only used by local dev.
+    baseURL:
+        process.env.NODE_ENV === 'production'
+            ? ''
+            : process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000',
     withCredentials: USE_COOKIES,
     withXSRFToken: USE_COOKIES,
     headers: {
