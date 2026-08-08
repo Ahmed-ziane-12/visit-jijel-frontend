@@ -3,13 +3,13 @@ import Axios from 'axios';
 // ---------------------------------------------------------------
 //  Auth mode
 // ---------------------------------------------------------------
-//  false → Bearer token in Authorization header (works across any domains)
 //  true  → Sanctum SPA session cookies (requires same parent domain)
 // ---------------------------------------------------------------
-const USE_COOKIES = false;
+const USE_COOKIES = true;
 
 const axios = Axios.create({
-    baseURL: process.env.NEXT_PUBLIC_BACKEND_URL,
+    // Empty in production → same-origin requests go through the Vercel rewrites.
+    baseURL: process.env.NEXT_PUBLIC_BACKEND_URL || '',
     withCredentials: USE_COOKIES,
     withXSRFToken: USE_COOKIES,
     headers: {
@@ -27,6 +27,16 @@ export function setupToken(token: string | null): void {
 }
 
 // ── Interceptors ────────────────────────────────────────────
+
+/**
+ * Bootstrap the Sanctum session: fetch the CSRF cookie so subsequent
+ * stateful POST/PUT/DELETE requests carry a valid XSRF token.
+ */
+export async function initCsrf(): Promise<void> {
+    if (USE_COOKIES) {
+        await axios.get('/sanctum/csrf-cookie');
+    }
+}
 
 /** Attach the Bearer token to every outgoing request. */
 axios.interceptors.request.use((config) => {

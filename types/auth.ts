@@ -43,18 +43,18 @@ export interface LoginResponse {
     user: AuthUser;
     role: Role;
     email_verified: boolean;
-    token: string;
+    token: string | null; // null for cookie/session-based web auth
 }
 
 export interface RegisterResponse {
     message: string;
     user: AuthUser;
-    token: string | null; // non-null for clients (auto-logged in), null for owners
+    token: string | null; // non-null for mobile clients (auto-logged in), null for web
 }
 
 export interface AdminLoginResponse {
     user: AuthUser;
     is_super_admin: boolean;
     must_reset_password: boolean;
-    token: string;
+    token: string | null; // null for cookie/session-based web auth
 }

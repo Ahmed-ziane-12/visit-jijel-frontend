@@ -22,6 +22,29 @@ const nextConfig: NextConfig = {
             },
         ],
     },
+    async rewrites() {
+        // Proxy backend traffic to the Laravel API on Render. The browser only
+        // talks to this Vercel domain, so the Sanctum session/XSRF cookies stay
+        // same-origin. Set BACKEND_URL in the Vercel dashboard (server-side).
+        const backendUrl = process.env.BACKEND_URL;
+        if (!backendUrl) {
+            return [];
+        }
+        return [
+            {
+                source: "/sanctum/:path*",
+                destination: `${backendUrl}/sanctum/:path*`,
+            },
+            {
+                source: "/api/:path*",
+                destination: `${backendUrl}/api/:path*`,
+            },
+            {
+                source: "/admin/:path*",
+                destination: `${backendUrl}/admin/:path*`,
+            },
+        ];
+    },
 };
 
 const withNextIntl = createNextIntlPlugin();
