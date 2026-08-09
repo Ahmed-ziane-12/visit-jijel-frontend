@@ -25,13 +25,15 @@ import Reviews from "@/app/[locale]/components/Reviews/Reviews";
 import ConfirmDialog from "@/app/[locale]/components/ConfirmDialog/ConfirmDialog"; // Adjust import path as needed
 import { useAuth } from "@/context/AuthContext";
 import ImageShowcase from "@/app/[locale]/components/ImageShowcase/ImageShowcase";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+import { localizeDestination } from "@/lib/localize";
 const BLUR =
     "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mN8/+F9PQAI8wNPvd7POQAAAABJRU5ErkJggg==";
 
 export default function ExplorePage() {
     const { id } = useParams<{ id: string }>();
     const t = useTranslations("destination");
+    const locale = useLocale();
     const commonT = useTranslations("common");
     const [destination, setDestination] = useState<Destination | null>(null);
     const [loading, setLoading] = useState(true);
@@ -64,6 +66,7 @@ export default function ExplorePage() {
 
     const coverIndex = useMemo(() => {
         const media = destination?.media ?? [];
+
         const idx = media.findIndex((m) => m.is_cover);
 
         return idx === -1 ? 0 : idx;
@@ -236,6 +239,9 @@ export default function ExplorePage() {
     }
 
     const media = destination?.media ?? [];
+    const localized = destination
+        ? localizeDestination(destination, locale)
+        : null;
 
     return (
         <div className={styles.container}>
@@ -277,23 +283,23 @@ export default function ExplorePage() {
                             }
                         >
                             <MediaTile media={media[coverIndex]} />
-                            {destination && (
+                            {localized && (
                                 <div className={styles.firstOverlay}>
                                     <h2 className={styles.firstName}>
-                                        {destination.name}
+                                        {localized.name}
                                     </h2>
                                     <div className={styles.firstMeta}>
-                                        {destination.address && (
+                                        {localized.address && (
                                             <span
                                                 className={styles.firstMetaItem}
                                             >
                                                 <MapPin size={14} />
-                                                {destination.address}
+                                                {localized.address}
                                             </span>
                                         )}
                                         <span className={styles.firstMetaItem}>
                                             <Tag size={14} />
-                                            {destination.category}
+                                            {localized.category}
                                         </span>
                                     </div>
                                 </div>
@@ -320,7 +326,7 @@ export default function ExplorePage() {
                                     <BadgeInfo className="text-(--primary-clr)" />{" "}
                                     {t("about")}
                                 </h1>
-                                <p>{destination?.description}</p>
+                                <p>{localized?.description}</p>
                             </div>
 
                             <div className={styles.highlights}>
@@ -344,7 +350,7 @@ export default function ExplorePage() {
                         </div>
                         <div className={`${styles.end}`}>
                             <h1>
-                                {t("about")} {destination?.name}
+                                {t("about")} {localized?.name}
                             </h1>
                             <div className={styles.map}>
                                 <Map

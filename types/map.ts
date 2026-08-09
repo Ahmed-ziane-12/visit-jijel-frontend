@@ -22,9 +22,13 @@ export interface MapProps {
 export interface Destination {
     id: number;
     name: string;
+    arabic_name?: string;
     description: string;
+    arabic_description?: string;
     category: string;
+    arabic_category?: string;
     address?: string;
+    arabic_address?: string;
     latitude?: number;
     longitude?: number;
     images?: string[];

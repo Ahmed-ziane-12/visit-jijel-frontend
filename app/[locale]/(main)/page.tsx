@@ -11,11 +11,12 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { motion } from "framer-motion";
 import axios from "@/lib/axios";
 import styles from "./page.module.css";
 import type { Destination } from "@/types/map";
+import { localizeDestination } from "@/lib/localize";
 
 const HERO_IMAGES = ["/phare.jpg", "/zoo.jpg", "/g.jpg", "/p2.jpg"];
 
@@ -150,6 +151,7 @@ function SectionTag({ label }: { label: string }) {
 
 export default function Home() {
     const t = useTranslations("home");
+    const locale = useLocale();
 
     /* data */
     const [loading, setLoading] = useState(true);
@@ -213,8 +215,8 @@ export default function Home() {
     console.log(featured.length >= 3);
 
     const display = featured.length >= 3 ? featured : dests;
-    const main = display[0];
-    const sides = display.slice(1, 3);
+    const main = localizeDestination(display[0], locale);
+    const sides = display.slice(1, 3).map((d) => localizeDestination(d, locale));
 
     return (
         <div>

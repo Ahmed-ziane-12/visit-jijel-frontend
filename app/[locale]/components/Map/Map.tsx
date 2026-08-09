@@ -11,7 +11,8 @@ import {
 import styles from "./Map.module.css";
 import { CategoryConfig, Destination } from "@/types/map";
 import { motion } from "framer-motion";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { localizeDestination } from "@/lib/localize";
 
 // ─── Category configuration ───────────────────────────────────────────────────
 
@@ -117,6 +118,8 @@ interface PreviewState {
 
 function HoverPreview({ destination, x, y }: PreviewState) {
     const t = useTranslations("map");
+    const locale = useLocale();
+    const localized = localizeDestination(destination, locale);
     const { color, bg, border, emoji } = getCategoryConfig(
         destination.category,
     );
@@ -179,7 +182,7 @@ function HoverPreview({ destination, x, y }: PreviewState) {
                     <img
                         key={imgIdx}
                         src={destination.media[0].secure_url}
-                        alt={`${destination.name} image ${imgIdx + 1}`}
+                        alt={`${localized.name} image ${imgIdx + 1}`}
                         className={styles.image}
                     />
                     {images.length > 1 && (
@@ -209,7 +212,7 @@ function HoverPreview({ destination, x, y }: PreviewState) {
                 <span className={styles.categoryBadge} style={badgeStyle}>
                     {emoji}&nbsp;{label}
                 </span>
-                <p className={styles.previewTitle}>{destination.name}</p>
+                <p className={styles.previewTitle}>{localized.name}</p>
                 {averageRating && (
                     <div className={styles.rating}>
                         {"★".repeat(Math.floor(averageRating))}
@@ -220,10 +223,10 @@ function HoverPreview({ destination, x, y }: PreviewState) {
                         </span>
                     </div>
                 )}
-                {destination.description && (
+                {localized.description && (
                     <p className={styles.previewDescription}>
-                        {destination.description.substring(0, 100)}
-                        {destination.description.length > 100 ? "..." : ""}
+                        {localized.description.substring(0, 100)}
+                        {localized.description.length > 100 ? "..." : ""}
                     </p>
                 )}
                 {destination.tags && destination.tags.length > 0 && (
