@@ -12,9 +12,11 @@ import {
     CirclePlus,
     Clock,
     Landmark,
+    MapPin,
     Phone,
     Play,
     Share2,
+    Tag,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -275,6 +277,27 @@ export default function ExplorePage() {
                             }
                         >
                             <MediaTile media={media[coverIndex]} />
+                            {destination && (
+                                <div className={styles.firstOverlay}>
+                                    <h2 className={styles.firstName}>
+                                        {destination.name}
+                                    </h2>
+                                    <div className={styles.firstMeta}>
+                                        {destination.address && (
+                                            <span
+                                                className={styles.firstMetaItem}
+                                            >
+                                                <MapPin size={14} />
+                                                {destination.address}
+                                            </span>
+                                        )}
+                                        <span className={styles.firstMetaItem}>
+                                            <Tag size={14} />
+                                            {destination.category}
+                                        </span>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                         <div className={styles.rest}>
                             {restSlots.map(({ m, i }, slotIdx) => (

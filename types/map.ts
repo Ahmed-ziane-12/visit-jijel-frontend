@@ -24,6 +24,7 @@ export interface Destination {
     name: string;
     description: string;
     category: string;
+    address?: string;
     latitude?: number;
     longitude?: number;
     images?: string[];
