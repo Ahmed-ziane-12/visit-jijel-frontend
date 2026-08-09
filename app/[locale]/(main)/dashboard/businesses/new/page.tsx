@@ -214,7 +214,7 @@ export default function CreateBusinessPage() {
                     cloudForm.append("folder", sig.folder);
 
                     const cloudRes = await fetch(
-                        `https://api.cloudinary.com/v1_1/${sig.cloud_name}/image/upload`,
+                        `https://api.cloudinary.com/v1_1/${sig.cloud_name}/auto/upload`,
                         { method: "POST", body: cloudForm }
                     );
                     const cloudData = await cloudRes.json();
