@@ -322,11 +322,11 @@ export default function ExplorePage() {
                     <div className={`${styles.details}`}>
                         <div className={`${styles.start}`}>
                             <div className={styles.about}>
-                                <h1 className="flex items-center gap-4">
+                                <h1 className="flex items-center gap-4 mb-4">
                                     <BadgeInfo className="text-(--primary-clr)" />{" "}
                                     {t("about")}
                                 </h1>
-                                <p className="tracking-wide">
+                                <p className="tracking-wide text-justify">
                                     {localized?.description}
                                 </p>
                             </div>
