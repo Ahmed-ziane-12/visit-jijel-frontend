@@ -13,6 +13,7 @@ import {
     Clock,
     Landmark,
     Phone,
+    Play,
     Share2,
 } from "lucide-react";
 import Link from "next/link";
@@ -30,7 +31,6 @@ export default function ExplorePage() {
     const { id } = useParams<{ id: string }>();
     const t = useTranslations("destination");
     const commonT = useTranslations("common");
-    const [coverImage, setCoverImage] = useState<string | undefined>("");
     const [destination, setDestination] = useState<Destination | null>(null);
     const [loading, setLoading] = useState(true);
     const [feedbackOpen, setfeedbackOpen] = useState(false);
@@ -46,11 +46,26 @@ export default function ExplorePage() {
     const [isDeletingOldReview, setIsDeletingOldReview] = useState(false);
     const { user } = useAuth();
     const [showcaseOpen, setShowcaseOpen] = useState(false);
+    const [showcaseIndex, setShowcaseIndex] = useState(0);
 
-    const mediaUrls = useMemo(
-        () => (destination?.media ?? []).map((m) => m.secure_url),
+    const showcaseItems = useMemo(
+        () =>
+            (destination?.media ?? []).map((m) => ({
+                src: m.secure_url,
+                type:
+                    m.resource_type === "video"
+                        ? ("video" as const)
+                        : ("image" as const),
+            })),
         [destination],
     );
+
+    const coverIndex = useMemo(() => {
+        const media = destination?.media ?? [];
+        const idx = media.findIndex((m) => m.is_cover);
+
+        return idx === -1 ? 0 : idx;
+    }, [destination]);
 
     useEffect(() => {
         const fetchDestination = async () => {
@@ -60,11 +75,6 @@ export default function ExplorePage() {
                 const data = res.data;
 
                 setDestination(data);
-
-                setCoverImage(
-                    data.media?.find((m: Media) => m.is_cover)?.secure_url ??
-                        data.media?.[0]?.secure_url,
-                );
             } catch (err) {
                 console.error("Failed to fetch destination:", err);
             } finally {
@@ -74,6 +84,11 @@ export default function ExplorePage() {
 
         if (id) fetchDestination();
     }, [id]);
+
+    const openShowcaseAt = (index: number) => {
+        setShowcaseIndex(index);
+        setShowcaseOpen(true);
+    };
 
     const handleAddReview = async (rating: number, body: string) => {
         if (!destination) return;
@@ -91,9 +106,16 @@ export default function ExplorePage() {
             setfeedbackTheme("success");
             setfeedback(t("review_success"));
             setfeedbackOpen(true);
-        } catch (error: any) {
-            if (error.response?.status === 422) {
-                const targetError = error.response.data?.errors?.target;
+        } catch (error) {
+            const err = error as {
+                response?: {
+                    status?: number;
+                    data?: { errors?: { target?: string[] } };
+                };
+            };
+
+            if (err.response?.status === 422) {
+                const targetError = err.response.data?.errors?.target;
                 const validationMessage = targetError?.[0];
 
                 if (
@@ -119,7 +141,7 @@ export default function ExplorePage() {
                     // Handle other validation errors
                     console.error(
                         "Validation error:",
-                        error.response.data.errors,
+                        err.response?.data?.errors,
                     );
                     // You can show a toast or alert here
                     alert(validationMessage || t("review_validation_error"));
@@ -202,6 +224,8 @@ export default function ExplorePage() {
         notFound();
     }
 
+    const media = destination?.media ?? [];
+
     return (
         <div className={styles.container}>
             <ConfirmDialog
@@ -216,7 +240,8 @@ export default function ExplorePage() {
                 onCancel={closeErrorDialog}
             />
             <ImageShowcase
-                images={mediaUrls}
+                items={showcaseItems}
+                initialIndex={showcaseIndex}
                 open={showcaseOpen}
                 onClose={() => setShowcaseOpen(false)}
             />
@@ -230,122 +255,34 @@ export default function ExplorePage() {
             ) : (
                 <>
                     <div className={styles.imageGrid}>
-                        <div className={`${styles.first} relative`}>
-                            {coverImage ? (
-                                <Image
-                                    src={coverImage}
-                                    alt={coverImage}
-                                    width={1000}
-                                    height={1000}
-                                    placeholder="blur"
-                                    blurDataURL={BLUR}
-                                />
-                            ) : (
-                                <Image
-                                    src="https://placehold.net/600x600.png"
-                                    alt={t("placeholder_alt")}
-                                    width={1000}
-                                    height={1000}
-                                />
-                            )}
+                        <div
+                            className={`${styles.first}${
+                                media[coverIndex] ? ` ${styles.clickable}` : ""
+                            }`}
+                            onClick={
+                                media[coverIndex]
+                                    ? () => openShowcaseAt(coverIndex)
+                                    : undefined
+                            }
+                        >
+                            <MediaTile media={media[coverIndex]} />
                         </div>
-                        <div className={`${styles.rest}`}>
-                            <div className={`${styles.image}`}>
-                                {destination?.media &&
-                                destination.media.length > 1 ? (
-                                    <Image
-                                        src={destination.media[1].secure_url}
-                                        alt={destination.name}
-                                        width={1000}
-                                        height={1000}
-                                        placeholder="blur"
-                                        blurDataURL={BLUR}
-                                    />
-                                ) : (
-                                    <Image
-                                        src="https://placehold.net/600x600.png"
-                                        alt={t("placeholder_alt")}
-                                        width={1000}
-                                        height={1000}
-                                    />
-                                )}
-                            </div>
-                            <div className={`${styles.image}`}>
-                                {destination?.media &&
-                                destination.media.length > 2 ? (
-                                    <Image
-                                        src={destination.media[2].secure_url}
-                                        alt={destination.name}
-                                        width={1000}
-                                        height={1000}
-                                        placeholder="blur"
-                                        blurDataURL={BLUR}
-                                    />
-                                ) : (
-                                    <Image
-                                        src="https://placehold.net/600x600.png"
-                                        alt={t("placeholder_alt")}
-                                        width={1000}
-                                        height={1000}
-                                    />
-                                )}
-                            </div>
-                            <div className={`${styles.image}`}>
-                                {destination?.media &&
-                                destination.media.length > 3 ? (
-                                    <Image
-                                        src={destination.media[3].secure_url}
-                                        alt={destination.name}
-                                        width={1000}
-                                        height={1000}
-                                        placeholder="blur"
-                                        blurDataURL={BLUR}
-                                    />
-                                ) : (
-                                    <Image
-                                        src="https://placehold.net/600x600.png"
-                                        alt={t("placeholder_alt")}
-                                        width={1000}
-                                        height={1000}
-                                    />
-                                )}
-                            </div>
-                            <div className={`${styles.image} ${styles.last}`}>
-                                {destination?.media &&
-                                destination.media.length > 4 ? (
-                                    <>
-                                        <Image
-                                            src={
-                                                destination.media[4].secure_url
-                                            }
-                                            alt=""
-                                            width={1000}
-                                            height={1000}
-                                            className="object-cover"
-                                            placeholder="blur"
-                                            blurDataURL={BLUR}
-                                        />
-
-                                        {destination.media.length > 5 && (
-                                            <button
-                                                className={styles.moreImages}
-                                                onClick={() =>
-                                                    setShowcaseOpen(true)
-                                                }
-                                            >
-                                                + {destination.media.length - 5}
-                                            </button>
-                                        )}
-                                    </>
-                                ) : (
-                                    <Image
-                                        src="https://placehold.net/600x600.png"
-                                        alt={t("placeholder_alt")}
-                                        width={1000}
-                                        height={1000}
-                                    />
-                                )}
-                            </div>
+                        <div className={styles.rest}>
+                            {[1, 2, 3, 4].map((slot) => (
+                                <div
+                                    key={slot}
+                                    className={`${styles.image}${
+                                        slot === 4 ? ` ${styles.last}` : ""
+                                    }${media[slot] ? ` ${styles.clickable}` : ""}`}
+                                    onClick={
+                                        media[slot]
+                                            ? () => openShowcaseAt(slot)
+                                            : undefined
+                                    }
+                                >
+                                    <MediaTile media={media[slot]} />
+                                </div>
+                            ))}
                         </div>
                     </div>
                     <div className={`${styles.details}`}>
@@ -444,5 +381,48 @@ export default function ExplorePage() {
                 </>
             )}
         </div>
+    );
+}
+
+function MediaTile({ media }: { media: Media | undefined }) {
+    if (!media) {
+        return (
+            <Image
+                src="https://placehold.net/600x600.png"
+                alt=""
+                width={1000}
+                height={1000}
+            />
+        );
+    }
+
+    if (media.resource_type === "video") {
+        return (
+            <>
+                <video
+                    src={media.secure_url}
+                    muted
+                    playsInline
+                    preload="metadata"
+                    className="h-full w-full object-cover"
+                />
+                <div className={styles.videoOverlay}>
+                    <div className={styles.videoPlay}>
+                        <Play size={20} />
+                    </div>
+                </div>
+            </>
+        );
+    }
+
+    return (
+        <Image
+            src={media.secure_url}
+            alt=""
+            width={1000}
+            height={1000}
+            placeholder="blur"
+            blurDataURL={BLUR}
+        />
     );
 }

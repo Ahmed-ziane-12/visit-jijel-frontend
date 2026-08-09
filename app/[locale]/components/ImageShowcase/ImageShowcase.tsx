@@ -5,28 +5,37 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
 
+export interface ShowcaseItem {
+    src: string;
+    type: "image" | "video";
+}
+
 interface ImageShowcaseProps {
-    images: string[];
+    items: ShowcaseItem[];
     initialIndex?: number;
     open: boolean;
     onClose: () => void;
 }
 
 export default function ImageShowcase({
-    images,
+    items,
     initialIndex = 0,
     open,
     onClose,
 }: ImageShowcaseProps) {
     const [index, setIndex] = useState(initialIndex);
+    const [lastKey, setLastKey] = useState("");
 
-    useEffect(() => {
+    const openKey = open ? `open:${initialIndex}` : "closed";
+
+    if (openKey !== lastKey) {
+        setLastKey(openKey);
         setIndex(initialIndex);
-    }, [initialIndex, open]);
+    }
 
     const goNext = useCallback(() => {
-        setIndex((i) => Math.min(i + 1, images.length - 1));
-    }, [images.length]);
+        setIndex((i) => Math.min(i + 1, items.length - 1));
+    }, [items.length]);
 
     const goPrev = useCallback(() => {
         setIndex((i) => Math.max(i - 1, 0));
@@ -51,7 +60,9 @@ export default function ImageShowcase({
         };
     }, [open]);
 
-    if (!open || images.length === 0) return null;
+    if (!open || items.length === 0) return null;
+
+    const item = items[index];
 
     return (
         <div className="fixed inset-0 z-5000 flex items-center justify-center bg-black/90">
@@ -63,7 +74,7 @@ export default function ImageShowcase({
             </button>
 
             <span className="absolute left-4 top-4 z-10 rounded-full bg-black/50 px-3 py-1 text-sm text-white">
-                {index + 1} / {images.length}
+                {index + 1} / {items.length}
             </span>
 
             {index > 0 && (
@@ -84,20 +95,30 @@ export default function ImageShowcase({
                     transition={{ duration: 0.2 }}
                     className="relative flex h-full w-full items-center justify-center p-16"
                 >
-                    <Image
-                        src={images[index]}
-                        alt=""
-                        fill
-                        className="object-contain"
-                        sizes="100vw"
-                        priority
-                        placeholder="blur"
-                        blurDataURL={`${images[index]}?w=10&q=1`}
-                    />
+                    {item.type === "video" ? (
+                        <video
+                            src={item.src}
+                            controls
+                            playsInline
+                            preload="metadata"
+                            className="max-h-full max-w-full object-contain"
+                        />
+                    ) : (
+                        <Image
+                            src={item.src}
+                            alt=""
+                            fill
+                            className="object-contain"
+                            sizes="100vw"
+                            priority
+                            placeholder="blur"
+                            blurDataURL={`${item.src}?w=10&q=1`}
+                        />
+                    )}
                 </motion.div>
             </AnimatePresence>
 
-            {index < images.length - 1 && (
+            {index < items.length - 1 && (
                 <button
                     onClick={goNext}
                     className="absolute right-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-black/50 text-white transition-colors hover:bg-white/20"

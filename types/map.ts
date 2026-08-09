@@ -37,6 +37,7 @@ export interface Media {
     secure_url: string;
     is_cover: boolean;
     collection: string;
+    resource_type?: string;
 }
 
 export interface Review {
