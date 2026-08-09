@@ -67,6 +67,15 @@ export default function ExplorePage() {
         return idx === -1 ? 0 : idx;
     }, [destination]);
 
+    const restSlots = useMemo(() => {
+        const all = destination?.media ?? [];
+
+        return all
+            .map((m, i) => ({ m, i }))
+            .filter(({ i }) => i !== coverIndex)
+            .slice(0, 4);
+    }, [destination, coverIndex]);
+
     useEffect(() => {
         const fetchDestination = async () => {
             try {
@@ -268,19 +277,15 @@ export default function ExplorePage() {
                             <MediaTile media={media[coverIndex]} />
                         </div>
                         <div className={styles.rest}>
-                            {[1, 2, 3, 4].map((slot) => (
+                            {restSlots.map(({ m, i }, slotIdx) => (
                                 <div
-                                    key={slot}
+                                    key={i}
                                     className={`${styles.image}${
-                                        slot === 4 ? ` ${styles.last}` : ""
-                                    }${media[slot] ? ` ${styles.clickable}` : ""}`}
-                                    onClick={
-                                        media[slot]
-                                            ? () => openShowcaseAt(slot)
-                                            : undefined
-                                    }
+                                        slotIdx === 3 ? ` ${styles.last}` : ""
+                                    } ${styles.clickable}`}
+                                    onClick={() => openShowcaseAt(i)}
                                 >
-                                    <MediaTile media={media[slot]} />
+                                    <MediaTile media={m} />
                                 </div>
                             ))}
                         </div>
