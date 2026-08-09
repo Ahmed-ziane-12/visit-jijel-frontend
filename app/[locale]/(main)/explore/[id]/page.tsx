@@ -326,7 +326,9 @@ export default function ExplorePage() {
                                     <BadgeInfo className="text-(--primary-clr)" />{" "}
                                     {t("about")}
                                 </h1>
-                                <p>{localized?.description}</p>
+                                <p className="tracking-wide">
+                                    {localized?.description}
+                                </p>
                             </div>
 
                             <div className={styles.highlights}>
