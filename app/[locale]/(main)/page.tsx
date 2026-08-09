@@ -215,7 +215,9 @@ export default function Home() {
     console.log(featured.length >= 3);
 
     const display = featured.length >= 3 ? featured : dests;
-    const main = localizeDestination(display[0], locale);
+    const main = display[0]
+        ? localizeDestination(display[0], locale)
+        : undefined;
     const sides = display.slice(1, 3).map((d) => localizeDestination(d, locale));
 
     return (
