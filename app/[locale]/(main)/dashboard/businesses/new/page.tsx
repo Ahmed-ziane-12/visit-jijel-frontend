@@ -196,7 +196,7 @@ export default function CreateBusinessPage() {
 
             if (form.images.length > 0) {
                 setUploadProgress(t("uploading_images"));
-                const folder = "businesses";
+                const folder = "jijel/businesses";
 
                 for (let i = 0; i < form.images.length; i++) {
                     const img = form.images[i];
