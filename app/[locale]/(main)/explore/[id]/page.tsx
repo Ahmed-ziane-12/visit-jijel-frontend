@@ -334,7 +334,7 @@ export default function ExplorePage() {
                             <div className={styles.highlights}>
                                 {destination?.tags?.map((tag) => (
                                     <Link
-                                        href="/"
+                                        href={`/search?q=${tag}`}
                                         key={tag}
                                         className={`${styles.tag}`}
                                     >
