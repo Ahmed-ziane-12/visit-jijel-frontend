@@ -347,7 +347,11 @@
         "modal_title": "Write a Review",
         "placeholder": "Optional review...",
         "submitting": "Submitting...",
-        "submit_btn": "Submit Review"
+        "submit_btn": "Submit Review",
+        "auth_required_title": "Login Required",
+        "auth_required_message": "You need to be logged in to write a review. Would you like to log in now?",
+        "go_to_login": "Go to Login",
+        "cancel": "Cancel"
     },
     "calendar": {
         "today": "Today",

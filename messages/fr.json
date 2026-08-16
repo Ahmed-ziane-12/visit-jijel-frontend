@@ -347,7 +347,11 @@
         "modal_title": "Écrire un avis",
         "placeholder": "Avis optionnel...",
         "submitting": "Envoi en cours...",
-        "submit_btn": "Soumettre l'avis"
+        "submit_btn": "Soumettre l'avis",
+        "auth_required_title": "Connexion requise",
+        "auth_required_message": "Vous devez être connecté pour écrire un avis. Voulez-vous vous connecter maintenant ?",
+        "go_to_login": "Se connecter",
+        "cancel": "Annuler"
     },
     "calendar": {
         "today": "Aujourd'hui",

@@ -48,7 +48,7 @@ export default function ExplorePage() {
     } | null>(null);
     const [oldReviewId, setOldReviewId] = useState<number | null>(null);
     const [isDeletingOldReview, setIsDeletingOldReview] = useState(false);
-    const { user } = useAuth();
+    const { user, isAuthenticated } = useAuth();
     const [showcaseOpen, setShowcaseOpen] = useState(false);
     const [showcaseIndex, setShowcaseIndex] = useState(0);
 
@@ -347,6 +347,7 @@ export default function ExplorePage() {
                                 <Reviews
                                     reviews={destination?.reviews}
                                     onSubmit={handleAddReview}
+                                    isAuthenticated={isAuthenticated}
                                 />
                             </div>
                         </div>

@@ -1,27 +1,44 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { MessageSquareText, PencilLine, Star, X, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Review } from "@/types/map";
 import { useTranslations } from "next-intl";
+import ConfirmDialog from "@/app/[locale]/components/ConfirmDialog/ConfirmDialog";
 
 interface ReviewsProps {
     reviews: Review[] | undefined;
     onSubmit: (rating: number, body: string) => Promise<void>;
+    isAuthenticated?: boolean;
 }
 
-export default function Reviews({ reviews, onSubmit }: ReviewsProps) {
+export default function Reviews({
+    reviews,
+    onSubmit,
+    isAuthenticated = false,
+}: ReviewsProps) {
     const t = useTranslations("reviews");
+    const router = useRouter();
     const [open, setOpen] = useState(false);
     const [rating, setRating] = useState(0);
     const [hover, setHover] = useState(0);
     const [body, setBody] = useState("");
 
     const [loading, setLoading] = useState(false);
+    const [authDialogOpen, setAuthDialogOpen] = useState(false);
 
     const isLoading = reviews === undefined;
     const isEmpty = reviews?.length === 0;
+
+    const handleWriteReview = () => {
+        if (!isAuthenticated) {
+            setAuthDialogOpen(true);
+            return;
+        }
+        setOpen(true);
+    };
 
     const handleSubmit = async () => {
         if (rating === 0 || loading) return;
@@ -67,7 +84,7 @@ export default function Reviews({ reviews, onSubmit }: ReviewsProps) {
                 </div>
 
                 <button
-                    onClick={() => setOpen(true)}
+                    onClick={handleWriteReview}
                     className="flex items-center gap-3 px-3 py-3 rounded-md bg-black text-white text-sm cursor-pointer hover:opacity-80"
                 >
                     <PencilLine size={16} />
@@ -248,6 +265,17 @@ export default function Reviews({ reviews, onSubmit }: ReviewsProps) {
                     </motion.div>
                 )}
             </AnimatePresence>
+
+            <ConfirmDialog
+                open={authDialogOpen}
+                theme="info"
+                title={t("auth_required_title")}
+                message={t("auth_required_message")}
+                confirmLabel={t("go_to_login")}
+                cancelLabel={t("cancel")}
+                onConfirm={() => router.push("/login")}
+                onCancel={() => setAuthDialogOpen(false)}
+            />
         </div>
     );
 }

@@ -347,7 +347,11 @@
         "modal_title": "اكتب تقييماً",
         "placeholder": "تقييم اختياري...",
         "submitting": "جارٍ الإرسال...",
-        "submit_btn": "إرسال التقييم"
+        "submit_btn": "إرسال التقييم",
+        "auth_required_title": "تسجيل الدخول مطلوب",
+        "auth_required_message": "يجب عليك تسجيل الدخول لكتابة تقييم. هل تريد تسجيل الدخول الآن؟",
+        "go_to_login": "الذهاب إلى تسجيل الدخول",
+        "cancel": "إلغاء"
     },
     "calendar": {
         "today": "اليوم",
