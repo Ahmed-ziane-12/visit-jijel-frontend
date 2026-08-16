@@ -139,7 +139,7 @@ export default function Reviews({
                                                 r.user.profile?.media?.find(
                                                     (m) =>
                                                         m.collection ===
-                                                        "profiles"
+                                                        "profiles",
                                                 )?.secure_url ||
                                                 "https://placehold.net/avatar.png"
                                             }
@@ -268,7 +268,7 @@ export default function Reviews({
 
             <ConfirmDialog
                 open={authDialogOpen}
-                theme="info"
+                theme="warning"
                 title={t("auth_required_title")}
                 message={t("auth_required_message")}
                 confirmLabel={t("go_to_login")}
