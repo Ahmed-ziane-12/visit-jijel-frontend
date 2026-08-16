@@ -14,14 +14,21 @@ export interface ProfileDropdownProps {
     userName?: string;
     userEmail?: string;
     avatarUrl?: string | null;
-    initials?: string;
+}
+
+function getInitials(name: string): string {
+    return name
+        .split(" ")
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((part) => part[0].toUpperCase())
+        .join("");
 }
 
 const ProfileDropdown = ({
     userName = "John Doe",
     userEmail = "john@example.com",
     avatarUrl = null,
-    initials = "JD",
 }: ProfileDropdownProps) => {
     const t = useTranslations("profile_menu");
     const { user, logout } = useAuth();
@@ -87,7 +94,7 @@ const ProfileDropdown = ({
                             className={styles.avatar}
                         />
                     ) : (
-                        <div className={styles.avatarInitials}>{initials}</div>
+                        <div className={styles.avatarInitials}>{getInitials(userName)}</div>
                     )}
                 </button>
 

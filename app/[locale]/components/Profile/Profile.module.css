@@ -23,7 +23,7 @@
 }
 
 .triggerButton:focus {
-    outline: 2px solid #3b82f6;
+    outline: 2px solid #eb662b;
     outline-offset: 2px;
 }
 
@@ -152,7 +152,7 @@
 }
 
 .menuItem:focus {
-    outline: 2px solid #3b82f6;
+    outline: 2px solid #eb662b;
     outline-offset: -2px;
 }
 
