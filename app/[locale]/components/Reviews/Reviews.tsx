@@ -119,8 +119,11 @@ export default function Reviews({ reviews, onSubmit }: ReviewsProps) {
                                         {/* AVATAR */}
                                         <img
                                             src={
-                                                r.user.profile?.media?.[0]
-                                                    ?.secure_url ||
+                                                r.user.profile?.media?.find(
+                                                    (m) =>
+                                                        m.collection ===
+                                                        "profiles"
+                                                )?.secure_url ||
                                                 "https://placehold.net/avatar.png"
                                             }
                                             className="w-10 h-10 rounded-full object-cover"
