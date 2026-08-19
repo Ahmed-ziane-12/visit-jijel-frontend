@@ -17,6 +17,7 @@ import {
     Settings,
     Save,
     MessageSquare,
+    MapPin,
 } from "lucide-react";
 import Image from "next/image";
 import styles from "./profile.module.css";
@@ -25,6 +26,7 @@ import UploadModal from "@/app/[locale]/components/UploadModal/UploadModal";
 import dynamic from "next/dynamic";
 import { CalendarEvent } from "../../../components/Calendar/Calendar";
 import { Media } from "@/types/map";
+import { PublicProfile } from "@/types/social";
 import PostsTab from "@/app/[locale]/components/Profile/PostsTab";
 import ProfileSidebar from "@/app/[locale]/components/Profile/ProfileSidebar";
 
@@ -43,7 +45,7 @@ interface UserProfile {
 export default function ProfilePage() {
     const t = useTranslations("profile");
     const tc = useTranslations("common");
-    const { user, loading, refreshUser, isAuthenticated } = useAuth();
+    const { user, loading: authLoading, refreshUser } = useAuth();
     const params = useParams();
     const router = useRouter();
     const profileId = params?.id as string;
@@ -62,15 +64,17 @@ export default function ProfilePage() {
     );
 
     useEffect(() => {
-        if (!loading && user?.profile?.role === "business_owner") {
+        if (!authLoading && user?.profile?.role === "business_owner") {
             router.replace(`/dashboard/`);
         }
-    }, [loading, user, profileId, router]);
+    }, [authLoading, user, profileId, router]);
 
     const [activeTab, setActiveTab] = useState<TabType>("posts");
     const [isCoverUploadOpen, setIsCoverUploadOpen] = useState(false);
     const [isProfileUploadOpen, setIsProfileUploadOpen] = useState(false);
     const [profile, setProfile] = useState<UserProfile | null>(null);
+    const [profileUser, setProfileUser] = useState<PublicProfile | null>(null);
+    const [profileLoading, setProfileLoading] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
     const [events, setEvents] = useState<CalendarEvent[]>([]);
     const [eventsLoading, setEventsLoading] = useState(false);
@@ -81,6 +85,67 @@ export default function ProfilePage() {
         phone: "",
         bio: "",
     });
+
+    // Fetch the profile user by ID
+    useEffect(() => {
+        const fetchProfile = async () => {
+            setProfileLoading(true);
+            try {
+                if (isOwnProfile && user) {
+                    // Own profile — use auth context data
+                    setProfileUser(user as unknown as PublicProfile);
+                } else {
+                    // Other user — fetch from API
+                    const res = await axios.get(
+                        `/api/v1/users/${profileId}`,
+                    );
+                    setProfileUser(res.data);
+                }
+            } catch (error) {
+                console.error("Failed to fetch profile:", error);
+            } finally {
+                setProfileLoading(false);
+            }
+        };
+
+        if (!authLoading) {
+            fetchProfile();
+        }
+    }, [authLoading, user, profileId, isOwnProfile]);
+
+    // Populate local state from fetched profile
+    useEffect(() => {
+        if (!profileUser) return;
+
+        const media = profileUser.profile?.media ?? [];
+        setMediaItems(media);
+        setProfile({
+            id: profileUser.id,
+            name: profileUser.name,
+            email: profileUser.email ?? "",
+            phone: profileUser.profile?.phone || "",
+            bio: profileUser.profile?.bio || "",
+            coverImage:
+                media.find((m: Media) => m.collection === "covers")
+                    ?.secure_url ??
+                "https://placehold.net/8-800x600.png",
+            profileImage:
+                media.find((m: Media) => m.collection === "profiles")
+                    ?.secure_url ??
+                "https://placehold.net/avatar-5.png",
+        });
+        setEditForm({
+            name: profileUser.name,
+            email: profileUser.email ?? "",
+            phone: profileUser.profile?.phone || "",
+            bio: profileUser.profile?.bio || "",
+        });
+
+        // Fetch events only for own profile
+        if (isOwnProfile) {
+            fetchEvents();
+        }
+    }, [profileUser, isOwnProfile]);
 
     const fetchEvents = async () => {
         if (!user) return;
@@ -108,36 +173,6 @@ export default function ProfilePage() {
             setEventsLoading(false);
         }
     };
-
-    useEffect(() => {
-        if (user) {
-            const media = user.profile?.media ?? [];
-            setMediaItems(media);
-            setProfile({
-                id: user.id,
-                name: user.name,
-                email: user.email,
-                phone: user.profile?.phone || "",
-                bio: user.profile?.bio || "",
-                coverImage:
-                    media.find((m: Media) => m.collection === "covers")
-                        ?.secure_url ??
-                    "https://placehold.net/8-800x600.png",
-                profileImage:
-                    media.find((m: Media) => m.collection === "profiles")
-                        ?.secure_url ??
-                    "https://placehold.net/avatar-5.png",
-            });
-            setEditForm({
-                name: user.name,
-                email: user.email,
-                phone: user.profile?.phone || "",
-                bio: user.profile?.bio || "",
-            });
-
-            fetchEvents();
-        }
-    }, [user]);
 
     const handleSaveChanges = async () => {
         try {
@@ -241,11 +276,8 @@ export default function ProfilePage() {
             case "posts":
                 return (
                     <PostsTab
-                        userName={profile?.name ?? ""}
-                        userAvatar={
-                            profile?.profileImage ??
-                            "https://placehold.net/avatar-5.png"
-                        }
+                        userId={Number(profileId)}
+                        isOwnProfile={isOwnProfile}
                     />
                 );
             case "trips":
@@ -258,6 +290,16 @@ export default function ProfilePage() {
                     </div>
                 );
             case "calendar":
+                if (!isOwnProfile) {
+                    return (
+                        <div className={styles.tabContent}>
+                            <div className={styles.tripsContainer}>
+                                <h2>{t("tab_calendar")}</h2>
+                                <p>Calendar is only available on your own profile.</p>
+                            </div>
+                        </div>
+                    );
+                }
                 return (
                     <div className={styles.calendarTabContent}>
                         {eventsLoading ? (
@@ -289,6 +331,16 @@ export default function ProfilePage() {
                     </div>
                 );
             case "settings":
+                if (!isOwnProfile) {
+                    return (
+                        <div className={styles.tabContent}>
+                            <div className={styles.tripsContainer}>
+                                <h2>{t("tab_settings")}</h2>
+                                <p>Settings are only available on your own profile.</p>
+                            </div>
+                        </div>
+                    );
+                }
                 return (
                     <div className={styles.tabContent}>
                         <div className={styles.settingsContainer}>
@@ -302,7 +354,7 @@ export default function ProfilePage() {
         }
     };
 
-    if (!profile) {
+    if (authLoading || profileLoading || !profile) {
         return (
             <div className={styles.loadingContainer}>
                 <div className={styles.spinner} />
@@ -371,23 +423,28 @@ export default function ProfilePage() {
                     <div className={styles.headerLeft}>
                         <h1 className={styles.name}>{profile.name}</h1>
                         <div className={styles.metaRow}>
-                            {user?.profile?.role && (
+                            {profileUser?.profile?.role && (
                                 <span className={styles.metaItem}>
                                     <Briefcase size={14} />
-                                    {user.profile.role === "business_owner"
+                                    {profileUser.profile.role ===
+                                    "business_owner"
                                         ? "Business Owner"
                                         : "Traveler"}
                                 </span>
                             )}
-                            {user?.profile?.wilaya && (
+                            {profileUser?.profile?.wilaya && (
                                 <span className={styles.metaItem}>
-                                    <Mail size={14} />
-                                    {user.profile.wilaya}
+                                    <MapPin size={14} />
+                                    {profileUser.profile.wilaya}
                                 </span>
                             )}
                             <span className={styles.metaItem}>
                                 <CalendarDays size={14} />
-                                Joined {formatJoinDate(user?.email_verified_at ?? undefined) ?? "2024"}
+                                Joined{" "}
+                                {formatJoinDate(
+                                    profileUser?.email_verified_at ??
+                                        undefined,
+                                ) ?? "2024"}
                             </span>
                         </div>
                     </div>
@@ -398,7 +455,9 @@ export default function ProfilePage() {
                                 onClick={() => setIsEditing(!isEditing)}
                             >
                                 <User size={16} />
-                                {isEditing ? tc("cancel") : t("edit_profile")}
+                                {isEditing
+                                    ? tc("cancel")
+                                    : t("edit_profile")}
                             </button>
                         )}
                     </div>
@@ -537,13 +596,17 @@ export default function ProfilePage() {
                             bio={profile.bio}
                             phone={profile.phone}
                             role={
-                                user?.profile?.role === "business_owner"
+                                profileUser?.profile?.role ===
+                                "business_owner"
                                     ? "Business Owner"
                                     : "Traveler"
                             }
-                            city={user?.profile?.wilaya ?? undefined}
+                            city={
+                                profileUser?.profile?.wilaya ?? undefined
+                            }
                             joinDate={formatJoinDate(
-                                user?.email_verified_at ?? undefined,
+                                profileUser?.email_verified_at ??
+                                    undefined,
                             )}
                             tripCount={0}
                             photos={photos}
@@ -553,35 +616,43 @@ export default function ProfilePage() {
             </div>
 
             {/* Upload Modals */}
-            <UploadModal
-                isOpen={isCoverUploadOpen}
-                onClose={() => setIsCoverUploadOpen(false)}
-                modelType="profile"
-                modelId={user?.profile?.id ?? profile.id}
-                collection="covers"
-                isCover={true}
-                onUploadSuccess={(url) => {
-                    setProfile((prev) =>
-                        prev ? { ...prev, coverImage: url } : null,
-                    );
-                    refreshUser();
-                }}
-            />
+            {isOwnProfile && (
+                <>
+                    <UploadModal
+                        isOpen={isCoverUploadOpen}
+                        onClose={() => setIsCoverUploadOpen(false)}
+                        modelType="profile"
+                        modelId={user?.profile?.id ?? profile.id}
+                        collection="covers"
+                        isCover={true}
+                        onUploadSuccess={(url) => {
+                            setProfile((prev) =>
+                                prev
+                                    ? { ...prev, coverImage: url }
+                                    : null,
+                            );
+                            refreshUser();
+                        }}
+                    />
 
-            <UploadModal
-                isOpen={isProfileUploadOpen}
-                onClose={() => setIsProfileUploadOpen(false)}
-                modelType="profile"
-                modelId={user?.profile?.id ?? profile.id}
-                collection="profiles"
-                isCover={false}
-                onUploadSuccess={(url) => {
-                    setProfile((prev) =>
-                        prev ? { ...prev, profileImage: url } : null,
-                    );
-                    refreshUser();
-                }}
-            />
+                    <UploadModal
+                        isOpen={isProfileUploadOpen}
+                        onClose={() => setIsProfileUploadOpen(false)}
+                        modelType="profile"
+                        modelId={user?.profile?.id ?? profile.id}
+                        collection="profiles"
+                        isCover={false}
+                        onUploadSuccess={(url) => {
+                            setProfile((prev) =>
+                                prev
+                                    ? { ...prev, profileImage: url }
+                                    : null,
+                            );
+                            refreshUser();
+                        }}
+                    />
+                </>
+            )}
         </>
     );
 }
