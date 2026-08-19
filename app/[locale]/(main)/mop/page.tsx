@@ -274,7 +274,9 @@ export default function Home() {
             >
                 <PreviewSection />
             </AnimateOnScroll>
-            <section className={styles.mobile}></section>
+            <section className={styles.mobile}>
+                <h1>A Mobile Section That Shows Mobile</h1>
+            </section>
 
             <section className={styles.contact}></section>
         </main>
