@@ -17,6 +17,7 @@ import {
     Loader2,
 } from "lucide-react";
 import axios from "@/lib/axios";
+import { getEcho } from "@/lib/broadcast";
 import { useAuth } from "@/context/AuthContext";
 import { Post, Comment, PaginatedResponse } from "@/types/social";
 import { Media } from "@/types/map";
@@ -808,6 +809,55 @@ export default function PostsTab({
         setLoading(true);
         fetchPosts(1);
     }, [fetchPosts]);
+
+    // Real-time broadcasts
+    useEffect(() => {
+        const echo = getEcho();
+        if (!echo) return;
+
+        const channel = echo.channel(`profile.${userId}.posts`);
+
+        channel.listen(".post.created", (post: Post) => {
+            setPosts((prev) => {
+                if (prev.some((p) => p.id === post.id)) return prev;
+                return [post, ...prev];
+            });
+        });
+
+        channel.listen(
+            ".post.liked",
+            (data: {
+                likeable_id: number;
+                likes_count: number;
+                dislikes_count: number;
+            }) => {
+                setPosts((prev) =>
+                    prev.map((p) => {
+                        if (p.id !== data.likeable_id) return p;
+                        return {
+                            ...p,
+                            _likes_count: data.likes_count,
+                            _dislikes_count: data.dislikes_count,
+                        };
+                    }),
+                );
+            },
+        );
+
+        channel.listen(".comment.created", (comment: Comment) => {
+            setPosts((prev) =>
+                prev.map((p) => {
+                    if (p.id !== comment.post_id) return p;
+                    if (p.comments.some((c) => c.id === comment.id)) return p;
+                    return { ...p, comments: [...p.comments, comment] };
+                }),
+            );
+        });
+
+        return () => {
+            echo.leaveChannel(`profile.${userId}.posts`);
+        };
+    }, [userId]);
 
     const handleMediaSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
