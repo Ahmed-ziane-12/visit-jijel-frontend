@@ -230,6 +230,7 @@
     },
     "profile": {
         "loading_calendar": "Chargement du calendrier...",
+        "tab_posts": "Publications",
         "tab_trips": "Mes voyages",
         "tab_calendar": "Calendrier",
         "tab_saved": "Favoris",

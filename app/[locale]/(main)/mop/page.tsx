@@ -7,13 +7,13 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import axios from "@/lib/axios";
-import AnimateOnScroll from "../components/AnimateOnScroll/AnimateOnScroll";
-import ProblemsSection from "../components/Problems/ProblemsSection";
-import SolutionSection from "../components/SolutionSection/SolutionSection";
-import PreviewSection from "../components/PreviewSection/PreviewSection";
-import SearchCard from "../components/SearchCard/SearchCard";
 import { ArrowRight, MapPinSearch, WandSparkles } from "lucide-react";
 import type { Destination } from "@/types/map";
+import SearchCard from "../../components/SearchCard/SearchCard";
+import ProblemsSection from "../../components/Problems/ProblemsSection";
+import SolutionSection from "../../components/SolutionSection/SolutionSection";
+import PreviewSection from "../../components/PreviewSection/PreviewSection";
+import AnimateOnScroll from "../../components/AnimateOnScroll/AnimateOnScroll";
 
 function useSections(t: ReturnType<typeof useTranslations>) {
     return [
@@ -164,7 +164,9 @@ export default function Home() {
                             <h2 className={styles.sectionTitle}>
                                 {section.title}
                             </h2>
-                            <button className={styles.seeAll}>{t("see_all")}</button>
+                            <button className={styles.seeAll}>
+                                {t("see_all")}
+                            </button>
                         </div>
                         <div className={styles.scrollRow}>
                             {section.items.map((dest) => (
@@ -192,9 +194,7 @@ export default function Home() {
         <main className={styles.page}>
             <section className={styles.hero}>
                 <div className={styles.left}>
-                    <h1 className={styles.title}>
-                        {t("hero_title")}
-                    </h1>
+                    <h1 className={styles.title}>{t("hero_title")}</h1>
                     <p className={styles.subtitle}>{t("hero_desc")}</p>
                     <div className={styles.cta}>
                         <button>
