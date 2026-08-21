@@ -336,11 +336,11 @@ function PostCard({
     const [submitting, setSubmitting] = useState(false);
 
     const isOwner = currentUserId === post.user_id;
-    const likesCount = post.likes.filter((l) => l.type === "like").length;
-    const dislikesCount = post.likes.filter(
+    const likesCount = (post.likes ?? []).filter((l) => l.type === "like").length;
+    const dislikesCount = (post.likes ?? []).filter(
         (l) => l.type === "dislike",
     ).length;
-    const myLike = post.likes.find((l) => l.user_id === currentUserId);
+    const myLike = (post.likes ?? []).find((l) => l.user_id === currentUserId);
 
     const handleLike = async () => {
         try {
@@ -558,7 +558,7 @@ function PostCard({
                         className="flex items-center gap-1 text-xs font-medium text-[var(--light-fg)] transition-colors hover:text-(--primary-clr)"
                     >
                         <MessageCircle size={14} />
-                        {post.comments.length > 0 && post.comments.length}
+                        {(post.comments ?? []).length > 0 && (post.comments ?? []).length}
                     </button>
                     <button
                         onClick={() => setShowShareModal(true)}
@@ -592,9 +592,9 @@ function PostCard({
                 )}
 
                 {/* Comments */}
-                {showComments && post.comments.length > 0 && (
+                {showComments && (post.comments ?? []).length > 0 && (
                     <div className="mt-3 flex flex-col gap-2.5 border-t border-(--border) pt-3">
-                        {post.comments.map((c) => (
+                        {(post.comments ?? []).map((c) => (
                             <CommentItem
                                 key={c.id}
                                 comment={c}
