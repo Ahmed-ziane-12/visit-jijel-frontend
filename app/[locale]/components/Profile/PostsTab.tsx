@@ -636,10 +636,10 @@ function CommentItem({
     );
     const [submitting, setSubmitting] = useState(false);
 
-    const likesCount = comment.likes.filter(
+    const likesCount = (comment.likes ?? []).filter(
         (l) => l.type === "like",
     ).length;
-    const myLike = comment.likes.find(
+    const myLike = (comment.likes ?? []).find(
         (l) => l.user_id === currentUserId,
     );
 
