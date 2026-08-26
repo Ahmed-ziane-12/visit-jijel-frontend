@@ -242,21 +242,25 @@ export default function ProfilePage() {
             label: t("tab_trips"),
             icon: <Briefcase size={18} />,
         },
-        {
-            id: "calendar" as TabType,
-            label: t("tab_calendar"),
-            icon: <CalendarDays size={18} />,
-        },
-        {
-            id: "saved" as TabType,
-            label: t("tab_saved"),
-            icon: <Heart size={18} />,
-        },
-        {
-            id: "settings" as TabType,
-            label: t("tab_settings"),
-            icon: <Settings size={18} />,
-        },
+        ...(isOwnProfile
+            ? [
+                  {
+                      id: "calendar" as TabType,
+                      label: t("tab_calendar"),
+                      icon: <CalendarDays size={18} />,
+                  },
+                  {
+                      id: "saved" as TabType,
+                      label: t("tab_saved"),
+                      icon: <Heart size={18} />,
+                  },
+                  {
+                      id: "settings" as TabType,
+                      label: t("tab_settings"),
+                      icon: <Settings size={18} />,
+                  },
+              ]
+            : []),
     ];
 
     const formatJoinDate = (dateStr?: string) => {
