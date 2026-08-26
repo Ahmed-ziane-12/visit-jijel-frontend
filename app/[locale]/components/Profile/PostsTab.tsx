@@ -15,6 +15,8 @@ import {
     Building2,
     CalendarDays,
     Loader2,
+    Ellipsis,
+    Pencil,
 } from "lucide-react";
 import axios from "@/lib/axios";
 import { getEcho } from "@/lib/broadcast";
@@ -319,6 +321,7 @@ function PostCard({
     post,
     currentUserId,
     onDelete,
+    onPostUpdated,
     onCommentAdded,
     onLikeToggled,
     onReShareCreated,
@@ -326,6 +329,7 @@ function PostCard({
     post: Post;
     currentUserId?: number;
     onDelete: (id: number) => void;
+    onPostUpdated: (post: Post) => void;
     onCommentAdded: (postId: number, comment: Comment) => void;
     onLikeToggled: (postId: number, likes: Post["likes"]) => void;
     onReShareCreated: (post: Post) => void;
@@ -334,6 +338,10 @@ function PostCard({
     const [showComments, setShowComments] = useState(false);
     const [showShareModal, setShowShareModal] = useState(false);
     const [submitting, setSubmitting] = useState(false);
+    const [showMenu, setShowMenu] = useState(false);
+    const [editing, setEditing] = useState(false);
+    const [editText, setEditText] = useState(post.body ?? "");
+    const menuRef = useRef<HTMLDivElement>(null);
 
     const isOwner = currentUserId === post.user_id;
     const likesCount = (post.likes ?? []).filter((l) => l.type === "like").length;
@@ -427,10 +435,35 @@ function PostCard({
         }
     };
 
+    useEffect(() => {
+        if (!showMenu) return;
+        const handleClick = (e: MouseEvent) => {
+            if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+                setShowMenu(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClick);
+        return () => document.removeEventListener("mousedown", handleClick);
+    }, [showMenu]);
+
     const handleDelete = async () => {
+        setShowMenu(false);
         try {
             await axios.delete(`/api/v1/posts/${post.id}`);
             onDelete(post.id);
+        } catch {
+            /* empty */
+        }
+    };
+
+    const handleEditSave = async () => {
+        if (!editText.trim()) return;
+        try {
+            const res = await axios.put(`/api/v1/posts/${post.id}`, {
+                body: editText.trim(),
+            });
+            onPostUpdated(res.data);
+            setEditing(false);
         } catch {
             /* empty */
         }
@@ -457,21 +490,71 @@ function PostCard({
                         </div>
                     </div>
                     {isOwner && (
-                        <button
-                            onClick={handleDelete}
-                            className="rounded-lg p-1 text-[var(--light-fg)] hover:bg-(--dim-bg) hover:text-red-500"
-                        >
-                            <Trash2 size={14} />
-                        </button>
+                        <div className="relative" ref={menuRef}>
+                            <button
+                                onClick={() => setShowMenu(!showMenu)}
+                                className="rounded-lg p-1 text-[var(--light-fg)] hover:bg-(--dim-bg)"
+                            >
+                                <Ellipsis size={14} />
+                            </button>
+                            {showMenu && (
+                                <div className="absolute right-0 top-8 z-10 w-36 rounded-lg border border-(--border) bg-white py-1 shadow-lg">
+                                    <button
+                                        onClick={() => {
+                                            setShowMenu(false);
+                                            setEditing(true);
+                                        }}
+                                        className="flex w-full items-center gap-2 px-3 py-2 text-xs text-(--foreground) hover:bg-(--dim-bg)"
+                                    >
+                                        <Pencil size={12} />
+                                        Edit
+                                    </button>
+                                    <button
+                                        onClick={handleDelete}
+                                        className="flex w-full items-center gap-2 px-3 py-2 text-xs text-red-500 hover:bg-red-50"
+                                    >
+                                        <Trash2 size={12} />
+                                        Delete
+                                    </button>
+                                </div>
+                            )}
+                        </div>
                     )}
                 </div>
 
                 {/* Post text */}
-                {post.body && (
+                {editing ? (
+                    <div className="mt-3">
+                        <textarea
+                            value={editText}
+                            onChange={(e) => setEditText(e.target.value)}
+                            rows={3}
+                            className="w-full rounded-lg border border-(--border) bg-(--dim-bg) p-2 text-sm outline-none focus:border-(--primary-clr)"
+                        />
+                        <div className="mt-2 flex justify-end gap-2">
+                            <button
+                                onClick={() => {
+                                    setEditing(false);
+                                    setEditText(post.body ?? "");
+                                }}
+                                className="rounded-lg px-3 py-1.5 text-xs font-medium text-[var(--light-fg)] hover:bg-(--dim-bg)"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleEditSave}
+                                disabled={!editText.trim()}
+                                className="rounded-lg bg-(--primary-clr) px-3 py-1.5 text-xs font-medium text-white hover:opacity-90 disabled:opacity-40"
+                            >
+                                Save
+                            </button>
+                        </div>
+                    </div>
+                ) : post.body ? (
                     <p className="mt-3 text-sm leading-relaxed">
                         {post.body}
                     </p>
-                )}
+                ) : null}
 
                 {/* Post media */}
                 {post.media?.length > 0 && (
@@ -927,6 +1010,10 @@ export default function PostsTab({
         setPosts([post, ...posts]);
     };
 
+    const handlePostUpdated = (updated: Post) => {
+        setPosts(posts.map((p) => (p.id === updated.id ? updated : p)));
+    };
+
     const handleShareItem = (
         type: string,
         id: number,
@@ -1050,6 +1137,7 @@ export default function PostsTab({
                     post={post}
                     currentUserId={user?.id}
                     onDelete={handleDelete}
+                    onPostUpdated={handlePostUpdated}
                     onCommentAdded={handleCommentAdded}
                     onLikeToggled={handleLikeToggled}
                     onReShareCreated={handleReShareCreated}
