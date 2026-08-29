@@ -5,7 +5,6 @@ import {
     ArrowRight,
     ChevronRight,
     Star,
-    MapPin,
     Compass,
     Map,
 } from "lucide-react";
@@ -18,35 +17,31 @@ import styles from "./page.module.css";
 import type { Destination } from "@/types/map";
 import { localizeDestination } from "@/lib/localize";
 
-const HERO_IMAGES = ["/phare.jpg", "/zoo.jpg", "/g.jpg", "/p2.jpg"];
+/* ─── Floating image card in the hero collage ─── */
 
-function FloatingImage({ src, index }: { src: string; index: number }) {
-    const positions = [
-        { top: "5%", left: "2%", w: 200, h: 260 },
-        { top: "10%", right: "3%", w: 180, h: 240 },
-        { bottom: "8%", left: "6%", w: 220, h: 280 },
-        { bottom: "5%", right: "5%", w: 160, h: 210 },
-        { top: "35%", left: "50%", w: 140, h: 190 },
-    ] as const;
-    const p = positions[index];
-
+function HeroImage({
+    src,
+    className,
+    duration = 4,
+    delay = 0,
+    scale = 1,
+}: {
+    src: string;
+    className?: string;
+    duration?: number;
+    delay?: number;
+    scale?: number;
+}) {
     return (
         <motion.div
-            className="absolute rounded-2xl overflow-hidden shadow-lg hidden md:block"
-            style={{
-                width: p.w,
-                height: p.h,
-                top: "top" in p ? p.top : undefined,
-                bottom: "bottom" in p ? p.bottom : undefined,
-                left: "left" in p ? p.left : undefined,
-                right: "right" in p ? p.right : undefined,
-            }}
-            animate={{ y: [0, -12, 0] }}
+            className={`absolute rounded-2xl overflow-hidden ring-1 ring-white/15 shadow-2xl ${className ?? ""}`}
+            style={{ scale }}
+            animate={{ y: [0, -14, 0], rotate: [0, -1, 0] }}
             transition={{
-                duration: 3 + index * 0.5,
+                duration,
                 repeat: Infinity,
                 ease: "easeInOut",
-                delay: index * 0.4,
+                delay,
             }}
         >
             <Image
@@ -54,9 +49,8 @@ function FloatingImage({ src, index }: { src: string; index: number }) {
                 alt=""
                 fill
                 className="object-cover"
-                sizes={`${p.w}px`}
+                sizes="(max-width:767px) 50vw, 320px"
             />
-            <div className="absolute inset-0 ring-1 ring-inset ring-black/10 rounded-2xl" />
         </motion.div>
     );
 }
@@ -218,68 +212,187 @@ export default function Home() {
     const main = display[0]
         ? localizeDestination(display[0], locale)
         : undefined;
-    const sides = display.slice(1, 3).map((d) => localizeDestination(d, locale));
+    const sides = display
+        .slice(1, 3)
+        .map((d) => localizeDestination(d, locale));
 
     return (
         <div>
-            {/* ══════ HERO (floating images + text) ══════ */}
-            <section className="relative min-h-[60vh] flex flex-col items-center justify-center text-center px-4 py-24 overflow-hidden pt-50">
-                {HERO_IMAGES.map((src, i) => (
-                    <FloatingImage key={src} src={src} index={i} />
-                ))}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6 }}
-                >
-                    <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-(--primary-clr) bg-(--background)/80 text-(--primary-clr) text-sm font-medium mb-6">
-                        <MapPin size={14} />
-                        {t("hero_badge")}
-                    </span>
-                </motion.div>
+            {/* ══════ HERO ══════ */}
+            <section className="relative overflow-hidden">
+                {/* Ambient background */}
+                <div className="absolute inset-0 -z-10">
+                    <Image
+                        src="/phare.jpg"
+                        alt=""
+                        fill
+                        className="object-cover"
+                        sizes="100vw"
+                        priority
+                    />
+                    <div className="absolute inset-0 bg-linear-to-br from-(--background)/95 via-(--background)/80 to-(--primary-clr)/25" />
+                    <div className="absolute inset-0 bg-linear-to-t from-(--background) via-transparent to-transparent" />
+                </div>
 
-                <motion.h1
-                    className="text-(--foreground) font-bold leading-[1.1] mb-5 text-balance max-w-4xl"
-                    style={{ fontSize: "clamp(2.25rem, 6vw, 4rem)" }}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: 0.1 }}
-                >
-                    {t("hero_title")}
-                </motion.h1>
+                {/* Soft glowing blobs */}
+                <div className="absolute -top-24 -right-24 -z-10 h-96 w-96 rounded-full bg-(--primary-clr)/20 blur-3xl" />
+                <div className="absolute top-1/2 -left-32 -z-10 h-80 w-80 rounded-full bg-(--primary-clr)/10 blur-3xl" />
 
-                <motion.p
-                    className="text-(--light-fg) text-lg md:text-xl max-w-2xl mx-auto mb-10 text-balance"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: 0.2 }}
-                >
-                    {t("hero_desc")}
-                </motion.p>
-
-                <motion.div
-                    className="flex flex-col sm:flex-row items-center justify-center gap-4"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: 0.3 }}
-                >
-                    <Link
-                        href="/explore"
-                        className="text-white inline-flex items-center gap-2 rounded-full px-7 py-3.5 font-semibold text-sm bg-(--primary-clr) hover:opacity-90 transition-all"
+                <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-4 py-20 md:grid-cols-2 md:px-8 md:py-28 lg:py-32">
+                    {/* ── Left: copy ── */}
+                    <motion.div
+                        initial="hidden"
+                        animate="visible"
+                        variants={stagger}
+                        className="text-center md:text-start"
                     >
-                        <Compass size={16} color="white" />
-                        Explore
-                        <ArrowRight size={16} />
-                    </Link>
-                    <Link
-                        href="/plan"
-                        className="inline-flex items-center gap-2 rounded-full px-7 py-3.5 font-semibold text-sm border border-(--border) text-(--foreground) hover:bg-(--dim-bg) transition-colors"
+                        <motion.div variants={fadeUp}>
+                            <motion.span
+                                className="inline-flex items-center gap-2 rounded-full border border-(--border) bg-(--background)/80 px-4 py-1.5 text-sm font-medium text-(--foreground) backdrop-blur"
+                                whileHover={{ scale: 1.05 }}
+                            >
+                                <span className="relative flex h-2 w-2">
+                                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-(--primary-clr) opacity-75" />
+                                    <span className="relative inline-flex h-2 w-2 rounded-full bg-(--primary-clr)" />
+                                </span>
+                                {t("hero_badge")}
+                            </motion.span>
+                        </motion.div>
+
+                        <motion.h1
+                            variants={fadeUp}
+                            className="mt-6 text-4xl font-extrabold leading-[1.08] tracking-tight text-(--foreground) sm:text-5xl lg:text-6xl text-balance"
+                        >
+                            {t("hero_title")}
+                        </motion.h1>
+
+                        <motion.p
+                            variants={fadeUp}
+                            className="mt-6 max-w-xl text-lg text-(--light-fg) leading-relaxed md:text-start mx-auto md:mx-0"
+                        >
+                            {t("hero_desc")}
+                        </motion.p>
+
+                        <motion.div
+                            variants={fadeUp}
+                            className="mt-9 flex flex-col items-center gap-3 sm:flex-row md:items-start"
+                        >
+                            <Link
+                                href="/explore"
+                                className="group inline-flex w-full items-center justify-center gap-2 rounded-full bg-(--primary-clr) px-7 py-3.5 text-sm font-semibold text-white shadow-lg shadow-(--primary-clr)/30 transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-(--primary-clr)/40 sm:w-auto"
+                            >
+                                <Compass size={16} />
+                                {t("hero_start")}
+                                <ArrowRight
+                                    size={16}
+                                    className="transition-transform group-hover:translate-x-1"
+                                />
+                            </Link>
+                            <Link
+                                href="/plan"
+                                className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-(--border) bg-(--background)/80 px-7 py-3.5 text-sm font-semibold text-(--foreground) backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-(--dim-bg) sm:w-auto"
+                            >
+                                <Map size={16} />
+                                {t("hero_plan")}
+                            </Link>
+                        </motion.div>
+
+                        {/* Stats */}
+                        <motion.div
+                            variants={fadeUp}
+                            className="mt-10 flex items-center justify-center gap-8 md:justify-start"
+                        >
+                            <div className="text-center md:text-start">
+                                <p className="text-2xl font-extrabold text-(--foreground)">
+                                    50+
+                                </p>
+                                <p className="text-xs text-(--light-fg)">
+                                    {t("hero_stat_dests")}
+                                </p>
+                            </div>
+                            <div className="h-10 w-px bg-(--border)" />
+                            <div className="text-center md:text-start">
+                                <p className="text-2xl font-extrabold text-(--foreground)">
+                                    10K+
+                                </p>
+                                <p className="text-xs text-(--light-fg)">
+                                    {t("hero_stat_travelers")}
+                                </p>
+                            </div>
+                            <div className="h-10 w-px bg-(--border)" />
+                            <div className="text-center md:text-start">
+                                <p className="text-2xl font-extrabold text-(--foreground)">
+                                    4.8
+                                </p>
+                                <p className="text-xs text-(--light-fg)">
+                                    {t("hero_stat_rating")}
+                                </p>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+
+                    {/* ── Right: image collage ── */}
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.92 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.8, delay: 0.2 }}
+                        className="relative mx-auto hidden h-[520px] w-full max-w-md md:block"
                     >
-                        <Map size={16} />
-                        {t("hero_plan") ?? "Plan Your Trip"}
-                        <ArrowRight size={16} />
-                    </Link>
-                </motion.div>
+                        <HeroImage src="/phare.jpg" className="left-2 top-6 h-72 w-60" />
+                        <HeroImage src="/zoo.jpg" className="right-0 top-0 h-60 w-48" duration={4.6} delay={0.3} />
+                        <HeroImage src="/g.jpg" className="bottom-0 left-0 h-52 w-44" duration={5} delay={0.6} />
+                        <HeroImage src="/p5.jpg" className="bottom-10 right-4 h-48 w-40" duration={4.3} delay={0.9} scale={1.05} />
+
+                        {/* Floating rating card */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 1, duration: 0.6 }}
+                            className="absolute bottom-0 right-8 flex items-center gap-3.5 rounded-2xl border border-white/30 bg-white/20 px-5 py-4 shadow-2xl shadow-black/30 backdrop-blur-xl"
+                        >
+                            <div className="relative flex -space-x-2.5">
+                                {["avatar-5", "avatar-2", "avatar-1"].map(
+                                    (a) => (
+                                        <div
+                                            key={a}
+                                            className="h-9 w-9 overflow-hidden rounded-full border-2 border-white/70"
+                                        >
+                                            <Image
+                                                src={`https://placehold.net/${a}.png`}
+                                                alt=""
+                                                width={36}
+                                                height={36}
+                                                className="h-full w-full object-cover"
+                                            />
+                                        </div>
+                                    ),
+                                )}
+                                <div className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-white/70 bg-(--primary-clr)/90 text-[0.6rem] font-bold text-white backdrop-blur">
+                                    +9K
+                                </div>
+                            </div>
+                            <div>
+                                <div className="flex items-center gap-0.5">
+                                    {Array.from({ length: 5 }).map((_, i) => (
+                                        <Star
+                                            key={i}
+                                            size={13}
+                                            className={
+                                                i < 5
+                                                    ? "text-amber-400"
+                                                    : "text-(--border)"
+                                            }
+                                            fill="currentColor"
+                                        />
+                                    ))}
+                                </div>
+                                <p className="mt-0.5 text-xs font-semibold text-white drop-shadow-sm">
+                                    {t("hero_stat_rating")}
+                                </p>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                </div>
             </section>
 
             {/* ══════ DESTINATIONS ══════ */}
