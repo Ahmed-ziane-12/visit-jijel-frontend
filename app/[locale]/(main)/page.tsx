@@ -1,13 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import {
-    ArrowRight,
-    ChevronRight,
-    Star,
-    Compass,
-    Map,
-} from "lucide-react";
+import { ArrowRight, ChevronRight, Star, Compass, Map } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useTranslations, useLocale } from "next-intl";
@@ -338,10 +332,29 @@ export default function Home() {
                         transition={{ duration: 0.8, delay: 0.2 }}
                         className="relative mx-auto hidden h-[520px] w-full max-w-md md:block"
                     >
-                        <HeroImage src="/phare.jpg" className="left-2 top-6 h-72 w-60" />
-                        <HeroImage src="/zoo.jpg" className="right-0 top-0 h-60 w-48" duration={4.6} delay={0.3} />
-                        <HeroImage src="/g.jpg" className="bottom-0 left-0 h-52 w-44" duration={5} delay={0.6} />
-                        <HeroImage src="/p5.jpg" className="bottom-10 right-4 h-48 w-40" duration={4.3} delay={0.9} scale={1.05} />
+                        <HeroImage
+                            src="/phare.jpg"
+                            className="left-2 top-6 h-72 w-60"
+                        />
+                        <HeroImage
+                            src="/zoo.jpg"
+                            className="right-0 top-0 h-60 w-48"
+                            duration={4.6}
+                            delay={0.3}
+                        />
+                        <HeroImage
+                            src="/g.jpg"
+                            className="bottom-0 left-0 h-52 w-44"
+                            duration={5}
+                            delay={0.6}
+                        />
+                        <HeroImage
+                            src="/p5.jpg"
+                            className="bottom-10 right-4 h-48 w-40"
+                            duration={4.3}
+                            delay={0.9}
+                            scale={1.05}
+                        />
 
                         {/* Floating rating card */}
                         <motion.div
@@ -674,7 +687,7 @@ export default function Home() {
                                 key={item.id}
                                 className={`${styles.card} group`}
                             >
-                                <Link href={`/explore?type=${item.type}`}>
+                                <Link href={`/businesses/${item.id}`}>
                                     <div className="rounded-2xl overflow-hidden bg-(--background) border border-(--border) transition-shadow hover:shadow-lg">
                                         <div className="relative aspect-4/3 overflow-hidden">
                                             <Image
