@@ -9,7 +9,8 @@ import {
     type CSSProperties,
 } from "react";
 import styles from "./Map.module.css";
-import { CategoryConfig, Destination } from "@/types/map";
+import { CategoryConfig, Destination, Media } from "@/types/map";
+import { Business, BusinessMedia } from "@/types/business";
 import { motion } from "framer-motion";
 import { useLocale, useTranslations } from "next-intl";
 import { localizeDestination } from "@/lib/localize";
@@ -73,6 +74,20 @@ const CATEGORY_CONFIG: Record<string, CategoryConfig> = {
         emoji: "⭐",
         label: "",
     },
+    touristic_agency: {
+        color: "#0891b2",
+        bg: "#cffafe",
+        border: "#a5f3fc",
+        emoji: "🧭",
+        label: "",
+    },
+    real_estate_agency: {
+        color: "#334155",
+        bg: "#f1f5f9",
+        border: "#e2e8f0",
+        emoji: "🏠",
+        label: "",
+    },
 };
 
 const DEFAULT_CATEGORY: CategoryConfig = {
@@ -85,6 +100,44 @@ const DEFAULT_CATEGORY: CategoryConfig = {
 
 function getCategoryConfig(category: string): CategoryConfig {
     return CATEGORY_CONFIG[category?.toLowerCase()] ?? DEFAULT_CATEGORY;
+}
+
+// ─── Unified pin model (destinations + businesses) ───────────────────────────
+
+interface Pin {
+    /** Namespaced key ("d:1" / "b:2") so destination & business ids never collide */
+    key: string;
+    kind: "destination" | "business";
+    category: string;
+    /** Normalized view — for destinations it's the original, for businesses a synthetic Destination */
+    destination: Destination;
+    business?: Business;
+    latitude: number;
+    longitude: number;
+}
+
+// Adapt a Business into a Destination-shaped record (usable by HoverPreview/Legend)
+function businessToDestination(business: Business): Destination {
+    return {
+        id: business.id,
+        name: business.name,
+        description: business.description ?? "",
+        category: business.type,
+        address: business.address ?? "",
+        latitude: business.latitude ?? undefined,
+        longitude: business.longitude ?? undefined,
+        media: (business.media ?? []).map((m) => ({
+            id: m.id,
+            secure_url: m.secure_url,
+            is_cover: m.is_cover,
+            collection: m.collection,
+        })),
+        images: (business.media ?? [])
+            .filter((m) => m.is_cover)
+            .map((m) => m.secure_url),
+        tags: [],
+        reviews: [],
+    };
 }
 
 // ─── SVG Marker factory ───────────────────────────────────────────────────────
@@ -273,17 +326,21 @@ function Legend({ categories }: { categories: string[] }) {
 
 interface MapComponentProps {
     destinations: Destination[];
+    businesses?: Business[];
     center?: [number, number];
     zoom?: number;
     onDestinationClick?: (destination: Destination) => void;
+    onBusinessClick?: (business: Business) => void;
     className?: string;
 }
 
 export default function Map({
     destinations = [],
+    businesses = [],
     center,
     zoom = 12,
     onDestinationClick,
+    onBusinessClick,
     className,
 }: MapComponentProps) {
     const t = useTranslations("map");
@@ -302,30 +359,58 @@ export default function Map({
         [destinations],
     );
 
-    // Derive unique categories present in destinations
-    const categories = useMemo(
-        () => [
-            ...new Set(
-                validDestinations.map(
-                    (d) => d.category?.toLowerCase() || "attraction",
-                ),
+    // Filter businesses that have coordinates
+    const validBusinesses = useMemo(
+        () =>
+            businesses.filter(
+                (biz) => biz.latitude && biz.longitude && biz.is_verified,
             ),
+        [businesses],
+    );
+
+    // Unify destinations + businesses into a single pin collection.
+    // Keys are namespaced ("d:1" / "b:2") so ids never collide across kinds.
+    const pins = useMemo<Pin[]>(
+        () => [
+            ...validDestinations.map((dest): Pin => ({
+                key: `d:${dest.id}`,
+                kind: "destination",
+                category: dest.category?.toLowerCase() || "attraction",
+                destination: dest,
+                latitude: dest.latitude!,
+                longitude: dest.longitude!,
+            })),
+            ...validBusinesses.map((biz): Pin => ({
+                key: `b:${biz.id}`,
+                kind: "business",
+                category: biz.type?.toLowerCase() || "touristic_agency",
+                destination: businessToDestination(biz),
+                business: biz,
+                latitude: biz.latitude!,
+                longitude: biz.longitude!,
+            })),
         ],
-        [validDestinations],
+        [validDestinations, validBusinesses],
+    );
+
+    // Derive unique categories present across all pins (destinations + businesses)
+    const categories = useMemo(
+        () => [...new Set(pins.map((pin) => pin.category))],
+        [pins],
     );
 
     // Compute centroid as fallback center
     const derivedCenter = useMemo<[number, number]>(() => {
         if (center) return center;
-        if (validDestinations.length === 0) return [36.8233, 5.7667]; // Jijel default center
+        if (pins.length === 0) return [36.8233, 5.7667]; // Jijel default center
         const avgLat =
-            validDestinations.reduce((s, d) => s + (d.latitude || 0), 0) /
-            validDestinations.length;
+            pins.reduce((s, pin) => s + (pin.latitude || 0), 0) /
+            pins.length;
         const avgLng =
-            validDestinations.reduce((s, d) => s + (d.longitude || 0), 0) /
-            validDestinations.length;
+            pins.reduce((s, pin) => s + (pin.longitude || 0), 0) /
+            pins.length;
         return [avgLat, avgLng];
-    }, [center, validDestinations]);
+    }, [center, pins]);
 
     const showPreview = useCallback(
         (destination: Destination, mapPixelPoint: { x: number; y: number }) => {
@@ -407,36 +492,42 @@ export default function Map({
             const map = mapRef.current;
             const existingIds = new Set(markersRef.current.keys());
 
-            for (const dest of validDestinations) {
-                if (!dest.latitude || !dest.longitude) continue;
+            for (const pin of pins) {
+                if (!pin.latitude || !pin.longitude) continue;
 
-                existingIds.delete(dest.id);
+                existingIds.delete(pin.key);
 
-                if (markersRef.current.has(dest.id)) continue; // already on map
+                if (markersRef.current.has(pin.key)) continue; // already on map
 
                 const icon = L.divIcon({
-                    html: buildMarkerSvg(dest.category),
+                    html: buildMarkerSvg(pin.category),
                     className: "",
                     iconSize: [38, 46],
                     iconAnchor: [19, 46],
                     popupAnchor: [0, -48],
                 });
 
-                const marker = L.marker([dest.latitude, dest.longitude], {
+                const marker = L.marker([pin.latitude, pin.longitude], {
                     icon,
                 }).addTo(map);
 
                 marker.on("mouseover", (e: any) => {
                     const point = map.latLngToContainerPoint(e.latlng);
-                    showPreview(dest, point);
+                    showPreview(pin.destination, point);
                 });
                 marker.on("mouseout", hidePreview);
                 marker.on("click", () => {
-                    onDestinationClick?.(dest);
+                    if (pin.kind === "business" && pin.business) {
+                        onBusinessClick?.(pin.business);
+                    } else {
+                        onDestinationClick?.(
+                            pin.destination as Destination,
+                        );
+                    }
                     hidePreview();
                 });
 
-                markersRef.current.set(dest.id, marker);
+                markersRef.current.set(pin.key, marker);
             }
 
             // Remove stale markers
@@ -449,10 +540,11 @@ export default function Map({
         syncMarkers();
     }, [
         isLoaded,
-        validDestinations,
+        pins,
         showPreview,
         hidePreview,
         onDestinationClick,
+        onBusinessClick,
     ]);
 
     // Recenter map when center prop changes

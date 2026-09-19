@@ -1,5 +1,6 @@
 "use client";
 import { Destination } from "@/types/map";
+import { Business } from "@/types/business";
 import dynamic from "next/dynamic";
 import styles from "./explore.module.css";
 import { useEffect, useMemo, useState } from "react";
@@ -26,6 +27,7 @@ const DEFAULT_FILTERS: FilterState = {
 
 export default function ExplorePage() {
     const [destinations, setDestinations] = useState<Destination[]>([]);
+    const [businesses, setBusinesses] = useState<Business[]>([]);
     const [activeFilters, setActiveFilters] =
         useState<FilterState>(DEFAULT_FILTERS);
     const router = useRouter();
@@ -34,6 +36,9 @@ export default function ExplorePage() {
         axios
             .get("/api/v1/destinations")
             .then((res) => setDestinations(res.data));
+        axios
+            .get("/api/v1/businesses")
+            .then((res) => setBusinesses(res.data));
     }, []);
 
     const filteredDestinations = useMemo(() => {
@@ -81,6 +86,10 @@ export default function ExplorePage() {
                         center={[36.8233, 5.7667]}
                         onDestinationClick={(dest) =>
                             router.push(`/explore/${dest.id}`)
+                        }
+                        businesses={businesses}
+                        onBusinessClick={(biz) =>
+                            router.push(`/businesses/${biz.id}`)
                         }
                     />
                     <FilterPanel
