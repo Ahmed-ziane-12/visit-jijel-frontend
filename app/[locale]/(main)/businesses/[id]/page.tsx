@@ -7,7 +7,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import axios from "@/lib/axios";
 import dynamic from "next/dynamic";
 import Image from "next/image";
-import { Destination, Media, Review, ReviewSummary } from "@/types/map";
+import { Destination, Media, Review } from "@/types/map";
 import { Business } from "@/types/business";
 import Reviews from "@/app/[locale]/components/Reviews/Reviews";
 import ConfirmDialog from "@/app/[locale]/components/ConfirmDialog/ConfirmDialog";
@@ -58,7 +58,7 @@ function businessMediaToTiles(business: Business): MediaTileItem[] {
         secure_url: m.secure_url,
         is_cover: m.is_cover,
         collection: m.collection ?? "",
-        resource_type: m.resource_type,
+        (m as { resource_type?: string }).resource_type,
     }));
     return base;
 }
