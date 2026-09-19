@@ -38,7 +38,7 @@ export default function ExplorePage() {
             .then((res) => setDestinations(res.data));
         axios
             .get("/api/v1/businesses")
-            .then((res) => setBusinesses(res.data));
+            .then((res) => setBusinesses(res.data?.data ?? res.data ?? []));
     }, []);
 
     const filteredDestinations = useMemo(() => {
