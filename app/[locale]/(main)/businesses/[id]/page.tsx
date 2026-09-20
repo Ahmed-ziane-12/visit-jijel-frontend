@@ -43,9 +43,7 @@ interface MediaTileItem {
 
 function localizeBusiness(business: Business): Business {
     const body =
-        typeof business.description === "string"
-            ? business.description
-            : "";
+        typeof business.description === "string" ? business.description : "";
     return { ...business, description: body };
 }
 
@@ -58,7 +56,6 @@ function businessMediaToTiles(business: Business): MediaTileItem[] {
         secure_url: m.secure_url,
         is_cover: m.is_cover,
         collection: m.collection ?? "",
-        (m as { resource_type?: string }).resource_type,
     }));
     return base;
 }
@@ -148,7 +145,7 @@ export default function BusinessPage() {
             media.map((m) => ({
                 src: m.secure_url,
                 type:
-                    m.resource_type === "video"
+                    (m as { resource_type?: string }).resource_type === "video"
                         ? ("video" as const)
                         : ("image" as const),
             })),
@@ -165,15 +162,6 @@ export default function BusinessPage() {
         setShowcaseIndex(index);
         setShowcaseOpen(true);
     }, []);
-
-    const showPreview = useCallback(
-        (item: MediaTileItem, point: { x: number; y: number }) => {
-            setPreview({ item, x: point.x, y: point.y });
-        },
-        [],
-    );
-
-    const hidePreview = useCallback(() => setPreview(null), []);
 
     if (loading) {
         return (
@@ -201,7 +189,7 @@ export default function BusinessPage() {
 
             {/* Showcase */}
             <div className="mb-6">
-                <div className={styles.showcase}>
+                <div className="relative aspect-video w-full overflow-hidden rounded-xl">
                     <Image
                         src={media[coverIndex]?.secure_url ?? BLUR}
                         alt={business.name}
@@ -214,7 +202,9 @@ export default function BusinessPage() {
             {/* Title row */}
             <div className="flex items-start justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl md:text-3xl font-bold">{business.name}</h1>
+                    <h1 className="text-2xl md:text-3xl font-bold">
+                        {business.name}
+                    </h1>
                     <p className="text-sm text-(--light-fg) mt-2">
                         {business.type?.replace("_", " ")}
                     </p>
@@ -239,33 +229,48 @@ export default function BusinessPage() {
                     )}
                     {business.phone && (
                         <InfoRow icon={<Phone size={18} />} label="Phone">
-                            <a href={`tel:${business.phone}`}>{business.phone}</a>
+                            <a href={`tel:${business.phone}`}>
+                                {business.phone}
+                            </a>
                         </InfoRow>
                     )}
                     {business.email && (
                         <InfoRow icon={<Mail size={18} />} label="Email">
-                            <a href={`mailto:${business.email}`}>{business.email}</a>
+                            <a href={`mailto:${business.email}`}>
+                                {business.email}
+                            </a>
                         </InfoRow>
                     )}
                     {business.website && (
                         <InfoRow icon={<Globe size={18} />} label="Website">
-                            <a href={business.website} target="_blank" rel="noreferrer">
+                            <a
+                                href={business.website}
+                                target="_blank"
+                                rel="noreferrer"
+                            >
                                 {business.website}
                             </a>
                         </InfoRow>
                     )}
                     {(business.wilaya || business.commune) && (
                         <InfoRow icon={<Landmark size={18} />} label="Location">
-                            {[business.wilaya, business.commune].filter(Boolean).join(", ")}
+                            {[business.wilaya, business.commune]
+                                .filter(Boolean)
+                                .join(", ")}
                         </InfoRow>
                     )}
                 </div>
 
                 <div className="md:col-span-2">
                     <Map
-                        destinations={business ? [businessToDestination(business)] : []}
+                        destinations={
+                            business ? [businessToDestination(business)] : []
+                        }
                         zoom={13}
-                        center={[business.latitude ?? 36.8233, business.longitude ?? 5.7667]}
+                        center={[
+                            business.latitude ?? 36.8233,
+                            business.longitude ?? 5.7667,
+                        ]}
                     />
                 </div>
             </div>
@@ -301,10 +306,11 @@ function InfoRow({
         <div className="flex items-start gap-3">
             <div className="mt-0.5 shrink-0">{icon}</div>
             <div className="min-w-0">
-                <p className="text-xs font-semibold uppercase tracking-wide opacity-60">{label}</p>
+                <p className="text-xs font-semibold uppercase tracking-wide opacity-60">
+                    {label}
+                </p>
                 <p className="text-sm font-medium text-gray-800">{children}</p>
             </div>
         </div>
     );
 }
-
