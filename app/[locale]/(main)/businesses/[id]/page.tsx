@@ -189,14 +189,37 @@ export default function BusinessPage() {
 
             {/* Showcase */}
             <div className="mb-6">
-                <div className="relative aspect-video w-full overflow-hidden rounded-xl">
-                    <Image
-                        src={media[coverIndex]?.secure_url ?? BLUR}
-                        alt={business.name}
-                        width={1200}
-                        height={600}
-                    />
-                </div>
+                {media.length > 0 && (
+                    <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+                        <div
+                            className="relative col-span-2 row-span-2 overflow-hidden rounded-xl cursor-pointer"
+                            onClick={() => openShowcaseAt(0)}
+                        >
+                            <Image
+                                src={media[0].secure_url ?? BLUR}
+                                alt={business.name}
+                                fill
+                                className="object-cover"
+                            />
+                        </div>
+                        {media.slice(1, 5).map((m) => (
+                            <div
+                                key={m.id}
+                                className="relative overflow-hidden rounded-xl cursor-pointer"
+                                onClick={() =>
+                                    openShowcaseAt(media.indexOf(m))
+                                }
+                            >
+                                <Image
+                                    src={m.secure_url}
+                                    alt={business.name}
+                                    fill
+                                    className="object-cover"
+                                />
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
 
             {/* Title row */}
@@ -218,6 +241,16 @@ export default function BusinessPage() {
                     </div>
                 </div>
             </div>
+
+            {/* About */}
+            {business.description && (
+                <div className="mt-6">
+                    <h2 className="text-lg font-bold mb-2">About</h2>
+                    <p className="tracking-wide text-justify">
+                        {business.description}
+                    </p>
+                </div>
+            )}
 
             {/* Details + Map side rail */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
@@ -261,7 +294,7 @@ export default function BusinessPage() {
                     )}
                 </div>
 
-                <div className="md:col-span-2">
+                <div className="relative z-0 md:col-span-2">
                     <Map
                         destinations={
                             business ? [businessToDestination(business)] : []
