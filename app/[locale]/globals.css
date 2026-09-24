@@ -48,6 +48,14 @@
 }
 
 @font-face {
+    font-family: "Supreme-Regular";
+    src: url("../public/fonts/Supreme-Regular.woff2") format("woff2");
+    font-weight: 400;
+    font-display: swap;
+    font-style: normal;
+}
+
+@font-face {
     font-family: "Wafir";
     src: url("/fonts/Wafir-Light.woff2") format("woff2");
     font-weight: 400;
@@ -80,6 +88,7 @@ body {
 body {
     background: var(--background);
     font-family:
+        Supreme-Regular,
         GeneralSans-Regular,
         Noto Kufi Arabic;
     -webkit-font-smoothing: antialiased;
