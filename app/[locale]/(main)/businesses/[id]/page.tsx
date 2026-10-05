@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
@@ -14,7 +14,7 @@ import type {
 } from "@/types/business";
 
 const IMAGE_PLACEHOLDER = "https://placehold.net/1200x800.png";
-const EMPTY = "—";
+const EMPTY = "�";
 
 const TYPE_LABELS: Record<string, string> = {
     hotel: "Hotel",
@@ -25,9 +25,74 @@ const TYPE_LABELS: Record<string, string> = {
 
 const CURRENCY_LABELS: Record<string, string> = {
     DZD: "DA",
-    EUR: "€",
+    EUR: "�",
     USD: "$",
-    GBP: "£",
+    GBP: "�",
+};
+
+type TypeContent = {
+    listingsStat: string;
+    listingsEyebrow: string;
+    listingsTitle: string;
+    listingsEmpty: string;
+    amenitiesTitle: string;
+    amenitiesEmpty: string;
+    priceUnit: string;
+    capacityNoun: string | null;
+};
+
+const TYPE_CONTENT: Record<string, TypeContent> = {
+    hotel: {
+        listingsStat: "Rooms",
+        listingsEyebrow: "Accommodation",
+        listingsTitle: "Rooms & suites",
+        listingsEmpty: "No rooms have been published yet.",
+        amenitiesTitle: "Facilities & amenities",
+        amenitiesEmpty: "No facilities have been listed yet.",
+        priceUnit: "/ night",
+        capacityNoun: "guests",
+    },
+    restaurant: {
+        listingsStat: "Menu items",
+        listingsEyebrow: "Menu",
+        listingsTitle: "Menu & specialties",
+        listingsEmpty: "No menu items have been published yet.",
+        amenitiesTitle: "Features & services",
+        amenitiesEmpty: "No features have been listed yet.",
+        priceUnit: "/ item",
+        capacityNoun: "guests",
+    },
+    touristic_agency: {
+        listingsStat: "Tours",
+        listingsEyebrow: "Services",
+        listingsTitle: "Tours & trips",
+        listingsEmpty: "No tours have been published yet.",
+        amenitiesTitle: "What's included",
+        amenitiesEmpty: "No services have been listed yet.",
+        priceUnit: "/ person",
+        capacityNoun: "travellers",
+    },
+    real_estate_agency: {
+        listingsStat: "Properties",
+        listingsEyebrow: "Portfolio",
+        listingsTitle: "Properties for sale & rent",
+        listingsEmpty: "No properties have been published yet.",
+        amenitiesTitle: "Property features",
+        amenitiesEmpty: "No property features have been listed yet.",
+        priceUnit: "",
+        capacityNoun: null,
+    },
+};
+
+const DEFAULT_CONTENT: TypeContent = {
+    listingsStat: "Listings",
+    listingsEyebrow: "Offerings",
+    listingsTitle: "Listings",
+    listingsEmpty: "No listings have been published yet.",
+    amenitiesTitle: "Features & amenities",
+amenitiesEmpty: "No features have been listed yet.",
+    priceUnit: "",
+    capacityNoun: null,
 };
 
 function imagesOnly(media: BusinessMedia[] | undefined): BusinessMedia[] {
@@ -239,9 +304,14 @@ export default function BusinessPage() {
             ? `${business?.latitude}, ${business?.longitude}`
             : EMPTY;
 
+        const content =
+            TYPE_CONTENT[business?.type ?? ""] ?? DEFAULT_CONTENT;
+
         return {
             name: business?.name ?? "",
             category: TYPE_LABELS[business?.type ?? ""] ?? "Business",
+            content,
+            isHotel: business?.type === "hotel",
             verified: Boolean(business?.is_verified),
             rating,
             ratingLabel: rating === null ? EMPTY : rating.toFixed(1),
@@ -258,8 +328,9 @@ export default function BusinessPage() {
             website: business?.website ?? null,
             description: business?.description ?? null,
             details: {
-                rooms: listings.length,
-                stars: starCount(listings),
+                listings: listings.length,
+                stars:
+                    business?.type === "hotel" ? starCount(listings) : null,
                 priceFrom: prices.length ? Math.min(...prices) : null,
             },
             currency: CURRENCY_LABELS[listings[0]?.currency ?? "DZD"] ?? "DA",
@@ -303,7 +374,7 @@ export default function BusinessPage() {
                 <div className="text-center">
                     <div className="mx-auto h-10 w-10 animate-spin rounded-full border-3 border-slate-200 border-t-emerald-600" />
                     <p className="mt-4 text-sm text-slate-500">
-                        Loading business details…
+                        Loading business details�
                     </p>
                 </div>
             </main>
@@ -399,7 +470,7 @@ export default function BusinessPage() {
 
                         <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-600">
                             <span className="flex items-center gap-1.5">
-                                <span className="text-amber-500">★</span>
+                                <span className="text-amber-500">?</span>
                                 <strong className="text-slate-900">
                                     {view.ratingLabel}
                                 </strong>
@@ -409,7 +480,7 @@ export default function BusinessPage() {
                             </span>
 
                             <span className="hidden text-slate-300 sm:block">
-                                •
+                                �
                             </span>
 
                             <span className="flex items-center gap-1.5">
@@ -577,23 +648,25 @@ export default function BusinessPage() {
                             <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
                                 <div>
                                     <p className="text-2xl font-bold">
-                                        {view.details.rooms}
+                                        {view.details.listings}
                                     </p>
                                     <p className="mt-1 text-sm text-slate-500">
-                                        Rooms
+                                        {view.content.listingsStat}
                                     </p>
                                 </div>
 
-                                <div>
-                                    <p className="text-2xl font-bold">
-                                        {view.details.stars !== null
-                                            ? "★".repeat(view.details.stars)
-                                            : EMPTY}
-                                    </p>
-                                    <p className="mt-1 text-sm text-slate-500">
-                                        Hotel rating
-                                    </p>
-                                </div>
+                                {view.isHotel && (
+                                    <div>
+                                        <p className="text-2xl font-bold">
+                                            {view.details.stars !== null
+                                                ? "?".repeat(view.details.stars)
+                                                : EMPTY}
+                                        </p>
+                                        <p className="mt-1 text-sm text-slate-500">
+                                            Hotel rating
+                                        </p>
+                                    </div>
+                                )}
 
                                 <div>
                                     <p className="text-2xl font-bold">
@@ -602,7 +675,10 @@ export default function BusinessPage() {
                                             : EMPTY}
                                     </p>
                                     <p className="mt-1 text-sm text-slate-500">
-                                        {view.currency} / night from
+                                        {view.currency}
+                                        {view.content.priceUnit
+                                            ? ` ${view.content.priceUnit} from`
+                                            : " from"}
                                     </p>
                                 </div>
 
@@ -620,7 +696,7 @@ export default function BusinessPage() {
                         {/* Amenities */}
                         <section className="mt-10">
                             <h2 className="text-2xl font-bold">
-                                Facilities & amenities
+                                {view.content.amenitiesTitle}
                             </h2>
 
                             {view.amenities.length > 0 ? (
@@ -631,15 +707,15 @@ export default function BusinessPage() {
                                             className="flex items-center gap-3 text-sm text-slate-700"
                                         >
                                             <span className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-50 text-emerald-700">
-                                                ✓
+                                                ?
                                             </span>
                                             {amenity}
                                         </div>
                                     ))}
                                 </div>
                             ) : (
-                                <p className="mt-6 text-sm text-slate-500">
-                                    No amenities have been listed yet.
+<p className="mt-6 text-sm text-slate-500">
+                                    {view.content.amenitiesEmpty}
                                 </p>
                             )}
                         </section>
@@ -649,11 +725,11 @@ export default function BusinessPage() {
                             <div className="flex items-end justify-between">
                                 <div>
                                     <p className="text-sm font-semibold uppercase tracking-wider text-emerald-700">
-                                        Accommodation
+                                        {view.content.listingsEyebrow}
                                     </p>
 
                                     <h2 className="mt-1 text-2xl font-bold">
-                                        Rooms & suites
+                                        {view.content.listingsTitle}
                                     </h2>
                                 </div>
                             </div>
@@ -709,16 +785,22 @@ export default function BusinessPage() {
                                                                 : EMPTY}
                                                         </span>
                                                         <span className="ml-1 text-xs text-slate-500">
-                                                            / night
+                                                            {view.content.priceUnit}
                                                         </span>
                                                     </div>
 
-                                                    {room.capacity !== null && (
-                                                        <span className="text-xs text-slate-500">
-                                                            Up to{" "}
-                                                            {room.capacity} guests
-                                                        </span>
-                                                    )}
+                                                    {room.capacity !== null &&
+                                                        view.content
+                                                            .capacityNoun && (
+                                                            <span className="text-xs text-slate-500">
+                                                                Up to{" "}
+                                                                {room.capacity}{" "}
+                                                                {
+                                                                    view.content
+                                                                        .capacityNoun
+                                                                }
+                                                            </span>
+                                                        )}
                                                 </div>
                                             </div>
                                         </div>
@@ -726,7 +808,7 @@ export default function BusinessPage() {
                                 </div>
                             ) : (
                                 <p className="mt-6 text-sm text-slate-500">
-                                    No rooms have been published yet.
+                                    {view.content.listingsEmpty}
                                 </p>
                             )}
                         </section>
@@ -745,7 +827,7 @@ export default function BusinessPage() {
                                         </span>
                                         <span className="text-amber-500">
                                             {view.rating !== null
-                                                ? "★".repeat(
+                                                ? "?".repeat(
                                                       Math.round(view.rating),
                                                   )
                                                 : EMPTY}
@@ -775,7 +857,7 @@ export default function BusinessPage() {
                                                 </div>
 
                                                 <span className="text-sm text-amber-500">
-                                                    {"★".repeat(review.rating)}
+                                                    {"?".repeat(review.rating)}
                                                 </span>
                                             </div>
 
@@ -864,14 +946,14 @@ export default function BusinessPage() {
 
                             <div className="space-y-4 text-sm">
                                 <div className="flex gap-3">
-                                    <span className="text-slate-400">📍</span>
+                                    <span className="text-slate-400">??</span>
                                     <span className="leading-5 text-slate-600">
                                         {view.address ?? EMPTY}
                                     </span>
                                 </div>
 
                                 <div className="flex gap-3">
-                                    <span className="text-slate-400">☎</span>
+                                    <span className="text-slate-400">?</span>
                                     {view.phone ? (
                                         <a
                                             href={`tel:${view.phone}`}
@@ -887,7 +969,7 @@ export default function BusinessPage() {
                                 </div>
 
                                 <div className="flex gap-3">
-                                    <span className="text-slate-400">✉</span>
+                                    <span className="text-slate-400">?</span>
                                     {view.email ? (
                                         <a
                                             href={`mailto:${view.email}`}
@@ -903,7 +985,7 @@ export default function BusinessPage() {
                                 </div>
 
                                 <div className="flex gap-3">
-                                    <span className="text-slate-400">↗</span>
+                                    <span className="text-slate-400">?</span>
                                     {view.website ? (
                                         <a
                                             href={
@@ -940,7 +1022,7 @@ export default function BusinessPage() {
                             <div className="absolute inset-0 flex items-center justify-center">
                                 <div className="text-center">
                                     <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-600 text-white shadow-lg">
-                                        📍
+                                        ??
                                     </div>
 
                                     <p className="mt-3 text-sm font-semibold text-slate-700">
@@ -970,11 +1052,11 @@ export default function BusinessPage() {
                                     rel="noopener noreferrer"
                                     className="mt-5 inline-block text-sm font-semibold text-emerald-700 hover:text-emerald-800"
                                 >
-                                    Get directions →
+                                    Get directions ?
                                 </a>
                             ) : (
                                 <span className="mt-5 inline-block cursor-not-allowed text-sm font-semibold text-slate-300">
-                                    Get directions →
+                                    Get directions ?
                                 </span>
                             )}
 
@@ -1028,7 +1110,7 @@ export default function BusinessPage() {
                         href={`/${locale}/explore`}
                         className="text-sm font-semibold text-emerald-700"
                     >
-                        View all →
+                        View all ?
                     </Link>
                 </div>
 
@@ -1076,7 +1158,7 @@ export default function BusinessPage() {
                         onClick={() => setShowAllImages(false)}
                         className="absolute right-6 top-6 text-2xl text-white"
                     >
-                        ×
+                        �
                     </button>
 
                     <div className="grid max-h-[90vh] max-w-5xl grid-cols-2 gap-3 overflow-auto">
