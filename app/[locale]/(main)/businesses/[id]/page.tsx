@@ -5,6 +5,20 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound, useParams } from "next/navigation";
 import { useLocale } from "next-intl";
+import {
+    ArrowRight,
+    BadgeCheck,
+    Bookmark,
+    Check,
+    ExternalLink,
+    Mail,
+    MapPin,
+    Phone,
+    Share2,
+    Sparkles,
+    Star,
+    X,
+} from "lucide-react";
 import axios from "@/lib/axios";
 import type {
     Business,
@@ -15,7 +29,7 @@ import type {
 } from "@/types/business";
 
 const IMAGE_PLACEHOLDER = "https://placehold.net/1200x800.png";
-const EMPTY = "�";
+const EMPTY = "\u2014";
 
 const TYPE_LABELS: Record<string, string> = {
     hotel: "Hotel",
@@ -26,9 +40,9 @@ const TYPE_LABELS: Record<string, string> = {
 
 const CURRENCY_LABELS: Record<string, string> = {
     DZD: "DA",
-    EUR: "€",
+    EUR: "\u20ac",
     USD: "$",
-    GBP: "£",
+    GBP: "\u00a3",
 };
 
 const PRICE_UNIT_LABELS: Record<PriceUnit, string> = {
@@ -37,7 +51,7 @@ const PRICE_UNIT_LABELS: Record<PriceUnit, string> = {
     item: "/ item",
     stay: "/ stay",
     day: "/ day",
-    m2: "/ m²",
+    m2: "/ m\u00b2",
     total: "",
 };
 
@@ -154,6 +168,26 @@ function starCount(listings: Listing[]): number | null {
     }
 
     return null;
+}
+
+function Stars({
+    value,
+    className = "h-4 w-4",
+}: {
+    value: number;
+    className?: string;
+}) {
+    return (
+        <span className="inline-flex items-center gap-0.5 text-amber-500">
+            {Array.from({ length: value }, (_, index) => (
+                <Star
+                    key={index}
+                    className={`${className} fill-current`}
+                    aria-hidden="true"
+                />
+            ))}
+        </span>
+    );
 }
 
 function ratingWord(rating: number | null): string {
@@ -427,7 +461,7 @@ const facts = [
                 <div className="text-center">
                     <div className="mx-auto h-10 w-10 animate-spin rounded-full border-3 border-slate-200 border-t-emerald-600" />
                     <p className="mt-4 text-sm text-slate-500">
-                        Loading business details�
+                        Loading business details{"\u2026"}
                     </p>
                 </div>
             </main>
@@ -471,7 +505,10 @@ const facts = [
     }
 
     return (
-        <main className="min-h-screen bg-white text-slate-900">
+<main
+            className="min-h-screen bg-white text-slate-900"
+            style={{ paddingTop: "clamp(56px, 6vh, 72px)" }}
+        >
             {/* Breadcrumb */}
             <div className="mx-auto max-w-7xl px-6 pt-6 lg:px-8">
                 <nav className="flex items-center gap-2 text-sm text-slate-500">
@@ -500,18 +537,8 @@ const facts = [
                             </span>
 
                             {view.verified && (
-                                <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
-                                    <svg
-                                        className="h-3.5 w-3.5"
-                                        viewBox="0 0 20 20"
-                                        fill="currentColor"
-                                    >
-                                        <path
-                                            fillRule="evenodd"
-                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.707a1 1 0 00-1.414-1.414L9 10.172 7.707 8.879a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l2.999-3z"
-                                            clipRule="evenodd"
-                                        />
-                                    </svg>
+<span className="flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+                                    <BadgeCheck className="h-3.5 w-3.5" />
                                     Verified
                                 </span>
                             )}
@@ -522,8 +549,8 @@ const facts = [
                         </h1>
 
                         <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-600">
-                            <span className="flex items-center gap-1.5">
-                                <span className="text-amber-500">?</span>
+<span className="flex items-center gap-1.5">
+                                <Star className="h-4 w-4 fill-amber-500 text-amber-500" />
                                 <strong className="text-slate-900">
                                     {view.ratingLabel}
                                 </strong>
@@ -532,67 +559,26 @@ const facts = [
                                 </span>
                             </span>
 
-                            <span className="hidden text-slate-300 sm:block">
-                                �
-                            </span>
+<span
+                                aria-hidden="true"
+                                className="hidden h-1 w-1 rounded-full bg-slate-300 sm:block"
+                            />
 
-                            <span className="flex items-center gap-1.5">
-                                <svg
-                                    className="h-4 w-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={1.8}
-                                        d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"
-                                    />
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={1.8}
-                                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                                    />
-                                </svg>
+<span className="flex items-center gap-1.5">
+                                <MapPin className="h-4 w-4" />
                                 {view.location}
                             </span>
                         </div>
                     </div>
 
                     <div className="flex gap-2">
-                        <button className="flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-medium transition hover:bg-slate-50">
-                            <svg
-                                className="h-4 w-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={1.8}
-                                    d="M5 5a3 3 0 013-3h8a3 3 0 013 3v14l-7-3-7 3V5z"
-                                />
-                            </svg>
+<button className="flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-medium transition hover:bg-slate-50">
+                            <Bookmark className="h-4 w-4" />
                             Save
                         </button>
 
                         <button className="flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-medium transition hover:bg-slate-50">
-                            <svg
-                                className="h-4 w-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={1.8}
-                                    d="M8.684 13.342C8.886 12.938 9 12.484 9 12s-.114-.938-.316-1.342m0 2.684a3 3 0 11-5.368-2.684 3 3 0 015.368 2.684zm10 5.316a3 3 0 11-5.368-2.684 3 3 0 015.368 2.684zm0-10a3 3 0 11-5.368-2.684 3 3 0 015.368 2.684z"
-                                />
-                            </svg>
+                            <Share2 className="h-4 w-4" />
                             Share
                         </button>
                     </div>
@@ -728,10 +714,15 @@ const facts = [
 
                                 {view.isHotel && (
                                     <div>
-                                        <p className="text-2xl font-bold">
-                                            {view.details.stars !== null
-                                                ? "?".repeat(view.details.stars)
-                                                : EMPTY}
+<p className="text-2xl font-bold">
+                                            {view.details.stars !== null ? (
+                                                <Stars
+                                                    value={view.details.stars}
+                                                    className="h-6 w-6"
+                                                />
+                                            ) : (
+                                                EMPTY
+                                            )}
                                         </p>
                                         <p className="mt-1 text-sm text-slate-500">
                                             Hotel rating
@@ -777,8 +768,8 @@ const facts = [
                                             key={amenity}
                                             className="flex items-center gap-3 text-sm text-slate-700"
                                         >
-                                            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-50 text-emerald-700">
-                                                ?
+<span className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-50 text-emerald-700">
+                                                <Check className="h-4 w-4" />
                                             </span>
                                             {amenity}
                                         </div>
@@ -803,7 +794,7 @@ const facts = [
                                             className="flex items-center gap-3 text-sm text-slate-700"
                                         >
                                             <span className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-600">
-                                                ◆
+                                                <Sparkles className="h-4 w-4" />
                                             </span>
                                             {service}
                                         </div>
@@ -917,12 +908,16 @@ const facts = [
                                         <span className="text-xl font-bold">
                                             {view.ratingLabel}
                                         </span>
-                                        <span className="text-amber-500">
-                                            {view.rating !== null
-                                                ? "?".repeat(
-                                                      Math.round(view.rating),
-                                                  )
-                                                : EMPTY}
+<span className="text-amber-500">
+                                            {view.rating !== null ? (
+                                                <Stars
+                                                    value={Math.round(
+                                                        view.rating,
+                                                    )}
+                                                />
+                                            ) : (
+                                                EMPTY
+                                            )}
                                         </span>
                                         <span className="text-sm text-slate-500">
                                             {view.reviewCount} reviews
@@ -948,9 +943,7 @@ const facts = [
                                                     </p>
                                                 </div>
 
-                                                <span className="text-sm text-amber-500">
-                                                    {"?".repeat(review.rating)}
-                                                </span>
+<Stars value={review.rating} className="h-3.5 w-3.5" />
                                             </div>
 
                                             <p className="mt-3 text-sm leading-6 text-slate-600">
@@ -984,7 +977,12 @@ const facts = [
 
                     {/* Right sidebar */}
                     <aside>
-                        <div className="sticky top-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                        <div
+                            style={{
+                                top: "calc(clamp(56px, 6vh, 72px) + 1.5rem)",
+                            }}
+                            className="sticky rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+                        >
                             <div className="flex items-start justify-between">
                                 <div>
                                     <p className="text-sm text-slate-500">
@@ -1037,15 +1035,15 @@ const facts = [
                             <div className="my-6 h-px bg-slate-200" />
 
                             <div className="space-y-4 text-sm">
-                                <div className="flex gap-3">
-                                    <span className="text-slate-400">??</span>
+<div className="flex gap-3">
+                                    <MapPin className="h-5 w-5 shrink-0 text-slate-400" />
                                     <span className="leading-5 text-slate-600">
                                         {view.address ?? EMPTY}
                                     </span>
                                 </div>
 
                                 <div className="flex gap-3">
-                                    <span className="text-slate-400">?</span>
+                                    <Phone className="h-5 w-5 shrink-0 text-slate-400" />
                                     {view.phone ? (
                                         <a
                                             href={`tel:${view.phone}`}
@@ -1060,8 +1058,8 @@ const facts = [
                                     )}
                                 </div>
 
-                                <div className="flex gap-3">
-                                    <span className="text-slate-400">?</span>
+<div className="flex gap-3">
+                                    <Mail className="h-5 w-5 shrink-0 text-slate-400" />
                                     {view.email ? (
                                         <a
                                             href={`mailto:${view.email}`}
@@ -1076,8 +1074,8 @@ const facts = [
                                     )}
                                 </div>
 
-                                <div className="flex gap-3">
-                                    <span className="text-slate-400">?</span>
+<div className="flex gap-3">
+                                    <ExternalLink className="h-5 w-5 shrink-0 text-slate-400" />
                                     {view.website ? (
                                         <a
                                             href={
@@ -1113,8 +1111,8 @@ const facts = [
                         <div className="relative min-h-87.5 bg-slate-200">
                             <div className="absolute inset-0 flex items-center justify-center">
                                 <div className="text-center">
-                                    <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-600 text-white shadow-lg">
-                                        ??
+<div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-600 text-white shadow-lg">
+                                        <MapPin className="h-6 w-6" />
                                     </div>
 
                                     <p className="mt-3 text-sm font-semibold text-slate-700">
@@ -1142,13 +1140,15 @@ const facts = [
                                     href={directionsUrl}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="mt-5 inline-block text-sm font-semibold text-emerald-700 hover:text-emerald-800"
+className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-700 hover:text-emerald-800"
                                 >
-                                    Get directions ?
+                                    Get directions
+                                    <ArrowRight className="h-4 w-4" />
                                 </a>
                             ) : (
-                                <span className="mt-5 inline-block cursor-not-allowed text-sm font-semibold text-slate-300">
-                                    Get directions ?
+                                <span className="mt-5 inline-flex cursor-not-allowed items-center gap-1.5 text-sm font-semibold text-slate-300">
+                                    Get directions
+                                    <ArrowRight className="h-4 w-4" />
                                 </span>
                             )}
 
@@ -1198,11 +1198,12 @@ const facts = [
                         </h2>
                     </div>
 
-                    <Link
+<Link
                         href={`/${locale}/explore`}
-                        className="text-sm font-semibold text-emerald-700"
+                        className="inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-700"
                     >
-                        View all ?
+                        View all
+                        <ArrowRight className="h-4 w-4" />
                     </Link>
                 </div>
 
@@ -1246,11 +1247,12 @@ const facts = [
             {/* Image modal */}
             {showAllImages && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-6">
-                    <button
+<button
                         onClick={() => setShowAllImages(false)}
-                        className="absolute right-6 top-6 text-2xl text-white"
+                        aria-label="Close gallery"
+                        className="absolute right-6 top-6 rounded-full p-2 text-white transition hover:bg-white/10"
                     >
-                        �
+                        <X className="h-6 w-6" />
                     </button>
 
                     <div className="grid max-h-[90vh] max-w-5xl grid-cols-2 gap-3 overflow-auto">
