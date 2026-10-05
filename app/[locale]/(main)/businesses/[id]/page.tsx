@@ -457,10 +457,10 @@ const facts = [
 
     if (loading) {
         return (
-            <main className="flex min-h-screen items-center justify-center bg-white text-slate-900">
+            <main className="flex min-h-screen items-center justify-center bg-(--background) text-(--foreground)">
                 <div className="text-center">
-                    <div className="mx-auto h-10 w-10 animate-spin rounded-full border-3 border-slate-200 border-t-emerald-600" />
-                    <p className="mt-4 text-sm text-slate-500">
+                    <div className="mx-auto h-10 w-10 animate-spin rounded-full border-3 border-(--border) border-t-(--primary-clr)" />
+                    <p className="mt-4 text-sm text-(--light-fg)">
                         Loading business details{"\u2026"}
                     </p>
                 </div>
@@ -470,12 +470,12 @@ const facts = [
 
     if (failed || !business) {
         return (
-            <main className="flex min-h-screen items-center justify-center bg-white px-6 text-slate-900">
+            <main className="flex min-h-screen items-center justify-center bg-(--background) px-6 text-(--foreground)">
                 <div className="max-w-md text-center">
                     <h1 className="text-2xl font-bold">
                         Business unavailable
                     </h1>
-                    <p className="mt-3 text-sm leading-6 text-slate-500">
+                    <p className="mt-3 text-sm leading-6 text-(--light-fg)">
                         We could not load this business right now. It may have
                         been removed or the details are not published yet.
                     </p>
@@ -487,14 +487,14 @@ const facts = [
                                 setLoading(true);
                                 void load();
                             }}
-                            className="rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700"
+                            className="rounded-lg bg-(--primary-clr) px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-(--primary-clr)"
                         >
                             Try again
                         </button>
 
                         <Link
                             href={`/${locale}/explore`}
-                            className="rounded-lg border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                            className="rounded-lg border border-(--border) px-5 py-2.5 text-sm font-semibold text-(--foreground) transition hover:bg-(--dim-bg)"
                         >
                             Back to explore
                         </Link>
@@ -506,24 +506,24 @@ const facts = [
 
     return (
 <main
-            className="min-h-screen bg-white text-slate-900"
+            className="min-h-screen bg-(--background) text-(--foreground)"
             style={{ paddingTop: "clamp(56px, 6vh, 72px)" }}
         >
             {/* Breadcrumb */}
             <div className="mx-auto max-w-7xl px-6 pt-6 lg:px-8">
-                <nav className="flex items-center gap-2 text-sm text-slate-500">
-                    <Link href={`/${locale}`} className="hover:text-slate-900">
+                <nav className="flex items-center gap-2 text-sm text-(--light-fg)">
+                    <Link href={`/${locale}`} className="hover:text-(--foreground)">
                         Home
                     </Link>
                     <span>/</span>
                     <Link
                         href={`/${locale}/explore`}
-                        className="hover:text-slate-900"
+                        className="hover:text-(--foreground)"
                     >
                         Businesses
                     </Link>
                     <span>/</span>
-                    <span className="text-slate-900">{view.name}</span>
+                    <span className="text-(--foreground)">{view.name}</span>
                 </nav>
             </div>
 
@@ -532,12 +532,12 @@ const facts = [
                 <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
                     <div>
                         <div className="mb-3 flex items-center gap-2">
-                            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
+                            <span className="rounded-full bg-(--dim-bg) px-3 py-1 text-xs font-semibold text-(--light-fg)">
                                 {view.category}
                             </span>
 
                             {view.verified && (
-<span className="flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+<span className="flex items-center gap-1 rounded-full bg-(--primary-clr)/10 px-3 py-1 text-xs font-semibold text-(--primary-clr)">
                                     <BadgeCheck className="h-3.5 w-3.5" />
                                     Verified
                                 </span>
@@ -548,10 +548,10 @@ const facts = [
                             {view.name}
                         </h1>
 
-                        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-600">
+                        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-(--light-fg)">
 <span className="flex items-center gap-1.5">
                                 <Star className="h-4 w-4 fill-amber-500 text-amber-500" />
-                                <strong className="text-slate-900">
+                                <strong className="text-(--foreground)">
                                     {view.ratingLabel}
                                 </strong>
                                 <span>
@@ -561,7 +561,7 @@ const facts = [
 
 <span
                                 aria-hidden="true"
-                                className="hidden h-1 w-1 rounded-full bg-slate-300 sm:block"
+                                className="hidden h-1 w-1 rounded-full bg-(--border) sm:block"
                             />
 
 <span className="flex items-center gap-1.5">
@@ -572,12 +572,12 @@ const facts = [
                     </div>
 
                     <div className="flex gap-2">
-<button className="flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-medium transition hover:bg-slate-50">
+<button className="flex items-center gap-2 rounded-lg border border-(--border) px-4 py-2.5 text-sm font-medium transition hover:bg-(--dim-bg)">
                             <Bookmark className="h-4 w-4" />
                             Save
                         </button>
 
-                        <button className="flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-medium transition hover:bg-slate-50">
+                        <button className="flex items-center gap-2 rounded-lg border border-(--border) px-4 py-2.5 text-sm font-medium transition hover:bg-(--dim-bg)">
                             <Share2 className="h-4 w-4" />
                             Share
                         </button>
@@ -588,7 +588,7 @@ const facts = [
             {/* Gallery */}
             <section className="mx-auto max-w-7xl px-6 lg:px-8">
                 <div className="grid h-105 grid-cols-1 gap-2 overflow-hidden rounded-2xl md:grid-cols-2">
-                    <div className="relative overflow-hidden bg-slate-100">
+                    <div className="relative overflow-hidden bg-(--dim-bg)">
                         <Image
                             src={view.images[activeIndex]}
                             alt={view.name}
@@ -603,7 +603,7 @@ const facts = [
                             <button
                                 key={image}
                                 onClick={() => setActiveImage(index + 1)}
-                                className="group relative overflow-hidden bg-slate-100"
+                                className="group relative overflow-hidden bg-(--dim-bg)"
                             >
                                 <img
                                     src={image}
@@ -636,7 +636,7 @@ const facts = [
                             onClick={() => setActiveImage(index)}
                             className={`h-16 w-20 shrink-0 overflow-hidden rounded-lg ${
                                 activeIndex === index
-                                    ? "ring-2 ring-emerald-600"
+                                    ? "ring-2 ring-(--primary-clr)"
                                     : ""
                             }`}
                         >
@@ -662,7 +662,7 @@ const facts = [
                             </h2>
 
                             <p
-                                className={`mt-4 max-w-3xl leading-7 text-slate-600 ${
+                                className={`mt-4 max-w-3xl leading-7 text-(--light-fg) ${
                                     expandedDescription ? "" : "line-clamp-3"
                                 }`}
                             >
@@ -675,7 +675,7 @@ const facts = [
                                     onClick={() =>
                                         setExpandedDescription((prev) => !prev)
                                     }
-                                    className="mt-3 text-sm font-semibold text-emerald-700 hover:text-emerald-800"
+                                    className="mt-3 text-sm font-semibold text-(--primary-clr) hover:text-(--primary-clr)"
                                 >
                                     {expandedDescription ? "Read less" : "Read more"}
                                 </button>
@@ -686,12 +686,12 @@ const facts = [
                                     {view.facts.map((fact) => (
                                         <span
                                             key={fact.label}
-                                            className="rounded-lg bg-slate-50 px-3.5 py-2 text-sm text-slate-600"
+                                            className="rounded-lg bg-(--dim-bg) px-3.5 py-2 text-sm text-(--light-fg)"
                                         >
-                                            <span className="text-slate-400">
+                                            <span className="text-(--light-fg)">
                                                 {fact.label}:{" "}
                                             </span>
-                                            <span className="font-medium text-slate-900">
+                                            <span className="font-medium text-(--foreground)">
                                                 {fact.value}
                                             </span>
                                         </span>
@@ -701,13 +701,13 @@ const facts = [
                         </section>
 
                         {/* Business stats */}
-                        <section className="mt-10 border-y border-slate-200 py-7">
+                        <section className="mt-10 border-y border-(--border) py-7">
                             <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
                                 <div>
                                     <p className="text-2xl font-bold">
                                         {view.details.listings}
                                     </p>
-                                    <p className="mt-1 text-sm text-slate-500">
+                                    <p className="mt-1 text-sm text-(--light-fg)">
                                         {view.content.listingsStat}
                                     </p>
                                 </div>
@@ -724,7 +724,7 @@ const facts = [
                                                 EMPTY
                                             )}
                                         </p>
-                                        <p className="mt-1 text-sm text-slate-500">
+                                        <p className="mt-1 text-sm text-(--light-fg)">
                                             Hotel rating
                                         </p>
                                     </div>
@@ -736,7 +736,7 @@ const facts = [
                                             ? formatAmount(view.details.priceFrom)
                                             : EMPTY}
                                     </p>
-                                    <p className="mt-1 text-sm text-slate-500">
+                                    <p className="mt-1 text-sm text-(--light-fg)">
                                         {view.currency}
                                         {view.priceUnit
                                             ? ` ${view.priceUnit} from`
@@ -748,7 +748,7 @@ const facts = [
                                     <p className="text-2xl font-bold">
                                         {view.ratingLabel}
                                     </p>
-                                    <p className="mt-1 text-sm text-slate-500">
+                                    <p className="mt-1 text-sm text-(--light-fg)">
                                         Guest rating
                                     </p>
                                 </div>
@@ -766,9 +766,9 @@ const facts = [
                                     {view.amenities.map((amenity) => (
                                         <div
                                             key={amenity}
-                                            className="flex items-center gap-3 text-sm text-slate-700"
+                                            className="flex items-center gap-3 text-sm text-(--foreground)"
                                         >
-<span className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-50 text-emerald-700">
+<span className="flex h-8 w-8 items-center justify-center rounded-full bg-(--primary-clr)/10 text-(--primary-clr)">
                                                 <Check className="h-4 w-4" />
                                             </span>
                                             {amenity}
@@ -776,7 +776,7 @@ const facts = [
                                     ))}
                                 </div>
                             ) : (
-<p className="mt-6 text-sm text-slate-500">
+<p className="mt-6 text-sm text-(--light-fg)">
                                     {view.content.amenitiesEmpty}
                                 </p>
                             )}
@@ -791,9 +791,9 @@ const facts = [
                                     {view.services.map((service) => (
                                         <div
                                             key={service}
-                                            className="flex items-center gap-3 text-sm text-slate-700"
+                                            className="flex items-center gap-3 text-sm text-(--foreground)"
                                         >
-                                            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-600">
+                                            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-(--dim-bg) text-(--light-fg)">
                                                 <Sparkles className="h-4 w-4" />
                                             </span>
                                             {service}
@@ -807,7 +807,7 @@ const facts = [
                         <section className="mt-14">
                             <div className="flex items-end justify-between">
                                 <div>
-                                    <p className="text-sm font-semibold uppercase tracking-wider text-emerald-700">
+                                    <p className="text-sm font-semibold uppercase tracking-wider text-(--primary-clr)">
                                         {view.content.listingsEyebrow}
                                     </p>
 
@@ -822,9 +822,9 @@ const facts = [
                                     {view.rooms.map((room) => (
                                         <div
                                             key={room.id}
-                                            className="overflow-hidden rounded-xl border border-slate-200 bg-white transition hover:shadow-md"
+                                            className="overflow-hidden rounded-xl border border-(--border) bg-(--background) transition hover:shadow-md"
                                         >
-                                            <div className="relative aspect-video bg-slate-100">
+                                            <div className="relative aspect-video bg-(--dim-bg)">
                                                 <img
                                                     src={room.image}
                                                     alt={room.name}
@@ -837,7 +837,7 @@ const facts = [
                                                     {room.name}
                                                 </h3>
 
-                                                <p className="mt-2 text-sm leading-6 text-slate-500">
+                                                <p className="mt-2 text-sm leading-6 text-(--light-fg)">
                                                     {room.description ??
                                                         "No description for this room yet."}
                                                 </p>
@@ -848,7 +848,7 @@ const facts = [
                                                             (feature) => (
                                                                 <span
                                                                     key={feature}
-                                                                    className="rounded-md bg-slate-100 px-2.5 py-1 text-xs text-slate-600"
+                                                                    className="rounded-md bg-(--dim-bg) px-2.5 py-1 text-xs text-(--light-fg)"
                                                                 >
                                                                     {feature}
                                                                 </span>
@@ -867,7 +867,7 @@ const facts = [
                                                                   )
                                                                 : EMPTY}
                                                         </span>
-                                                        <span className="ml-1 text-xs text-slate-500">
+                                                        <span className="ml-1 text-xs text-(--light-fg)">
                                                             {view.content.priceUnit}
                                                         </span>
                                                     </div>
@@ -875,7 +875,7 @@ const facts = [
                                                     {room.capacity !== null &&
                                                         view.content
                                                             .capacityNoun && (
-                                                            <span className="text-xs text-slate-500">
+                                                            <span className="text-xs text-(--light-fg)">
                                                                 Up to{" "}
                                                                 {room.capacity}{" "}
                                                                 {
@@ -890,14 +890,14 @@ const facts = [
                                     ))}
                                 </div>
                             ) : (
-                                <p className="mt-6 text-sm text-slate-500">
+                                <p className="mt-6 text-sm text-(--light-fg)">
                                     {view.content.listingsEmpty}
                                 </p>
                             )}
                         </section>
 
                         {/* Reviews */}
-                        <section className="mt-14 border-t border-slate-200 pt-12">
+                        <section className="mt-14 border-t border-(--border) pt-12">
                             <div className="flex items-center justify-between">
                                 <div>
                                     <h2 className="text-2xl font-bold">
@@ -919,7 +919,7 @@ const facts = [
                                                 EMPTY
                                             )}
                                         </span>
-                                        <span className="text-sm text-slate-500">
+                                        <span className="text-sm text-(--light-fg)">
                                             {view.reviewCount} reviews
                                         </span>
                                     </div>
@@ -927,7 +927,7 @@ const facts = [
                             </div>
 
                             {visibleReviews.length > 0 ? (
-                                <div className="mt-8 divide-y divide-slate-200">
+                                <div className="mt-8 divide-y divide-(--border)">
                                     {visibleReviews.map((review) => (
                                         <article
                                             key={review.id}
@@ -938,7 +938,7 @@ const facts = [
                                                     <p className="font-semibold">
                                                         {review.name}
                                                     </p>
-                                                    <p className="mt-1 text-xs text-slate-400">
+                                                    <p className="mt-1 text-xs text-(--light-fg)">
                                                         {review.date}
                                                     </p>
                                                 </div>
@@ -946,7 +946,7 @@ const facts = [
 <Stars value={review.rating} className="h-3.5 w-3.5" />
                                             </div>
 
-                                            <p className="mt-3 text-sm leading-6 text-slate-600">
+                                            <p className="mt-3 text-sm leading-6 text-(--light-fg)">
                                                 {review.text ??
                                                     "No comment was left with this rating."}
                                             </p>
@@ -954,7 +954,7 @@ const facts = [
                                     ))}
                                 </div>
                             ) : (
-                                <p className="mt-8 text-sm text-slate-500">
+                                <p className="mt-8 text-sm text-(--light-fg)">
                                     No reviews yet. Be the first to share your
                                     experience.
                                 </p>
@@ -965,7 +965,7 @@ const facts = [
                                     onClick={() =>
                                         setShowAllReviews((prev) => !prev)
                                     }
-                                    className="mt-4 w-full rounded-lg border border-slate-200 py-3 text-sm font-semibold hover:bg-slate-50"
+                                    className="mt-4 w-full rounded-lg border border-(--border) py-3 text-sm font-semibold hover:bg-(--dim-bg)"
                                 >
                                     {showAllReviews
                                         ? "Show fewer reviews"
@@ -981,11 +981,11 @@ const facts = [
                             style={{
                                 top: "calc(clamp(56px, 6vh, 72px) + 1.5rem)",
                             }}
-                            className="sticky rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+                            className="sticky rounded-2xl border border-(--border) bg-(--background) p-6 shadow-sm"
                         >
                             <div className="flex items-start justify-between">
                                 <div>
-                                    <p className="text-sm text-slate-500">
+                                    <p className="text-sm text-(--light-fg)">
                                         Starting from
                                     </p>
                                     <p className="mt-1 text-2xl font-bold">
@@ -995,7 +995,7 @@ const facts = [
                                               )
                                             : EMPTY}
                                         {view.details.priceFrom !== null && (
-                                            <span className="text-sm font-medium text-slate-500">
+                                            <span className="text-sm font-medium text-(--light-fg)">
                                                 {" "}
                                                 {view.currency}
                                             </span>
@@ -1003,17 +1003,17 @@ const facts = [
                                     </p>
                                 </div>
 
-                                <div className="rounded-lg bg-emerald-50 px-3 py-2 text-center">
-                                    <p className="text-sm font-bold text-emerald-700">
+                                <div className="rounded-lg bg-(--primary-clr)/10 px-3 py-2 text-center">
+                                    <p className="text-sm font-bold text-(--primary-clr)">
                                         {view.ratingLabel}
                                     </p>
-                                    <p className="text-[10px] text-emerald-600">
+                                    <p className="text-[10px] text-(--primary-clr)">
                                         {view.ratingWord}
                                     </p>
                                 </div>
                             </div>
 
-                            <button className="mt-6 w-full rounded-lg bg-emerald-600 px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-emerald-700">
+                            <button className="mt-6 w-full rounded-lg bg-(--primary-clr) px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-(--primary-clr)">
                                 Contact business
                             </button>
 
@@ -1022,60 +1022,60 @@ const facts = [
                                     href={directionsUrl}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="mt-2 block w-full rounded-lg border border-slate-200 px-5 py-3.5 text-center text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                                    className="mt-2 block w-full rounded-lg border border-(--border) px-5 py-3.5 text-center text-sm font-semibold text-(--foreground) transition hover:bg-(--dim-bg)"
                                 >
                                     Get directions
                                 </a>
                             ) : (
-                                <span className="mt-2 block w-full cursor-not-allowed rounded-lg border border-slate-200 px-5 py-3.5 text-center text-sm font-semibold text-slate-300">
+                                <span className="mt-2 block w-full cursor-not-allowed rounded-lg border border-(--border) px-5 py-3.5 text-center text-sm font-semibold text-(--light-fg)">
                                     Get directions
                                 </span>
                             )}
 
-                            <div className="my-6 h-px bg-slate-200" />
+                            <div className="my-6 h-px bg-(--border)" />
 
                             <div className="space-y-4 text-sm">
 <div className="flex gap-3">
-                                    <MapPin className="h-5 w-5 shrink-0 text-slate-400" />
-                                    <span className="leading-5 text-slate-600">
+                                    <MapPin className="h-5 w-5 shrink-0 text-(--light-fg)" />
+                                    <span className="leading-5 text-(--light-fg)">
                                         {view.address ?? EMPTY}
                                     </span>
                                 </div>
 
                                 <div className="flex gap-3">
-                                    <Phone className="h-5 w-5 shrink-0 text-slate-400" />
+                                    <Phone className="h-5 w-5 shrink-0 text-(--light-fg)" />
                                     {view.phone ? (
                                         <a
                                             href={`tel:${view.phone}`}
-                                            className="text-slate-600 hover:text-emerald-700"
+                                            className="text-(--light-fg) hover:text-(--primary-clr)"
                                         >
                                             {view.phone}
                                         </a>
                                     ) : (
-                                        <span className="text-slate-400">
+                                        <span className="text-(--light-fg)">
                                             {EMPTY}
                                         </span>
                                     )}
                                 </div>
 
 <div className="flex gap-3">
-                                    <Mail className="h-5 w-5 shrink-0 text-slate-400" />
+                                    <Mail className="h-5 w-5 shrink-0 text-(--light-fg)" />
                                     {view.email ? (
                                         <a
                                             href={`mailto:${view.email}`}
-                                            className="break-all text-slate-600 hover:text-emerald-700"
+                                            className="break-all text-(--light-fg) hover:text-(--primary-clr)"
                                         >
                                             {view.email}
                                         </a>
                                     ) : (
-                                        <span className="text-slate-400">
+                                        <span className="text-(--light-fg)">
                                             {EMPTY}
                                         </span>
                                     )}
                                 </div>
 
 <div className="flex gap-3">
-                                    <ExternalLink className="h-5 w-5 shrink-0 text-slate-400" />
+                                    <ExternalLink className="h-5 w-5 shrink-0 text-(--light-fg)" />
                                     {view.website ? (
                                         <a
                                             href={
@@ -1085,12 +1085,12 @@ const facts = [
                                             }
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="break-all text-slate-600 hover:text-emerald-700"
+                                            className="break-all text-(--light-fg) hover:text-(--primary-clr)"
                                         >
                                             {view.website}
                                         </a>
                                     ) : (
-                                        <span className="text-slate-400">
+                                        <span className="text-(--light-fg)">
                                             {EMPTY}
                                         </span>
                                     )}
@@ -1102,24 +1102,24 @@ const facts = [
             </section>
 
             {/* Location */}
-            <section className="border-t border-slate-200 bg-slate-50">
+            <section className="border-t border-(--border) bg-(--dim-bg)">
                 <div className="mx-auto max-w-7xl px-6 py-14 lg:px-8">
                     <h2 className="text-2xl font-bold">Location</h2>
 
-                    <div className="mt-6 grid overflow-hidden rounded-2xl border border-slate-200 bg-white lg:grid-cols-[1fr_350px]">
+                    <div className="mt-6 grid overflow-hidden rounded-2xl border border-(--border) bg-(--background) lg:grid-cols-[1fr_350px]">
                         {/* Map placeholder */}
-                        <div className="relative min-h-87.5 bg-slate-200">
+                        <div className="relative min-h-87.5 bg-(--border)">
                             <div className="absolute inset-0 flex items-center justify-center">
                                 <div className="text-center">
-<div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-600 text-white shadow-lg">
+<div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-(--primary-clr) text-white shadow-lg">
                                         <MapPin className="h-6 w-6" />
                                     </div>
 
-                                    <p className="mt-3 text-sm font-semibold text-slate-700">
+                                    <p className="mt-3 text-sm font-semibold text-(--foreground)">
                                         {view.name}
                                     </p>
 
-                                    <p className="mt-1 text-xs text-slate-500">
+                                    <p className="mt-1 text-xs text-(--light-fg)">
                                         {view.coords}
                                     </p>
                                 </div>
@@ -1127,11 +1127,11 @@ const facts = [
                         </div>
 
                         <div className="p-7">
-                            <p className="text-sm font-semibold text-slate-500">
+                            <p className="text-sm font-semibold text-(--light-fg)">
                                 Address
                             </p>
 
-                            <p className="mt-2 leading-6 text-slate-700">
+                            <p className="mt-2 leading-6 text-(--foreground)">
                                 {view.address ?? EMPTY}
                             </p>
 
@@ -1140,41 +1140,41 @@ const facts = [
                                     href={directionsUrl}
                                     target="_blank"
                                     rel="noopener noreferrer"
-className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-700 hover:text-emerald-800"
+className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-(--primary-clr) hover:text-(--primary-clr)"
                                 >
                                     Get directions
                                     <ArrowRight className="h-4 w-4" />
                                 </a>
                             ) : (
-                                <span className="mt-5 inline-flex cursor-not-allowed items-center gap-1.5 text-sm font-semibold text-slate-300">
+                                <span className="mt-5 inline-flex cursor-not-allowed items-center gap-1.5 text-sm font-semibold text-(--light-fg)">
                                     Get directions
                                     <ArrowRight className="h-4 w-4" />
                                 </span>
                             )}
 
-                            <div className="my-7 h-px bg-slate-200" />
+                            <div className="my-7 h-px bg-(--border)" />
 
-                            <p className="text-sm font-semibold text-slate-500">
+                            <p className="text-sm font-semibold text-(--light-fg)">
                                 Nearby
                             </p>
 
                             <div className="mt-4 space-y-4">
                                 <div className="flex justify-between text-sm">
-                                    <span className="text-slate-600">
+                                    <span className="text-(--light-fg)">
                                         City centre
                                     </span>
                                     <span className="font-medium">{EMPTY}</span>
                                 </div>
 
                                 <div className="flex justify-between text-sm">
-                                    <span className="text-slate-600">
+                                    <span className="text-(--light-fg)">
                                         Beach
                                     </span>
                                     <span className="font-medium">{EMPTY}</span>
                                 </div>
 
                                 <div className="flex justify-between text-sm">
-                                    <span className="text-slate-600">
+                                    <span className="text-(--light-fg)">
                                         Restaurants
                                     </span>
                                     <span className="font-medium">{EMPTY}</span>
@@ -1189,7 +1189,7 @@ className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-emer
             <section className="mx-auto max-w-7xl px-6 py-14 lg:px-8">
                 <div className="flex items-end justify-between">
                     <div>
-                        <p className="text-sm font-semibold uppercase tracking-wider text-emerald-700">
+                        <p className="text-sm font-semibold uppercase tracking-wider text-(--primary-clr)">
                             You may also like
                         </p>
 
@@ -1200,7 +1200,7 @@ className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-emer
 
 <Link
                         href={`/${locale}/explore`}
-                        className="inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-700"
+                        className="inline-flex items-center gap-1.5 text-sm font-semibold text-(--primary-clr)"
                     >
                         View all
                         <ArrowRight className="h-4 w-4" />
@@ -1213,10 +1213,10 @@ className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-emer
                             <Link
                                 key={item.id}
                                 href={`/${locale}/businesses/${item.id}`}
-                                className="rounded-xl border border-slate-200 p-5 transition hover:-translate-y-0.5 hover:shadow-md"
+                                className="rounded-xl border border-(--border) p-5 transition hover:-translate-y-0.5 hover:shadow-md"
                             >
                                 <div className="flex items-center justify-between">
-                                    <span className="rounded-md bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">
+                                    <span className="rounded-md bg-(--dim-bg) px-2.5 py-1 text-xs font-medium text-(--light-fg)">
                                         {TYPE_LABELS[item.type] ?? "Business"}
                                     </span>
 
@@ -1229,7 +1229,7 @@ className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-emer
 
                                 <h3 className="mt-4 font-bold">{item.name}</h3>
 
-                                <p className="mt-1 text-sm text-slate-500">
+                                <p className="mt-1 text-sm text-(--light-fg)">
                                     {[item.commune, item.wilaya]
                                         .filter(Boolean)
                                         .join(", ") || EMPTY}
@@ -1238,7 +1238,7 @@ className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-emer
                         ))}
                     </div>
                 ) : (
-                    <p className="mt-7 text-sm text-slate-500">
+                    <p className="mt-7 text-sm text-(--light-fg)">
                         No other businesses to show here yet.
                     </p>
                 )}
