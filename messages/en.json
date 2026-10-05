@@ -539,5 +539,145 @@
         "confirm": "Confirm",
         "cancel": "Cancel",
         "loading": "Please wait..."
+    },
+    "business_detail": {
+        "type_labels": {
+            "hotel": "Hotel",
+            "restaurant": "Restaurant",
+            "touristic_agency": "Touristic Agency",
+            "real_estate_agency": "Real Estate Agency",
+            "fallback": "Business"
+        },
+        "currency_labels": {
+            "DZD": "DA",
+            "EUR": "\u20ac",
+            "USD": "$",
+            "GBP": "\u00a3"
+        },
+        "price_units": {
+            "night": "/ night",
+            "person": "/ person",
+            "item": "/ item",
+            "stay": "/ stay",
+            "day": "/ day",
+            "m2": "/ m\u00b2",
+            "total": ""
+        },
+        "types": {
+            "hotel": {
+                "listings_stat": "Rooms",
+                "listings_eyebrow": "Accommodation",
+                "listings_title": "Rooms & suites",
+                "listings_empty": "No rooms have been published yet.",
+                "amenities_title": "Facilities & amenities",
+                "amenities_empty": "No facilities have been listed yet.",
+                "price_unit": "/ night",
+                "capacity_noun": "guests"
+            },
+            "restaurant": {
+                "listings_stat": "Menu items",
+                "listings_eyebrow": "Menu",
+                "listings_title": "Menu & specialties",
+                "listings_empty": "No menu items have been published yet.",
+                "amenities_title": "Features & services",
+                "amenities_empty": "No features have been listed yet.",
+                "price_unit": "/ item",
+                "capacity_noun": "guests"
+            },
+            "touristic_agency": {
+                "listings_stat": "Tours",
+                "listings_eyebrow": "Services",
+                "listings_title": "Tours & trips",
+                "listings_empty": "No tours have been published yet.",
+                "amenities_title": "What's included",
+                "amenities_empty": "No services have been listed yet.",
+                "price_unit": "/ person",
+                "capacity_noun": "travellers"
+            },
+            "real_estate_agency": {
+                "listings_stat": "Properties",
+                "listings_eyebrow": "Portfolio",
+                "listings_title": "Properties for sale & rent",
+                "listings_empty": "No properties have been published yet.",
+                "amenities_title": "Property features",
+                "amenities_empty": "No property features have been listed yet.",
+                "price_unit": "",
+                "capacity_noun": ""
+            },
+            "default": {
+                "listings_stat": "Listings",
+                "listings_eyebrow": "Offerings",
+                "listings_title": "Listings",
+                "listings_empty": "No listings have been published yet.",
+                "amenities_title": "Features & amenities",
+                "amenities_empty": "No features have been listed yet.",
+                "price_unit": "",
+                "capacity_noun": ""
+            }
+        },
+        "status": {
+            "loading": "Loading business details\u2026",
+            "error_title": "Business unavailable",
+            "error_body": "We could not load this business right now. It may have been removed or the details are not published yet.",
+            "back_to_explore": "Back to explore"
+        },
+        "breadcrumb": {
+            "aria_label": "Breadcrumb",
+            "home": "Home",
+            "businesses": "Businesses"
+        },
+        "actions": {
+            "verified": "Verified",
+            "save": "Save",
+            "share": "Share",
+            "view_all_photos": "View all photos",
+            "read_more": "Read more",
+            "read_less": "Read less",
+            "show_fewer_reviews": "Show fewer reviews",
+            "show_more_reviews": "Show more reviews",
+            "close_gallery": "Close gallery",
+            "get_directions": "Get directions",
+            "view_all": "View all",
+            "retry": "Retry"
+        },
+        "stats": {
+            "hotel_rating": "Hotel rating",
+            "guest_rating": "Guest rating",
+            "rooms": "Rooms",
+            "cuisine": "Cuisine",
+            "seats": "Seats",
+"price_from": "{currency} {unit} from",
+        "price_from_plain": "{currency} from"
+        },
+        "sections": {
+            "about": "About",
+            "services": "Services",
+            "reviews": "Reviews",
+            "location": "Location",
+            "address": "Address",
+            "nearby": "Nearby",
+            "nearby_city_centre": "City centre",
+            "nearby_beach": "Beach",
+            "nearby_restaurants": "Restaurants",
+            "related_eyebrow": "You may also like",
+            "related_title": "Nearby businesses",
+            "no_related": "No other businesses to show here yet."
+        },
+        "reviews": {
+            "count": "{count, plural, one {# review} other {# reviews}}",
+            "guest_name": "Guest",
+            "no_comment": "No comment was left with this rating.",
+            "empty": "No reviews yet. Be the first to share your experience.",
+            "not_rated": "Not rated yet",
+            "excellent": "Excellent",
+            "very_good": "Very good",
+            "average": "Average",
+            "poor": "Poor"
+        },
+        "sidebar_starting_from": "Starting from",
+        "sidebar_contact": "Contact business",
+        "about_empty": "No description has been provided for this business yet.",
+        "listing_item_empty": "No description has been added for this listing yet.",
+        "up_to": "Up to {count} {noun}"
     }
 }

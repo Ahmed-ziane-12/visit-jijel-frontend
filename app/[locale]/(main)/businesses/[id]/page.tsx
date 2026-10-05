@@ -4,8 +4,9 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound, useParams } from "next/navigation";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import {
+    ArrowLeft,
     ArrowRight,
     BadgeCheck,
     Bookmark,
@@ -31,29 +32,24 @@ import type {
 const IMAGE_PLACEHOLDER = "https://placehold.net/1200x800.png";
 const EMPTY = "\u2014";
 
-const TYPE_LABELS: Record<string, string> = {
-    hotel: "Hotel",
-    restaurant: "Restaurant",
-    touristic_agency: "Touristic Agency",
-    real_estate_agency: "Real Estate Agency",
+const TYPE_LABEL_KEYS: Record<string, string> = {
+    hotel: "hotel",
+    restaurant: "restaurant",
+    touristic_agency: "touristic_agency",
+    real_estate_agency: "real_estate_agency",
 };
 
-const CURRENCY_LABELS: Record<string, string> = {
-    DZD: "DA",
-    EUR: "\u20ac",
-    USD: "$",
-    GBP: "\u00a3",
-};
+const PRICE_UNITS: PriceUnit[] = [
+    "night",
+    "person",
+    "item",
+    "stay",
+    "day",
+    "m2",
+    "total",
+];
 
-const PRICE_UNIT_LABELS: Record<PriceUnit, string> = {
-    night: "/ night",
-    person: "/ person",
-    item: "/ item",
-    stay: "/ stay",
-    day: "/ day",
-    m2: "/ m\u00b2",
-    total: "",
-};
+const CURRENCY_KEYS = ["DZD", "EUR", "USD", "GBP"];
 
 type TypeContent = {
     listingsStat: string;
@@ -64,60 +60,6 @@ type TypeContent = {
     amenitiesEmpty: string;
     priceUnit: string;
     capacityNoun: string | null;
-};
-
-const TYPE_CONTENT: Record<string, TypeContent> = {
-    hotel: {
-        listingsStat: "Rooms",
-        listingsEyebrow: "Accommodation",
-        listingsTitle: "Rooms & suites",
-        listingsEmpty: "No rooms have been published yet.",
-        amenitiesTitle: "Facilities & amenities",
-        amenitiesEmpty: "No facilities have been listed yet.",
-        priceUnit: "/ night",
-        capacityNoun: "guests",
-    },
-    restaurant: {
-        listingsStat: "Menu items",
-        listingsEyebrow: "Menu",
-        listingsTitle: "Menu & specialties",
-        listingsEmpty: "No menu items have been published yet.",
-        amenitiesTitle: "Features & services",
-        amenitiesEmpty: "No features have been listed yet.",
-        priceUnit: "/ item",
-        capacityNoun: "guests",
-    },
-    touristic_agency: {
-        listingsStat: "Tours",
-        listingsEyebrow: "Services",
-        listingsTitle: "Tours & trips",
-        listingsEmpty: "No tours have been published yet.",
-        amenitiesTitle: "What's included",
-        amenitiesEmpty: "No services have been listed yet.",
-        priceUnit: "/ person",
-        capacityNoun: "travellers",
-    },
-    real_estate_agency: {
-        listingsStat: "Properties",
-        listingsEyebrow: "Portfolio",
-        listingsTitle: "Properties for sale & rent",
-        listingsEmpty: "No properties have been published yet.",
-        amenitiesTitle: "Property features",
-        amenitiesEmpty: "No property features have been listed yet.",
-        priceUnit: "",
-        capacityNoun: null,
-    },
-};
-
-const DEFAULT_CONTENT: TypeContent = {
-    listingsStat: "Listings",
-    listingsEyebrow: "Offerings",
-    listingsTitle: "Listings",
-    listingsEmpty: "No listings have been published yet.",
-    amenitiesTitle: "Features & amenities",
-amenitiesEmpty: "No features have been listed yet.",
-    priceUnit: "",
-    capacityNoun: null,
 };
 
 function imagesOnly(media: BusinessMedia[] | undefined): BusinessMedia[] {
@@ -151,8 +93,8 @@ function numericPrice(price: string | number | null | undefined): number | null 
     return Number.isFinite(parsed) ? parsed : null;
 }
 
-function formatAmount(value: number): string {
-    return new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(
+function formatAmount(value: number, locale: string): string {
+    return new Intl.NumberFormat(locale, { maximumFractionDigits: 0 }).format(
         value,
     );
 }
@@ -190,24 +132,23 @@ function Stars({
     );
 }
 
-function ratingWord(rating: number | null): string {
-    if (rating === null) return "Not rated yet";
-    if (rating >= 4.5) return "Excellent";
-    if (rating >= 4) return "Very good";
-    if (rating >= 3) return "Average";
-    return "Poor";
-}
-
-function formatMonthYear(value: string | null | undefined): string {
+function formatMonthYear(
+    value: string | null | undefined,
+    locale: string,
+): string {
     if (!value) return EMPTY;
 
     const date = new Date(value);
     if (Number.isNaN(date.getTime())) return EMPTY;
 
-    return new Intl.DateTimeFormat("en-US", {
+    return new Intl.DateTimeFormat(locale, {
         month: "long",
         year: "numeric",
     }).format(date);
+}
+
+function hasForwardArrow(locale: string): boolean {
+    return locale !== "ar";
 }
 
 function hasCoordinates(business: Business | null): boolean {
@@ -222,6 +163,7 @@ function hasCoordinates(business: Business | null): boolean {
 export default function BusinessPage() {
     const { id } = useParams<{ id: string }>();
     const locale = useLocale();
+    const t = useTranslations("business_detail");
 
     const [business, setBusiness] = useState<Business | null>(null);
     const [reviews, setReviews] = useState<BusinessReview[]>([]);
@@ -359,26 +301,35 @@ const amenities = Array.from(
             ? `${business?.latitude}, ${business?.longitude}`
             : EMPTY;
 
-        const content =
-            TYPE_CONTENT[business?.type ?? ""] ?? DEFAULT_CONTENT;
+const typeKey = TYPE_LABEL_KEYS[business?.type ?? ""] ?? "default";
+        const content: TypeContent = {
+            listingsStat: t(`types.${typeKey}.listings_stat`),
+            listingsEyebrow: t(`types.${typeKey}.listings_eyebrow`),
+            listingsTitle: t(`types.${typeKey}.listings_title`),
+            listingsEmpty: t(`types.${typeKey}.listings_empty`),
+            amenitiesTitle: t(`types.${typeKey}.amenities_title`),
+            amenitiesEmpty: t(`types.${typeKey}.amenities_empty`),
+            priceUnit: t(`types.${typeKey}.price_unit`),
+            capacityNoun: t(`types.${typeKey}.capacity_noun`) || null,
+        };
 
-const detail = business?.detail ?? null;
+        const detail = business?.detail ?? null;
 
-const facts = [
+        const facts = [
                 detail?.number_of_rooms !== null &&
                 detail?.number_of_rooms !== undefined
                     ? {
-                          label: "Rooms",
+                          label: t("stats.rooms"),
                           value: String(detail.number_of_rooms),
                       }
                     : null,
                 detail?.cuisine_type
-                    ? { label: "Cuisine", value: detail.cuisine_type }
+                    ? { label: t("stats.cuisine"), value: detail.cuisine_type }
                     : null,
                 detail?.seating_capacity !== null &&
                 detail?.seating_capacity !== undefined
                     ? {
-                          label: "Seats",
+                          label: t("stats.seats"),
                           value: String(detail.seating_capacity),
                       }
                     : null,
@@ -386,9 +337,13 @@ const facts = [
                 Boolean(fact),
             );
 
+            const typeLabelKey = TYPE_LABEL_KEYS[business?.type ?? ""];
+
             return {
                 name: business?.name ?? "",
-                category: TYPE_LABELS[business?.type ?? ""] ?? "Business",
+                category: typeLabelKey
+                    ? t(`type_labels.${typeLabelKey}`)
+                    : t("type_labels.fallback"),
                 content,
                 facts,
             isHotel: business?.type === "hotel",
@@ -396,7 +351,16 @@ const facts = [
             verified: Boolean(business?.is_verified),
             rating,
             ratingLabel: rating === null ? EMPTY : rating.toFixed(1),
-            ratingWord: ratingWord(rating),
+            ratingWord:
+                rating === null
+                    ? t("reviews.not_rated")
+                    : rating >= 4.5
+                      ? t("reviews.excellent")
+                      : rating >= 4
+                        ? t("reviews.very_good")
+                        : rating >= 3
+                          ? t("reviews.average")
+                          : t("reviews.poor"),
             reviewCount: reviewTotal,
             location:
                 [business?.commune, business?.wilaya]
@@ -416,10 +380,15 @@ const facts = [
                         : null,
                 priceFrom,
             },
-            currency: CURRENCY_LABELS[listings[0]?.currency ?? "DZD"] ?? "DA",
-            priceUnit: detail?.price_unit
-                ? PRICE_UNIT_LABELS[detail.price_unit]
-                : content.priceUnit,
+            currency: (() => {
+                const code = listings[0]?.currency ?? "DZD";
+                const known = CURRENCY_KEYS.includes(code);
+                return t(`currency_labels.${known ? code : "DZD"}`);
+            })(),
+            priceUnit:
+                detail?.price_unit && PRICE_UNITS.includes(detail.price_unit)
+                    ? t(`price_units.${detail.price_unit}`)
+                    : content.priceUnit,
             amenities,
             services,
             images,
@@ -434,16 +403,16 @@ const facts = [
                     (item): item is string => typeof item === "string",
                 ),
             })),
-            reviews: reviews.map((review) => ({
+reviews: reviews.map((review) => ({
                 id: review.id,
-                name: review.user?.name ?? "Guest",
-                date: formatMonthYear(review.created_at),
+                name: review.user?.name ?? t("reviews.guest_name"),
+                date: formatMonthYear(review.created_at, locale),
                 rating: Math.max(0, Math.min(5, review.rating ?? 0)),
                 text: review.body,
             })),
             related,
         };
-    }, [business, reviews, reviewTotal, related]);
+    }, [business, reviews, reviewTotal, related, locale, t]);
 
     const activeIndex = Math.min(activeImage, view.images.length - 1);
     const thumbnailImages = view.images.slice(1, 5);
@@ -461,7 +430,7 @@ const facts = [
                 <div className="text-center">
                     <div className="mx-auto h-10 w-10 animate-spin rounded-full border-3 border-(--border) border-t-(--primary-clr)" />
                     <p className="mt-4 text-sm text-(--light-fg)">
-                        Loading business details{"\u2026"}
+                        {t("status.loading")}
                     </p>
                 </div>
             </main>
@@ -472,12 +441,11 @@ const facts = [
         return (
             <main className="flex min-h-screen items-center justify-center bg-(--background) px-6 text-(--foreground)">
                 <div className="max-w-md text-center">
-                    <h1 className="text-2xl font-bold">
-                        Business unavailable
+<h1 className="text-2xl font-bold">
+                        {t("status.error_title")}
                     </h1>
                     <p className="mt-3 text-sm leading-6 text-(--light-fg)">
-                        We could not load this business right now. It may have
-                        been removed or the details are not published yet.
+                        {t("status.error_body")}
                     </p>
 
                     <div className="mt-6 flex justify-center gap-3">
@@ -489,14 +457,14 @@ const facts = [
                             }}
                             className="rounded-lg bg-(--primary-clr) px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-(--primary-clr)"
                         >
-                            Try again
+{t("actions.retry")}
                         </button>
 
                         <Link
                             href={`/${locale}/explore`}
                             className="rounded-lg border border-(--border) px-5 py-2.5 text-sm font-semibold text-(--foreground) transition hover:bg-(--dim-bg)"
                         >
-                            Back to explore
+{t("status.back_to_explore")}
                         </Link>
                     </div>
                 </div>
@@ -511,16 +479,19 @@ const facts = [
         >
             {/* Breadcrumb */}
             <div className="mx-auto max-w-7xl px-6 pt-6 lg:px-8">
-                <nav className="flex items-center gap-2 text-sm text-(--light-fg)">
+                <nav
+                    aria-label={t("breadcrumb.aria_label")}
+                    className="flex items-center gap-2 text-sm text-(--light-fg)"
+                >
                     <Link href={`/${locale}`} className="hover:text-(--foreground)">
-                        Home
+{t("breadcrumb.home")}
                     </Link>
                     <span>/</span>
                     <Link
                         href={`/${locale}/explore`}
                         className="hover:text-(--foreground)"
                     >
-                        Businesses
+{t("breadcrumb.businesses")}
                     </Link>
                     <span>/</span>
                     <span className="text-(--foreground)">{view.name}</span>
@@ -539,7 +510,7 @@ const facts = [
                             {view.verified && (
 <span className="flex items-center gap-1 rounded-full bg-(--primary-clr)/10 px-3 py-1 text-xs font-semibold text-(--primary-clr)">
                                     <BadgeCheck className="h-3.5 w-3.5" />
-                                    Verified
+{t("actions.verified")}
                                 </span>
                             )}
                         </div>
@@ -555,7 +526,9 @@ const facts = [
                                     {view.ratingLabel}
                                 </strong>
                                 <span>
-                                    ({view.reviewCount} reviews)
+                                    {t("reviews.count", {
+                                        count: view.reviewCount,
+                                    })}
                                 </span>
                             </span>
 
@@ -574,12 +547,12 @@ const facts = [
                     <div className="flex gap-2">
 <button className="flex items-center gap-2 rounded-lg border border-(--border) px-4 py-2.5 text-sm font-medium transition hover:bg-(--dim-bg)">
                             <Bookmark className="h-4 w-4" />
-                            Save
+                            {t("actions.save")}
                         </button>
 
                         <button className="flex items-center gap-2 rounded-lg border border-(--border) px-4 py-2.5 text-sm font-medium transition hover:bg-(--dim-bg)">
                             <Share2 className="h-4 w-4" />
-                            Share
+                            {t("actions.share")}
                         </button>
                     </div>
                 </div>
@@ -620,7 +593,7 @@ const facts = [
                                             }}
                                             className="absolute inset-0 flex items-center justify-center bg-black/45 text-sm font-semibold text-white"
                                         >
-                                            View all photos
+                                            {t("actions.view_all_photos")}
                                         </div>
                                     )}
                             </button>
@@ -657,8 +630,8 @@ const facts = [
                     <div>
                         {/* Overview */}
                         <section>
-                            <h2 className="text-2xl font-bold">
-                                About {view.name}
+<h2 className="text-2xl font-bold">
+                                {t("sections.about")} {view.name}
                             </h2>
 
                             <p
@@ -666,8 +639,8 @@ const facts = [
                                     expandedDescription ? "" : "line-clamp-3"
                                 }`}
                             >
-                                {view.description ??
-                                    "No description has been provided for this business yet."}
+{view.description ??
+                                    t("about_empty")}
                             </p>
 
 {view.description && (
@@ -677,7 +650,9 @@ const facts = [
                                     }
                                     className="mt-3 text-sm font-semibold text-(--primary-clr) hover:text-(--primary-clr)"
                                 >
-                                    {expandedDescription ? "Read less" : "Read more"}
+                                    {expandedDescription
+                                        ? t("actions.read_less")
+                                        : t("actions.read_more")}
                                 </button>
                             )}
 
@@ -725,7 +700,7 @@ const facts = [
                                             )}
                                         </p>
                                         <p className="mt-1 text-sm text-(--light-fg)">
-                                            Hotel rating
+                                            {t("stats.hotel_rating")}
                                         </p>
                                     </div>
                                 )}
@@ -733,14 +708,21 @@ const facts = [
 <div>
                                     <p className="text-2xl font-bold">
                                         {view.details.priceFrom !== null
-                                            ? formatAmount(view.details.priceFrom)
+                                            ? formatAmount(
+                                                  view.details.priceFrom,
+                                                  locale,
+                                              )
                                             : EMPTY}
                                     </p>
                                     <p className="mt-1 text-sm text-(--light-fg)">
-                                        {view.currency}
                                         {view.priceUnit
-                                            ? ` ${view.priceUnit} from`
-                                            : " from"}
+                                            ? t("stats.price_from", {
+                                                  currency: view.currency,
+                                                  unit: view.priceUnit,
+                                              })
+                                            : t("stats.price_from_plain", {
+                                                  currency: view.currency,
+                                              })}
                                     </p>
                                 </div>
 
@@ -749,7 +731,7 @@ const facts = [
                                         {view.ratingLabel}
                                     </p>
                                     <p className="mt-1 text-sm text-(--light-fg)">
-                                        Guest rating
+                                        {t("stats.guest_rating")}
                                     </p>
                                 </div>
                             </div>
@@ -785,7 +767,9 @@ const facts = [
                         {/* Services */}
                         {view.services.length > 0 && (
                             <section className="mt-10">
-                                <h2 className="text-2xl font-bold">Services</h2>
+                                <h2 className="text-2xl font-bold">
+                                    {t("sections.services")}
+                                </h2>
 
                                 <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
                                     {view.services.map((service) => (
@@ -838,8 +822,8 @@ const facts = [
                                                 </h3>
 
                                                 <p className="mt-2 text-sm leading-6 text-(--light-fg)">
-                                                    {room.description ??
-                                                        "No description for this room yet."}
+{room.description ??
+                                                        t("listing_item_empty")}
                                                 </p>
 
                                                 {room.features.length > 0 && (
@@ -862,8 +846,9 @@ const facts = [
                                                         <span className="text-lg font-bold">
                                                             {room.price !==
                                                             null
-                                                                ? formatAmount(
+? formatAmount(
                                                                       room.price,
+                                                                      locale,
                                                                   )
                                                                 : EMPTY}
                                                         </span>
@@ -876,12 +861,15 @@ const facts = [
                                                         view.content
                                                             .capacityNoun && (
                                                             <span className="text-xs text-(--light-fg)">
-                                                                Up to{" "}
-                                                                {room.capacity}{" "}
-                                                                {
-                                                                    view.content
-                                                                        .capacityNoun
-                                                                }
+{t(
+                                                                    "up_to",
+                                                                    {
+                                                                        count: room.capacity,
+                                                                        noun: view
+                                                                            .content
+                                                                            .capacityNoun,
+                                                                    },
+                                                                )}
                                                             </span>
                                                         )}
                                                 </div>
@@ -900,9 +888,9 @@ const facts = [
                         <section className="mt-14 border-t border-(--border) pt-12">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <h2 className="text-2xl font-bold">
-                                        Reviews
-                                    </h2>
+<h2 className="text-2xl font-bold">
+                                         {t("sections.reviews")}
+                                     </h2>
 
                                     <div className="mt-2 flex items-center gap-2">
                                         <span className="text-xl font-bold">
@@ -920,11 +908,13 @@ const facts = [
                                             )}
                                         </span>
                                         <span className="text-sm text-(--light-fg)">
-                                            {view.reviewCount} reviews
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
+{t("reviews.count", {
+                                                 count: view.reviewCount,
+                                             })}
+                                         </span>
+                                     </div>
+                                 </div>
+                             </div>
 
                             {visibleReviews.length > 0 ? (
                                 <div className="mt-8 divide-y divide-(--border)">
@@ -947,16 +937,15 @@ const facts = [
                                             </div>
 
                                             <p className="mt-3 text-sm leading-6 text-(--light-fg)">
-                                                {review.text ??
-                                                    "No comment was left with this rating."}
+{review.text ??
+                                                    t("reviews.no_comment")}
                                             </p>
                                         </article>
                                     ))}
                                 </div>
                             ) : (
                                 <p className="mt-8 text-sm text-(--light-fg)">
-                                    No reviews yet. Be the first to share your
-                                    experience.
+{t("reviews.empty")}
                                 </p>
                             )}
 
@@ -967,9 +956,9 @@ const facts = [
                                     }
                                     className="mt-4 w-full rounded-lg border border-(--border) py-3 text-sm font-semibold hover:bg-(--dim-bg)"
                                 >
-                                    {showAllReviews
-                                        ? "Show fewer reviews"
-                                        : "Show all reviews"}
+{showAllReviews
+                                        ? t("actions.show_fewer_reviews")
+                                        : t("actions.show_more_reviews")}
                                 </button>
                             )}
                         </section>
@@ -986,12 +975,13 @@ const facts = [
                             <div className="flex items-start justify-between">
                                 <div>
                                     <p className="text-sm text-(--light-fg)">
-                                        Starting from
+                                        {t("sidebar_starting_from")}
                                     </p>
                                     <p className="mt-1 text-2xl font-bold">
                                         {view.details.priceFrom !== null
-                                            ? formatAmount(
+? formatAmount(
                                                   view.details.priceFrom,
+                                                  locale,
                                               )
                                             : EMPTY}
                                         {view.details.priceFrom !== null && (
@@ -1014,7 +1004,7 @@ const facts = [
                             </div>
 
                             <button className="mt-6 w-full rounded-lg bg-(--primary-clr) px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-(--primary-clr)">
-                                Contact business
+{t("sidebar_contact")}
                             </button>
 
                             {directionsUrl ? (
@@ -1024,11 +1014,11 @@ const facts = [
                                     rel="noopener noreferrer"
                                     className="mt-2 block w-full rounded-lg border border-(--border) px-5 py-3.5 text-center text-sm font-semibold text-(--foreground) transition hover:bg-(--dim-bg)"
                                 >
-                                    Get directions
+{t("actions.get_directions")}
                                 </a>
                             ) : (
                                 <span className="mt-2 block w-full cursor-not-allowed rounded-lg border border-(--border) px-5 py-3.5 text-center text-sm font-semibold text-(--light-fg)">
-                                    Get directions
+                                    {t("actions.get_directions")}
                                 </span>
                             )}
 
@@ -1104,7 +1094,9 @@ const facts = [
             {/* Location */}
             <section className="border-t border-(--border) bg-(--dim-bg)">
                 <div className="mx-auto max-w-7xl px-6 py-14 lg:px-8">
-                    <h2 className="text-2xl font-bold">Location</h2>
+                    <h2 className="text-2xl font-bold">
+                        {t("sections.location")}
+                    </h2>
 
                     <div className="mt-6 grid overflow-hidden rounded-2xl border border-(--border) bg-(--background) lg:grid-cols-[1fr_350px]">
                         {/* Map placeholder */}
@@ -1127,8 +1119,8 @@ const facts = [
                         </div>
 
                         <div className="p-7">
-                            <p className="text-sm font-semibold text-(--light-fg)">
-                                Address
+<p className="text-sm font-semibold text-(--light-fg)">
+                                {t("sections.address")}
                             </p>
 
                             <p className="mt-2 leading-6 text-(--foreground)">
@@ -1142,40 +1134,48 @@ const facts = [
                                     rel="noopener noreferrer"
 className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-(--primary-clr) hover:text-(--primary-clr)"
                                 >
-                                    Get directions
-                                    <ArrowRight className="h-4 w-4" />
+                                    {t("actions.get_directions")}
+                                    {hasForwardArrow(locale) ? (
+                                        <ArrowRight className="h-4 w-4" />
+                                    ) : (
+                                        <ArrowLeft className="h-4 w-4" />
+                                    )}
                                 </a>
                             ) : (
                                 <span className="mt-5 inline-flex cursor-not-allowed items-center gap-1.5 text-sm font-semibold text-(--light-fg)">
-                                    Get directions
-                                    <ArrowRight className="h-4 w-4" />
+                                    {t("actions.get_directions")}
+                                    {hasForwardArrow(locale) ? (
+                                        <ArrowRight className="h-4 w-4" />
+                                    ) : (
+                                        <ArrowLeft className="h-4 w-4" />
+                                    )}
                                 </span>
                             )}
 
                             <div className="my-7 h-px bg-(--border)" />
 
-                            <p className="text-sm font-semibold text-(--light-fg)">
-                                Nearby
+<p className="text-sm font-semibold text-(--light-fg)">
+                                {t("sections.nearby")}
                             </p>
 
                             <div className="mt-4 space-y-4">
                                 <div className="flex justify-between text-sm">
                                     <span className="text-(--light-fg)">
-                                        City centre
+                                        {t("sections.nearby_city_centre")}
                                     </span>
                                     <span className="font-medium">{EMPTY}</span>
                                 </div>
 
                                 <div className="flex justify-between text-sm">
                                     <span className="text-(--light-fg)">
-                                        Beach
+                                        {t("sections.nearby_beach")}
                                     </span>
                                     <span className="font-medium">{EMPTY}</span>
                                 </div>
 
                                 <div className="flex justify-between text-sm">
                                     <span className="text-(--light-fg)">
-                                        Restaurants
+                                        {t("sections.nearby_restaurants")}
                                     </span>
                                     <span className="font-medium">{EMPTY}</span>
                                 </div>
@@ -1189,12 +1189,12 @@ className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-(--p
             <section className="mx-auto max-w-7xl px-6 py-14 lg:px-8">
                 <div className="flex items-end justify-between">
                     <div>
-                        <p className="text-sm font-semibold uppercase tracking-wider text-(--primary-clr)">
-                            You may also like
+<p className="text-sm font-semibold uppercase tracking-wider text-(--primary-clr)">
+                            {t("sections.related_eyebrow")}
                         </p>
 
                         <h2 className="mt-1 text-2xl font-bold">
-                            Nearby businesses
+                            {t("sections.related_title")}
                         </h2>
                     </div>
 
@@ -1202,8 +1202,12 @@ className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-(--p
                         href={`/${locale}/explore`}
                         className="inline-flex items-center gap-1.5 text-sm font-semibold text-(--primary-clr)"
                     >
-                        View all
-                        <ArrowRight className="h-4 w-4" />
+                        {t("actions.view_all")}
+                        {hasForwardArrow(locale) ? (
+                            <ArrowRight className="h-4 w-4" />
+                        ) : (
+                            <ArrowLeft className="h-4 w-4" />
+                        )}
                     </Link>
                 </div>
 
@@ -1217,12 +1221,17 @@ className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-(--p
                             >
                                 <div className="flex items-center justify-between">
                                     <span className="rounded-md bg-(--dim-bg) px-2.5 py-1 text-xs font-medium text-(--light-fg)">
-                                        {TYPE_LABELS[item.type] ?? "Business"}
+{(() => {
+                                        const key = TYPE_LABEL_KEYS[item.type];
+                                        return key
+                                            ? t(`type_labels.${key}`)
+                                            : t("type_labels.fallback");
+                                    })()}
                                     </span>
 
                                     {item.is_verified && (
                                         <span className="text-xs font-medium text-blue-600">
-                                            Verified
+                                            {t("actions.verified")}
                                         </span>
                                     )}
                                 </div>
@@ -1239,7 +1248,7 @@ className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-(--p
                     </div>
                 ) : (
                     <p className="mt-7 text-sm text-(--light-fg)">
-                        No other businesses to show here yet.
+                        {t("sections.no_related")}
                     </p>
                 )}
             </section>
@@ -1249,7 +1258,7 @@ className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-(--p
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-6">
 <button
                         onClick={() => setShowAllImages(false)}
-                        aria-label="Close gallery"
+                        aria-label={t("actions.close_gallery")}
                         className="absolute right-6 top-6 rounded-full p-2 text-white transition hover:bg-white/10"
                     >
                         <X className="h-6 w-6" />

@@ -539,5 +539,145 @@
         "confirm": "Confirmer",
         "cancel": "Annuler",
         "loading": "Veuillez patienter..."
+    },
+    "business_detail": {
+        "type_labels": {
+            "hotel": "Hôtel",
+            "restaurant": "Restaurant",
+            "touristic_agency": "Agence de voyages",
+            "real_estate_agency": "Agence immobilière",
+            "fallback": "Commerce"
+        },
+        "currency_labels": {
+            "DZD": "DA",
+            "EUR": "\u20ac",
+            "USD": "$",
+            "GBP": "\u00a3"
+        },
+        "price_units": {
+            "night": "/ nuit",
+            "person": "/ personne",
+            "item": "/ article",
+            "stay": "/ séjour",
+            "day": "/ jour",
+            "m2": "/ m\u00b2",
+            "total": ""
+        },
+        "types": {
+            "hotel": {
+                "listings_stat": "Chambres",
+                "listings_eyebrow": "Hébergement",
+                "listings_title": "Chambres & suites",
+                "listings_empty": "Aucune chambre n'a encore été publiée.",
+                "amenities_title": "Équipements & services",
+                "amenities_empty": "Aucun équipement n'a encore été ajouté.",
+                "price_unit": "/ nuit",
+                "capacity_noun": "voyageurs"
+            },
+            "restaurant": {
+                "listings_stat": "Plats",
+                "listings_eyebrow": "Carte",
+                "listings_title": "Carte & spécialités",
+                "listings_empty": "Aucun plat n'a encore été publié.",
+                "amenities_title": "Caractéristiques & services",
+                "amenities_empty": "Aucune caractéristique n'a encore été ajoutée.",
+                "price_unit": "/ article",
+                "capacity_noun": "couverts"
+            },
+            "touristic_agency": {
+                "listings_stat": "Circuits",
+                "listings_eyebrow": "Services",
+                "listings_title": "Circuits & voyages",
+                "listings_empty": "Aucun circuit n'a encore été publié.",
+                "amenities_title": "Ce qui est inclus",
+                "amenities_empty": "Aucun service n'a encore été ajouté.",
+                "price_unit": "/ personne",
+                "capacity_noun": "voyageurs"
+            },
+            "real_estate_agency": {
+                "listings_stat": "Biens",
+                "listings_eyebrow": "Portefeuille",
+                "listings_title": "Biens à vendre & à louer",
+                "listings_empty": "Aucun bien n'a encore été publié.",
+                "amenities_title": "Caractéristiques du bien",
+                "amenities_empty": "Aucune caractéristique n'a encore été ajoutée.",
+                "price_unit": "",
+                "capacity_noun": ""
+            },
+            "default": {
+                "listings_stat": "Annonces",
+                "listings_eyebrow": "Offres",
+                "listings_title": "Annonces",
+                "listings_empty": "Aucune annonce n'a encore été publiée.",
+                "amenities_title": "Caractéristiques & services",
+                "amenities_empty": "Aucune caractéristique n'a encore été ajoutée.",
+                "price_unit": "",
+                "capacity_noun": ""
+            }
+        },
+        "status": {
+            "loading": "Chargement des détails\u2026",
+            "error_title": "Commerce indisponible",
+            "error_body": "Impossible de charger ce commerce pour le moment. Il a peut-être été supprimé ou ses détails ne sont pas encore publiés.",
+            "back_to_explore": "Retour à l'exploration"
+        },
+        "breadcrumb": {
+            "aria_label": "Fil d'Ariane",
+            "home": "Accueil",
+            "businesses": "Commerces"
+        },
+        "actions": {
+            "verified": "Vérifié",
+            "save": "Enregistrer",
+            "share": "Partager",
+            "view_all_photos": "Voir toutes les photos",
+            "read_more": "Lire la suite",
+            "read_less": "Réduire",
+            "show_fewer_reviews": "Afficher moins d'avis",
+            "show_more_reviews": "Afficher plus d'avis",
+            "close_gallery": "Fermer la galerie",
+            "get_directions": "Itinéraire",
+            "view_all": "Tout voir",
+            "retry": "Réessayer"
+        },
+        "stats": {
+            "hotel_rating": "Note de l'hôtel",
+            "guest_rating": "Note des voyageurs",
+            "rooms": "Chambres",
+            "cuisine": "Cuisine",
+            "seats": "Places",
+            "price_from": "{currency} {unit} à partir de",
+            "price_from_plain": "{currency} à partir de"
+        },
+        "sections": {
+            "about": "À propos",
+            "services": "Services",
+            "reviews": "Avis",
+            "location": "Localisation",
+            "address": "Adresse",
+            "nearby": "À proximité",
+            "nearby_city_centre": "Centre-ville",
+            "nearby_beach": "Plage",
+            "nearby_restaurants": "Restaurants",
+            "related_eyebrow": "Vous aimerez aussi",
+            "related_title": "Commerces à proximité",
+            "no_related": "Aucun autre commerce à afficher pour le moment."
+        },
+        "reviews": {
+            "count": "{count} avis",
+            "guest_name": "Voyageur",
+            "no_comment": "Aucun commentaire n'a été laissé avec cette note.",
+            "empty": "Aucun avis pour le moment. Soyez le premier à partager votre expérience.",
+            "not_rated": "Pas encore noté",
+            "excellent": "Excellent",
+            "very_good": "Très bien",
+            "average": "Moyen",
+            "poor": "Médiocre"
+        },
+        "sidebar_starting_from": "À partir de",
+        "sidebar_contact": "Contacter le commerce",
+        "about_empty": "Aucune description n'a encore été fournie pour ce commerce.",
+        "listing_item_empty": "Aucune description n'a encore été ajoutée pour cette offre.",
+        "up_to": "Jusqu'à {count} {noun}"
     }
 }
