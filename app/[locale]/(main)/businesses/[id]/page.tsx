@@ -11,6 +11,7 @@ import type {
     BusinessMedia,
     BusinessReview,
     Listing,
+    PriceUnit,
 } from "@/types/business";
 
 const IMAGE_PLACEHOLDER = "https://placehold.net/1200x800.png";
@@ -25,9 +26,19 @@ const TYPE_LABELS: Record<string, string> = {
 
 const CURRENCY_LABELS: Record<string, string> = {
     DZD: "DA",
-    EUR: "�",
+    EUR: "€",
     USD: "$",
-    GBP: "�",
+    GBP: "£",
+};
+
+const PRICE_UNIT_LABELS: Record<PriceUnit, string> = {
+    night: "/ night",
+    person: "/ person",
+    item: "/ item",
+    stay: "/ stay",
+    day: "/ day",
+    m2: "/ m²",
+    total: "",
 };
 
 type TypeContent = {
@@ -276,17 +287,27 @@ export default function BusinessPage() {
         const urls = galleryUrls(business?.media);
         const images = urls.length > 0 ? urls : [IMAGE_PLACEHOLDER];
 
-        const prices = listings
+const prices = listings
             .map((listing) => numericPrice(listing.price))
             .filter((value): value is number => value !== null);
 
-        const amenities = Array.from(
+        const detailPrice = numericPrice(business?.detail?.average_price);
+        const priceFrom = prices.length
+            ? Math.min(...prices)
+            : detailPrice;
+
+const amenities = Array.from(
             new Set(
-                listings
-                    .flatMap((listing) => listing.amenities ?? [])
-                    .filter((item): item is string => typeof item === "string"),
+                [
+                    ...(business?.detail?.amenities ?? []),
+                    ...listings.flatMap((listing) => listing.amenities ?? []),
+                ].filter((item): item is string => typeof item === "string"),
             ),
         );
+
+        const services = (
+            business?.detail?.services ?? []
+        ).filter((item): item is string => typeof item === "string");
 
         const ratings = reviews
             .map((review) => review.rating)
@@ -307,11 +328,37 @@ export default function BusinessPage() {
         const content =
             TYPE_CONTENT[business?.type ?? ""] ?? DEFAULT_CONTENT;
 
-        return {
-            name: business?.name ?? "",
-            category: TYPE_LABELS[business?.type ?? ""] ?? "Business",
-            content,
+const detail = business?.detail ?? null;
+
+const facts = [
+                detail?.number_of_rooms !== null &&
+                detail?.number_of_rooms !== undefined
+                    ? {
+                          label: "Rooms",
+                          value: String(detail.number_of_rooms),
+                      }
+                    : null,
+                detail?.cuisine_type
+                    ? { label: "Cuisine", value: detail.cuisine_type }
+                    : null,
+                detail?.seating_capacity !== null &&
+                detail?.seating_capacity !== undefined
+                    ? {
+                          label: "Seats",
+                          value: String(detail.seating_capacity),
+                      }
+                    : null,
+            ].filter((fact): fact is { label: string; value: string } =>
+                Boolean(fact),
+            );
+
+            return {
+                name: business?.name ?? "",
+                category: TYPE_LABELS[business?.type ?? ""] ?? "Business",
+                content,
+                facts,
             isHotel: business?.type === "hotel",
+            isRestaurant: business?.type === "restaurant",
             verified: Boolean(business?.is_verified),
             rating,
             ratingLabel: rating === null ? EMPTY : rating.toFixed(1),
@@ -330,11 +377,17 @@ export default function BusinessPage() {
             details: {
                 listings: listings.length,
                 stars:
-                    business?.type === "hotel" ? starCount(listings) : null,
-                priceFrom: prices.length ? Math.min(...prices) : null,
+                    business?.type === "hotel"
+                        ? (detail?.star_rating ?? starCount(listings))
+                        : null,
+                priceFrom,
             },
             currency: CURRENCY_LABELS[listings[0]?.currency ?? "DZD"] ?? "DA",
+            priceUnit: detail?.price_unit
+                ? PRICE_UNIT_LABELS[detail.price_unit]
+                : content.priceUnit,
             amenities,
+            services,
             images,
             rooms: listings.map((listing) => ({
                 id: listing.id,
@@ -631,7 +684,7 @@ export default function BusinessPage() {
                                     "No description has been provided for this business yet."}
                             </p>
 
-                            {view.description && (
+{view.description && (
                                 <button
                                     onClick={() =>
                                         setExpandedDescription((prev) => !prev)
@@ -640,6 +693,24 @@ export default function BusinessPage() {
                                 >
                                     {expandedDescription ? "Read less" : "Read more"}
                                 </button>
+                            )}
+
+                            {view.facts.length > 0 && (
+                                <div className="mt-6 flex flex-wrap gap-3">
+                                    {view.facts.map((fact) => (
+                                        <span
+                                            key={fact.label}
+                                            className="rounded-lg bg-slate-50 px-3.5 py-2 text-sm text-slate-600"
+                                        >
+                                            <span className="text-slate-400">
+                                                {fact.label}:{" "}
+                                            </span>
+                                            <span className="font-medium text-slate-900">
+                                                {fact.value}
+                                            </span>
+                                        </span>
+                                    ))}
+                                </div>
                             )}
                         </section>
 
@@ -668,7 +739,7 @@ export default function BusinessPage() {
                                     </div>
                                 )}
 
-                                <div>
+<div>
                                     <p className="text-2xl font-bold">
                                         {view.details.priceFrom !== null
                                             ? formatAmount(view.details.priceFrom)
@@ -676,13 +747,13 @@ export default function BusinessPage() {
                                     </p>
                                     <p className="mt-1 text-sm text-slate-500">
                                         {view.currency}
-                                        {view.content.priceUnit
-                                            ? ` ${view.content.priceUnit} from`
+                                        {view.priceUnit
+                                            ? ` ${view.priceUnit} from`
                                             : " from"}
                                     </p>
                                 </div>
 
-                                <div>
+<div>
                                     <p className="text-2xl font-bold">
                                         {view.ratingLabel}
                                     </p>
@@ -719,6 +790,27 @@ export default function BusinessPage() {
                                 </p>
                             )}
                         </section>
+
+                        {/* Services */}
+                        {view.services.length > 0 && (
+                            <section className="mt-10">
+                                <h2 className="text-2xl font-bold">Services</h2>
+
+                                <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                    {view.services.map((service) => (
+                                        <div
+                                            key={service}
+                                            className="flex items-center gap-3 text-sm text-slate-700"
+                                        >
+                                            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-600">
+                                                ◆
+                                            </span>
+                                            {service}
+                                        </div>
+                                    ))}
+                                </div>
+                            </section>
+                        )}
 
                         {/* Type-specific section */}
                         <section className="mt-14">

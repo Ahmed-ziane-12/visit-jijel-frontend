@@ -12,6 +12,30 @@ export interface BusinessMedia {
     sort_order?: number;
 }
 
+export type PriceUnit =
+    | "night"
+    | "person"
+    | "item"
+    | "stay"
+    | "day"
+    | "m2"
+    | "total";
+
+export interface BusinessDetail {
+    id: number;
+    business_id: number;
+    average_price: string | null;
+    price_unit: PriceUnit | null;
+    number_of_rooms: number | null;
+    star_rating: number | null;
+    cuisine_type: string | null;
+    seating_capacity: number | null;
+    amenities: string[] | null;
+    services: string[] | null;
+    created_at: string;
+    updated_at: string;
+}
+
 export interface BusinessOwner {
     id: number;
     name: string;
@@ -57,6 +81,7 @@ export interface Business {
     media: BusinessMedia[];
     listings_count?: number;
     owner?: BusinessOwner | null;
+    detail?: BusinessDetail | null;
     listings?: Listing[];
 }
 

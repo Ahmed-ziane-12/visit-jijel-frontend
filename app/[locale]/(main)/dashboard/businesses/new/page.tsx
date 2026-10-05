@@ -4,8 +4,9 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import axios from "@/lib/axios";
-import type { BusinessType } from "@/types/business";
+import type { BusinessType, PriceUnit } from "@/types/business";
 import Breadcrumbs from "@/app/[locale]/components/Breadcrumbs/Breadcrumbs";
+import ChipInput from "@/app/[locale]/components/ChipInput/ChipInput";
 import {
     Building2,
     MapPin,
@@ -23,6 +24,7 @@ import {
     Hotel,
     Globe,
     Store,
+    SlidersHorizontal,
 } from "lucide-react";
 
 const BUSINESS_TYPES: { value: BusinessType; icon: React.ElementType }[] = [
@@ -42,8 +44,38 @@ const TYPE_LABELS: Record<BusinessType, string> = {
 const STEPS = [
     { key: "basic_info", icon: Building2 },
     { key: "location", icon: MapPin },
+    { key: "details", icon: SlidersHorizontal },
     { key: "images", icon: ImageIcon },
     { key: "preview", icon: FileText },
+];
+
+const PRICE_UNITS: { value: PriceUnit; labelKey: string }[] = [
+    { value: "night", labelKey: "price_unit_night" },
+    { value: "person", labelKey: "price_unit_person" },
+    { value: "item", labelKey: "price_unit_item" },
+    { value: "stay", labelKey: "price_unit_stay" },
+    { value: "day", labelKey: "price_unit_day" },
+    { value: "m2", labelKey: "price_unit_m2" },
+    { value: "total", labelKey: "price_unit_total" },
+];
+
+const AMENITY_SUGGESTIONS = [
+    "Free Wi-Fi",
+    "Parking",
+    "Air conditioning",
+    "Restaurant",
+    "24/7 reception",
+    "Pool",
+    "Gym",
+    "Sea view",
+];
+
+const SERVICE_SUGGESTIONS = [
+    "Room service",
+    "Airport transfer",
+    "Guided tours",
+    "Breakfast",
+    "Laundry",
 ];
 
 interface FileWithPreview {
@@ -64,6 +96,14 @@ interface FormData {
     commune: string;
     latitude: string;
     longitude: string;
+    average_price: string;
+    price_unit: PriceUnit | "";
+    number_of_rooms: string;
+    star_rating: string;
+    cuisine_type: string;
+    seating_capacity: string;
+    amenities: string[];
+    services: string[];
     images: FileWithPreview[];
 }
 
@@ -79,6 +119,14 @@ const INITIAL_FORM: FormData = {
     commune: "",
     latitude: "",
     longitude: "",
+    average_price: "",
+    price_unit: "",
+    number_of_rooms: "",
+    star_rating: "",
+    cuisine_type: "",
+    seating_capacity: "",
+    amenities: [],
+    services: [],
     images: [],
 };
 
@@ -148,10 +196,25 @@ export default function CreateBusinessPage() {
         }));
     }, []);
 
+    const isValidNumber = (value: string, min: number, max: number) => {
+        if (!value.trim()) return true;
+
+        const parsed = Number(value);
+        return Number.isFinite(parsed) && parsed >= min && parsed <= max;
+    };
+
     const canProceed = (): boolean => {
         if (step === 0) return form.type !== "" && form.name.trim().length > 0;
-        if (step === 1) return true;
-        if (step === 2) return true;
+
+        if (step === 2) {
+            return (
+                isValidNumber(form.average_price, 0, 99999999.99) &&
+                isValidNumber(form.number_of_rooms, 0, 100000) &&
+                isValidNumber(form.seating_capacity, 0, 100000) &&
+                isValidNumber(form.star_rating, 1, 5)
+            );
+        }
+
         return true;
     };
 
@@ -177,22 +240,52 @@ export default function CreateBusinessPage() {
             return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
         };
 
-        try {
-            const { data: business } = await axios.post("/api/v1/businesses", {
-                type: form.type,
-                name: form.name.trim(),
-                description: form.description || undefined,
-                phone: form.phone || undefined,
-                email: form.email || undefined,
-                website: sanitizeUrl(form.website),
-                address: form.address || undefined,
-                wilaya: form.wilaya || undefined,
-                commune: form.commune || undefined,
-                latitude: form.latitude ? parseFloat(form.latitude) : undefined,
-                longitude: form.longitude
-                    ? parseFloat(form.longitude)
+const detail: Record<string, unknown> = {
+                average_price: form.average_price
+                    ? parseFloat(form.average_price)
                     : undefined,
-            });
+                price_unit: form.price_unit || undefined,
+                number_of_rooms:
+                    form.type === "hotel" && form.number_of_rooms
+                        ? parseInt(form.number_of_rooms, 10)
+                        : undefined,
+                star_rating:
+                    form.type === "hotel" && form.star_rating
+                        ? parseInt(form.star_rating, 10)
+                        : undefined,
+                cuisine_type:
+                    form.type === "restaurant" && form.cuisine_type
+                        ? form.cuisine_type.trim()
+                        : undefined,
+                seating_capacity:
+                    form.type === "restaurant" && form.seating_capacity
+                        ? parseInt(form.seating_capacity, 10)
+                        : undefined,
+                amenities: form.amenities.length ? form.amenities : undefined,
+                services: form.services.length ? form.services : undefined,
+            };
+
+            const hasDetail = Object.values(detail).some(
+                (value) => value !== undefined,
+            );
+
+            try {
+                const { data: business } = await axios.post("/api/v1/businesses", {
+                    type: form.type,
+                    name: form.name.trim(),
+                    description: form.description || undefined,
+                    phone: form.phone || undefined,
+                    email: form.email || undefined,
+                    website: sanitizeUrl(form.website),
+                    address: form.address || undefined,
+                    wilaya: form.wilaya || undefined,
+                    commune: form.commune || undefined,
+                    latitude: form.latitude ? parseFloat(form.latitude) : undefined,
+                    longitude: form.longitude
+                        ? parseFloat(form.longitude)
+                        : undefined,
+                    detail: hasDetail ? detail : undefined,
+                });
 
             if (form.images.length > 0) {
                 setUploadProgress(t("uploading_images"));
@@ -569,6 +662,188 @@ export default function CreateBusinessPage() {
 
             {step === 2 && (
                 <section className="space-y-6">
+                    <p className="text-sm text-(--light-fg)">
+                        {t("form_details_hint")}
+                    </p>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label
+                                htmlFor="average_price"
+                                className="block text-sm font-medium mb-1.5"
+                            >
+                                {t("form_average_price")}
+                            </label>
+                            <input
+                                id="average_price"
+                                name="average_price"
+                                type="number"
+                                min={0}
+                                step="0.01"
+                                inputMode="decimal"
+                                value={form.average_price}
+                                onChange={handleInputChange}
+                                placeholder={t("form_average_price_placeholder")}
+                                className="w-full px-4 py-2.5 rounded-xl border border-(--border) focus:border-(--primary-clr) focus:ring-2 focus:ring-(--primary-clr)/20 outline-none transition-all text-sm"
+                            />
+                        </div>
+
+                        <div>
+                            <label
+                                htmlFor="price_unit"
+                                className="block text-sm font-medium mb-1.5"
+                            >
+                                {t("form_price_unit")}
+                            </label>
+                            <select
+                                id="price_unit"
+                                name="price_unit"
+                                value={form.price_unit}
+                                onChange={handleInputChange}
+                                className="w-full px-4 py-2.5 rounded-xl border border-(--border) focus:border-(--primary-clr) focus:ring-2 focus:ring-(--primary-clr)/20 outline-none transition-all text-sm bg-(--background)"
+                            >
+                                <option value="">
+                                    {t("form_price_unit_none")}
+                                </option>
+                                {PRICE_UNITS.map((unit) => (
+                                    <option key={unit.value} value={unit.value}>
+                                        {t(unit.labelKey)}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+
+                    {form.type === "hotel" && (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label
+                                    htmlFor="number_of_rooms"
+                                    className="block text-sm font-medium mb-1.5"
+                                >
+                                    {t("form_number_of_rooms")}
+                                </label>
+                                <input
+                                    id="number_of_rooms"
+                                    name="number_of_rooms"
+                                    type="number"
+                                    min={0}
+                                    step="1"
+                                    inputMode="numeric"
+                                    value={form.number_of_rooms}
+                                    onChange={handleInputChange}
+                                    placeholder="42"
+                                    className="w-full px-4 py-2.5 rounded-xl border border-(--border) focus:border-(--primary-clr) focus:ring-2 focus:ring-(--primary-clr)/20 outline-none transition-all text-sm"
+                                />
+                            </div>
+
+                            <div>
+                                <label
+                                    htmlFor="star_rating"
+                                    className="block text-sm font-medium mb-1.5"
+                                >
+                                    {t("form_star_rating")}
+                                </label>
+                                <select
+                                    id="star_rating"
+                                    name="star_rating"
+                                    value={form.star_rating}
+                                    onChange={handleInputChange}
+                                    className="w-full px-4 py-2.5 rounded-xl border border-(--border) focus:border-(--primary-clr) focus:ring-2 focus:ring-(--primary-clr)/20 outline-none transition-all text-sm bg-(--background)"
+                                >
+                                    <option value="">
+                                        {t("form_star_rating_none")}
+                                    </option>
+                                    {[1, 2, 3, 4, 5].map((stars) => (
+                                        <option key={stars} value={stars}>
+                                            {"★".repeat(stars)}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+                    )}
+
+                    {form.type === "restaurant" && (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label
+                                    htmlFor="cuisine_type"
+                                    className="block text-sm font-medium mb-1.5"
+                                >
+                                    {t("form_cuisine_type")}
+                                </label>
+                                <input
+                                    id="cuisine_type"
+                                    name="cuisine_type"
+                                    type="text"
+                                    maxLength={100}
+                                    value={form.cuisine_type}
+                                    onChange={handleInputChange}
+                                    placeholder={t("form_cuisine_type_placeholder")}
+                                    className="w-full px-4 py-2.5 rounded-xl border border-(--border) focus:border-(--primary-clr) focus:ring-2 focus:ring-(--primary-clr)/20 outline-none transition-all text-sm"
+                                />
+                            </div>
+
+                            <div>
+                                <label
+                                    htmlFor="seating_capacity"
+                                    className="block text-sm font-medium mb-1.5"
+                                >
+                                    {t("form_seating_capacity")}
+                                </label>
+                                <input
+                                    id="seating_capacity"
+                                    name="seating_capacity"
+                                    type="number"
+                                    min={0}
+                                    step="1"
+                                    inputMode="numeric"
+                                    value={form.seating_capacity}
+                                    onChange={handleInputChange}
+                                    placeholder="80"
+                                    className="w-full px-4 py-2.5 rounded-xl border border-(--border) focus:border-(--primary-clr) focus:ring-2 focus:ring-(--primary-clr)/20 outline-none transition-all text-sm"
+                                />
+                            </div>
+                        </div>
+                    )}
+
+                    <div>
+                        <label
+                            htmlFor="amenities"
+                            className="block text-sm font-medium mb-1.5"
+                        >
+                            {t("form_amenities")}
+                        </label>
+                        <ChipInput
+                            id="amenities"
+                            value={form.amenities}
+                            onChange={(value) => updateField("amenities", value)}
+                            placeholder={t("form_amenities_placeholder")}
+                            suggestions={AMENITY_SUGGESTIONS}
+                        />
+                    </div>
+
+                    <div>
+                        <label
+                            htmlFor="services"
+                            className="block text-sm font-medium mb-1.5"
+                        >
+                            {t("form_services")}
+                        </label>
+                        <ChipInput
+                            id="services"
+                            value={form.services}
+                            onChange={(value) => updateField("services", value)}
+                            placeholder={t("form_services_placeholder")}
+                            suggestions={SERVICE_SUGGESTIONS}
+                        />
+                    </div>
+                </section>
+            )}
+
+            {step === 3 && (
+                <section className="space-y-6">
                     <div>
                         <p className="text-sm text-(--light-fg) mb-4">
                             {t("form_images_hint")}
@@ -654,7 +929,7 @@ export default function CreateBusinessPage() {
                 </section>
             )}
 
-            {step === 3 && (
+            {step === 4 && (
                 <section className="space-y-6">
                     <div className="rounded-xl border border-(--border) divide-y divide-(--border)">
                         <div className="p-5 flex items-center gap-4">
@@ -714,6 +989,91 @@ export default function CreateBusinessPage() {
                                 )}
                             </div>
                         </div>
+
+{(form.average_price ||
+                            form.price_unit ||
+                            form.number_of_rooms ||
+                            form.star_rating ||
+                            form.cuisine_type ||
+                            form.seating_capacity ||
+                            form.amenities.length > 0 ||
+                            form.services.length > 0) && (
+                            <div className="p-5 flex items-start gap-4">
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
+                                    <SlidersHorizontal size={20} />
+                                </div>
+                                <div className="flex-1">
+                                    <p className="text-xs text-(--light-fg) uppercase tracking-wide font-medium">
+                                        {t("details")}
+                                    </p>
+
+                                    <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-sm">
+                                        {form.average_price && (
+                                            <span>
+                                                {t("form_average_price")}:{" "}
+                                                {form.average_price}
+                                                {form.price_unit
+                                                    ? ` ${t(
+                                                          PRICE_UNITS.find(
+                                                              (u) =>
+                                                                  u.value ===
+                                                                  form.price_unit,
+                                                          )?.labelKey ?? "",
+                                                      )}`
+                                                    : ""}
+                                            </span>
+                                        )}
+                                        {form.number_of_rooms && (
+                                            <span>
+                                                {t("form_number_of_rooms")}:{" "}
+                                                {form.number_of_rooms}
+                                            </span>
+                                        )}
+                                        {form.star_rating && (
+                                            <span>
+                                                {"★".repeat(
+                                                    Number(form.star_rating),
+                                                )}
+                                            </span>
+                                        )}
+                                        {form.cuisine_type && (
+                                            <span>
+                                                {t("form_cuisine_type")}:{" "}
+                                                {form.cuisine_type}
+                                            </span>
+                                        )}
+                                        {form.seating_capacity && (
+                                            <span>
+                                                {t("form_seating_capacity")}:{" "}
+                                                {form.seating_capacity}
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    {(form.amenities.length > 0 ||
+                                        form.services.length > 0) && (
+                                        <div className="flex flex-wrap gap-1.5 mt-3">
+                                            {form.amenities.map((tag) => (
+                                                <span
+                                                    key={tag}
+                                                    className="px-2 py-0.5 rounded-full bg-(--primary-clr)/10 text-(--primary-clr) text-xs font-medium"
+                                                >
+                                                    {tag}
+                                                </span>
+                                            ))}
+                                            {form.services.map((tag) => (
+                                                <span
+                                                    key={tag}
+                                                    className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-xs font-medium"
+                                                >
+                                                    {tag}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
 
                         {form.images.length > 0 && (
                             <div className="p-5 flex items-start gap-4">
