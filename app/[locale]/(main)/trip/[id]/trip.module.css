@@ -1,5 +1,5 @@
 .container {
-    display: grid;
+    /* display: grid; */
     gap: 1rem;
     background-color: var(--dim-bg);
     padding: calc(clamp(56px, 6vh, 72px) + 0.5rem) 2rem 2rem 2rem;
