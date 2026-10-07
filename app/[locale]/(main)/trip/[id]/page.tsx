@@ -42,6 +42,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { addDays, format } from "date-fns";
+import { parseDateOnly } from "@/lib/dates";
 import { AxiosError } from "axios";
 import {
     SLOTS as TIME_SLOTS,
@@ -441,7 +442,7 @@ const TripPage = () => {
             const days = itenirary.days ?? [];
             const last = days[days.length - 1];
             const nextDate = last
-                ? addDays(new Date(last.day_date + "T00:00:00"), 1)
+                ? addDays(parseDateOnly(last.day_date), 1)
                 : new Date();
             const dateStr = format(nextDate, "yyyy-MM-dd");
             const nextNumber =
@@ -612,12 +613,12 @@ const TripPage = () => {
                     <p>
                         <CalendarDays size={16} />
                         {format(
-                            new Date(`${itenirary.start_date}T00:00:00`),
+                            parseDateOnly(itenirary.start_date),
                             "dd-MM-yy",
                         )}{" "}
                         —{" "}
                         {format(
-                            new Date(`${itenirary.end_date}T00:00:00`),
+                            parseDateOnly(itenirary.end_date),
                             "dd-MM-yy",
                         )}
                     </p>

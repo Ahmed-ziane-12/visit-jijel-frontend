@@ -27,6 +27,7 @@ import styles from "./profile.module.css";
 import axios from "@/lib/axios";
 import { format, addDays } from "date-fns";
 import { fetchMyTrips } from "@/lib/itinerary";
+import { parseDateOnly } from "@/lib/dates";
 import UploadModal from "@/app/[locale]/components/UploadModal/UploadModal";
 import dynamic from "next/dynamic";
 import { CalendarEvent } from "../../../components/Calendar/Calendar";
@@ -399,15 +400,15 @@ export default function ProfilePage() {
                                                 <h3>{trip.title}</h3>
                                                 <p>
                                                     {format(
-                                                        new Date(
-                                                            `${trip.start_date}T00:00:00`,
+                                                        parseDateOnly(
+                                                            trip.start_date,
                                                         ),
                                                         "dd-MM-yy",
                                                     )}{" "}
                                                     —{" "}
                                                     {format(
-                                                        new Date(
-                                                            `${trip.end_date}T00:00:00`,
+                                                        parseDateOnly(
+                                                            trip.end_date,
                                                         ),
                                                         "dd-MM-yy",
                                                     )}
@@ -452,11 +453,8 @@ export default function ProfilePage() {
                     const tripBlocks: CalendarEvent[] = trips.map((trip) => ({
                         id: `trip-${trip.id}`,
                         title: trip.title,
-                        start: new Date(`${trip.start_date}T00:00:00`),
-                        end: addDays(
-                            new Date(`${trip.end_date}T00:00:00`),
-                            1,
-                        ),
+                        start: parseDateOnly(trip.start_date),
+                        end: addDays(parseDateOnly(trip.end_date), 1),
                         allDay: true,
                         color: "#4f46e5",
                         locked: true,
