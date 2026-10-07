@@ -57,6 +57,7 @@ import {
     updateTripItem,
 } from "@/lib/itinerary";
 import ConfirmDialog from "@/app/[locale]/components/ConfirmDialog/ConfirmDialog";
+import Link from "next/link";
 
 const MotionLoader = motion(Loader2);
 
@@ -111,7 +112,7 @@ function SortableItem({
                     <AlarmClock size={16} className="text-(--light-fg)" />
                     {item.start_time} - {item.end_time}
                 </p>
-                <h3>{item.title}</h3>
+                <Link href={`/explore/${item.id}`}>{item.title}</Link>
                 <p>{item.description}</p>
             </div>
 
@@ -150,8 +151,7 @@ function MapViewPopup({
                 const link = document.createElement("link");
                 link.id = "leaflet-css";
                 link.rel = "stylesheet";
-                link.href =
-                    "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
+                link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
                 document.head.appendChild(link);
             }
 
@@ -174,14 +174,11 @@ function MapViewPopup({
                 zoomControl: true,
             });
 
-            L.tileLayer(
-                "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-                {
-                    attribution:
-                        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-                    maxZoom: 19,
-                },
-            ).addTo(map);
+            L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                attribution:
+                    '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+                maxZoom: 19,
+            }).addTo(map);
 
             mapRef.current = map;
 
@@ -305,7 +302,11 @@ const TripPage = () => {
             } catch (err) {
                 if (cancelled) return;
                 const status = (err as AxiosError).response?.status;
-                setError(status === 401 || status === 403 ? "login_required" : "not_found");
+                setError(
+                    status === 401 || status === 403
+                        ? "login_required"
+                        : "not_found",
+                );
                 setLoading(false);
             }
         };
@@ -495,7 +496,9 @@ const TripPage = () => {
                         ? candidate.id
                         : undefined,
                 listing_id:
-                    candidate.item_type === "listing" ? candidate.id : undefined,
+                    candidate.item_type === "listing"
+                        ? candidate.id
+                        : undefined,
                 event_id:
                     candidate.item_type === "event" ? candidate.id : undefined,
                 title: candidate.title,
@@ -513,7 +516,10 @@ const TripPage = () => {
                           ...prev,
                           days: (prev.days ?? []).map((d) =>
                               d.id === selectedDay.id
-                                  ? { ...d, items: [...(d.items ?? []), created] }
+                                  ? {
+                                        ...d,
+                                        items: [...(d.items ?? []), created],
+                                    }
                                   : d,
                           ),
                       }
@@ -617,10 +623,7 @@ const TripPage = () => {
                             "dd-MM-yy",
                         )}{" "}
                         —{" "}
-                        {format(
-                            parseDateOnly(itenirary.end_date),
-                            "dd-MM-yy",
-                        )}
+                        {format(parseDateOnly(itenirary.end_date), "dd-MM-yy")}
                     </p>
                 </div>
 
@@ -656,13 +659,13 @@ const TripPage = () => {
                                 key={day.id}
                                 onClick={() => setSelectedDayId(day.id)}
                                 className={`${styles.day} ${
-                                    selectedDay?.id === day.id ? styles.active : ""
+                                    selectedDay?.id === day.id
+                                        ? styles.active
+                                        : ""
                                 }`}
                             >
                                 <h3>
-                                    {day.day_number
-                                        .toString()
-                                        .padStart(2, "0")}
+                                    {day.day_number.toString().padStart(2, "0")}
                                 </h3>
 
                                 <p>{t("day_label")}</p>
@@ -770,17 +773,13 @@ const TripPage = () => {
                                                 </div>
                                                 <div className={styles.details}>
                                                     <p className="flex items-center justify-start gap-2">
-                                                        <AlarmClock
-                                                            size={16}
-                                                        />
+                                                        <AlarmClock size={16} />
                                                         {
                                                             activeItem.start_time
                                                         }{" "}
                                                         - {activeItem.end_time}
                                                     </p>
-                                                    <h3>
-                                                        {activeItem.title}
-                                                    </h3>
+                                                    <h3>{activeItem.title}</h3>
                                                     <p>
                                                         {activeItem.description}
                                                     </p>
