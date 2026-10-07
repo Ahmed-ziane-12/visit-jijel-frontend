@@ -1,18 +1,21 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
 import {
+    ArrowRight,
     Camera,
     User,
     Mail,
     Phone,
+    Plus,
     FileText,
     Briefcase,
     CalendarDays,
+    CalendarRange,
     Heart,
     Settings,
     Save,
@@ -22,10 +25,12 @@ import {
 import Image from "next/image";
 import styles from "./profile.module.css";
 import axios from "@/lib/axios";
+import { format, addDays } from "date-fns";
+import { fetchMyTrips } from "@/lib/itinerary";
 import UploadModal from "@/app/[locale]/components/UploadModal/UploadModal";
 import dynamic from "next/dynamic";
 import { CalendarEvent } from "../../../components/Calendar/Calendar";
-import { Media } from "@/types/map";
+import { Media, Itenirary } from "@/types/map";
 import { PublicProfile } from "@/types/social";
 import PostsTab from "@/app/[locale]/components/Profile/PostsTab";
 import ProfileSidebar from "@/app/[locale]/components/Profile/ProfileSidebar";
@@ -40,6 +45,18 @@ interface UserProfile {
     bio?: string;
     coverImage?: string;
     profileImage?: string;
+}
+
+interface ApiCalendarEvent {
+    id: number;
+    title: string;
+    starts_at: string;
+    ends_at?: string;
+    all_day?: boolean;
+    notes?: string;
+    color?: string;
+    itinerary_id?: number;
+    source?: string;
 }
 
 export default function ProfilePage() {
@@ -78,6 +95,8 @@ export default function ProfilePage() {
     const [isEditing, setIsEditing] = useState(false);
     const [events, setEvents] = useState<CalendarEvent[]>([]);
     const [eventsLoading, setEventsLoading] = useState(false);
+    const [trips, setTrips] = useState<Itenirary[]>([]);
+    const [tripsLoading, setTripsLoading] = useState(false);
     const [mediaItems, setMediaItems] = useState<Media[]>([]);
     const [editForm, setEditForm] = useState({
         name: "",
@@ -113,6 +132,48 @@ export default function ProfilePage() {
         }
     }, [authLoading, user, profileId, isOwnProfile]);
 
+    const fetchTrips = useCallback(async () => {
+        setTripsLoading(true);
+        try {
+            const data = await fetchMyTrips();
+            setTrips(data);
+        } catch (error) {
+            console.error("Failed to fetch trips:", error);
+        } finally {
+            setTripsLoading(false);
+        }
+    }, []);
+
+    const fetchEvents = useCallback(async () => {
+        if (!user) return;
+        if (user.profile.role == "business_owner") return;
+
+        setEventsLoading(true);
+        try {
+            const response = await axios.get("/api/v1/calendar-events");
+            const formattedEvents = response.data.map(
+                (event: ApiCalendarEvent) => ({
+                    id: event.id.toString(),
+                    title: event.title,
+                    start: event.starts_at
+                        ? new Date(event.starts_at)
+                        : new Date(),
+                    end: event.ends_at ? new Date(event.ends_at) : undefined,
+                    allDay: event.all_day,
+                    description: event.notes,
+                    color: event.color || "#eb662b",
+                    tripId: event.itinerary_id,
+                    locked: event.source === "itinerary",
+                }),
+            );
+            setEvents(formattedEvents);
+        } catch (error) {
+            console.error("Failed to fetch events:", error);
+        } finally {
+            setEventsLoading(false);
+        }
+    }, [user]);
+
     // Populate local state from fetched profile
     useEffect(() => {
         if (!profileUser) return;
@@ -141,38 +202,12 @@ export default function ProfilePage() {
             bio: profileUser.profile?.bio || "",
         });
 
-        // Fetch events only for own profile
+        // Fetch events and trips only for own profile
         if (isOwnProfile) {
-            fetchEvents();
+            void fetchEvents();
+            void fetchTrips();
         }
-    }, [profileUser, isOwnProfile]);
-
-    const fetchEvents = async () => {
-        if (!user) return;
-        if (user.profile.role == "business_owner") return;
-
-        setEventsLoading(true);
-        try {
-            const response = await axios.get("/api/v1/user/events");
-            const formattedEvents = response.data.map((event: any) => ({
-                id: event.id.toString(),
-                title: event.title,
-                start: new Date(event.start_date),
-                end: event.end_date ? new Date(event.end_date) : undefined,
-                allDay: event.all_day,
-                description: event.description,
-                location: event.location,
-                attendees: event.attendees,
-                color: event.color || "#eb662b",
-                tripId: event.trip_id,
-            }));
-            setEvents(formattedEvents);
-        } catch (error) {
-            console.error("Failed to fetch events:", error);
-        } finally {
-            setEventsLoading(false);
-        }
-    };
+    }, [profileUser, isOwnProfile, fetchEvents, fetchTrips]);
 
     const handleSaveChanges = async () => {
         try {
@@ -185,20 +220,31 @@ export default function ProfilePage() {
         }
     };
 
+    const resolveEnd = (end?: Date | string, start?: Date | string) => {
+        const s = new Date(start ?? Date.now()).getTime();
+        const e = end ? new Date(end).getTime() : s;
+        return new Date(e > s ? e : s + 60 * 60 * 1000).toISOString();
+    };
+
     const handleAddEvent = async (event: CalendarEvent) => {
         try {
-            const response = await axios.post("/api/v1/user/events", {
+            const response = await axios.post("/api/v1/calendar-events", {
                 title: event.title,
-                start_date: event.start,
-                end_date: event.end,
+                starts_at: new Date(event.start).toISOString(),
+                ends_at: resolveEnd(event.end, event.start),
                 all_day: event.allDay,
-                description: event.description,
-                location: event.location,
-                attendees: event.attendees,
+                notes: event.description,
+                color: event.color,
+                source: "manual",
             });
             setEvents([
                 ...events,
-                { ...event, id: response.data.id.toString() },
+                {
+                    ...event,
+                    id: response.data.id.toString(),
+                    start: event.start,
+                    end: event.end,
+                },
             ]);
         } catch (error) {
             console.error("Failed to add event:", error);
@@ -207,14 +253,13 @@ export default function ProfilePage() {
 
     const handleUpdateEvent = async (event: CalendarEvent) => {
         try {
-            await axios.put(`/api/v1/user/events/${event.id}`, {
+            await axios.put(`/api/v1/calendar-events/${event.id}`, {
                 title: event.title,
-                start_date: event.start,
-                end_date: event.end,
+                starts_at: new Date(event.start).toISOString(),
+                ends_at: resolveEnd(event.end, event.start),
                 all_day: event.allDay,
-                description: event.description,
-                location: event.location,
-                attendees: event.attendees,
+                notes: event.description,
+                color: event.color,
             });
             setEvents(events.map((e) => (e.id === event.id ? event : e)));
         } catch (error) {
@@ -223,8 +268,9 @@ export default function ProfilePage() {
     };
 
     const handleDeleteEvent = async (eventId: string) => {
+        if (eventId.startsWith("trip-")) return;
         try {
-            await axios.delete(`/api/v1/user/events/${eventId}`);
+            await axios.delete(`/api/v1/calendar-events/${eventId}`);
             setEvents(events.filter((e) => e.id !== eventId));
         } catch (error) {
             console.error("Failed to delete event:", error);
@@ -286,11 +332,108 @@ export default function ProfilePage() {
                 );
             case "trips":
                 return (
-                    <div className={styles.tabContent}>
-                        <div className={styles.tripsContainer}>
-                            <h2>{t("no_trips_title")}</h2>
-                            <p>{t("no_trips_desc")}</p>
+                    <div className={styles.tripsTab}>
+                        <div className={styles.tripsHeader}>
+                            <h2>{t("trips_title")}</h2>
+                            {isOwnProfile && (
+                                <button
+                                    className={styles.createTripButton}
+                                    onClick={() => router.push("/plan")}
+                                >
+                                    <Plus size={16} />
+                                    {t("create_trip")}
+                                </button>
+                            )}
                         </div>
+
+                        {tripsLoading ? (
+                            <div className={styles.tripsLoading}>
+                                <div className={styles.spinner} />
+                            </div>
+                        ) : trips.length === 0 ? (
+                            <div className={styles.tabContent}>
+                                <div className={styles.tripsContainer}>
+                                    <h2>{t("no_trips_title")}</h2>
+                                    <p>{t("no_trips_desc")}</p>
+                                    {isOwnProfile && (
+                                        <button
+                                            className={styles.createTripButton}
+                                            onClick={() =>
+                                                router.push("/plan")
+                                            }
+                                        >
+                                            <Plus size={16} />
+                                            {t("create_trip")}
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        ) : (
+                            <div className={styles.tripsList}>
+                                {trips.map((trip) => {
+                                    const dayCount =
+                                        trip.days?.length ?? 0;
+                                    const activityCount = (
+                                        trip.days ?? []
+                                    ).reduce(
+                                        (sum, day) =>
+                                            sum + (day.items?.length ?? 0),
+                                        0,
+                                    );
+                                    return (
+                                        <button
+                                            key={trip.id}
+                                            className={styles.tripCard}
+                                            onClick={() =>
+                                                router.push(`/trip/${trip.id}`)
+                                            }
+                                        >
+                                            <div
+                                                className={styles.tripCardIcon}
+                                            >
+                                                <CalendarRange size={22} />
+                                            </div>
+                                            <div
+                                                className={styles.tripCardInfo}
+                                            >
+                                                <h3>{trip.title}</h3>
+                                                <p>
+                                                    {format(
+                                                        new Date(
+                                                            `${trip.start_date}T00:00:00`,
+                                                        ),
+                                                        "dd-MM-yy",
+                                                    )}{" "}
+                                                    —{" "}
+                                                    {format(
+                                                        new Date(
+                                                            `${trip.end_date}T00:00:00`,
+                                                        ),
+                                                        "dd-MM-yy",
+                                                    )}
+                                                </p>
+                                                <span>
+                                                    {t("trip_day_count", {
+                                                        count: dayCount,
+                                                    })}
+                                                    {" · "}
+                                                    {t(
+                                                        "trip_activity_count",
+                                                        { count: activityCount },
+                                                    )}
+                                                </span>
+                                            </div>
+                                            <ArrowRight
+                                                size={18}
+                                                className={
+                                                    styles.tripCardArrow
+                                                }
+                                            />
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        )}
                     </div>
                 );
             case "calendar":
@@ -304,27 +447,48 @@ export default function ProfilePage() {
                         </div>
                     );
                 }
-                return (
-                    <div className={styles.calendarTabContent}>
-                        {eventsLoading ? (
-                            <div className={styles.calendarLoading}>
-                                <div className={styles.spinner} />
-                                <p>{t("loading_events")}</p>
-                            </div>
-                        ) : (
-                            <Calendar
-                                events={events}
-                                onEventAdd={handleAddEvent}
-                                onEventUpdate={handleUpdateEvent}
-                                onEventDelete={handleDeleteEvent}
-                                editable={true}
-                                selectable={true}
-                                initialView="dayGridMonth"
-                                height="600px"
-                            />
-                        )}
-                    </div>
-                );
+                {
+                    // Trip date ranges shown as locked all-day blocks.
+                    const tripBlocks: CalendarEvent[] = trips.map((trip) => ({
+                        id: `trip-${trip.id}`,
+                        title: trip.title,
+                        start: new Date(`${trip.start_date}T00:00:00`),
+                        end: addDays(
+                            new Date(`${trip.end_date}T00:00:00`),
+                            1,
+                        ),
+                        allDay: true,
+                        color: "#4f46e5",
+                        locked: true,
+                        tripId: trip.id,
+                    }));
+                    const calendarEvents: CalendarEvent[] = [
+                        ...tripBlocks,
+                        ...events,
+                    ];
+
+                    return (
+                        <div className={styles.calendarTabContent}>
+                            {eventsLoading ? (
+                                <div className={styles.calendarLoading}>
+                                    <div className={styles.spinner} />
+                                    <p>{t("loading_events")}</p>
+                                </div>
+                            ) : (
+                                <Calendar
+                                    events={calendarEvents}
+                                    onEventAdd={handleAddEvent}
+                                    onEventUpdate={handleUpdateEvent}
+                                    onEventDelete={handleDeleteEvent}
+                                    editable={true}
+                                    selectable={true}
+                                    initialView="dayGridMonth"
+                                    height="600px"
+                                />
+                            )}
+                        </div>
+                    );
+                }
             case "saved":
                 return (
                     <div className={styles.tabContent}>
@@ -612,7 +776,7 @@ export default function ProfilePage() {
                                 profileUser?.email_verified_at ??
                                     undefined,
                             )}
-                            tripCount={0}
+                            tripCount={trips.length}
                             photos={photos}
                         />
                     </div>

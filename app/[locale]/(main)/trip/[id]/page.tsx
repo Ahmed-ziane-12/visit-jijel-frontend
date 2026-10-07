@@ -611,7 +611,15 @@ const TripPage = () => {
 
                     <p>
                         <CalendarDays size={16} />
-                        {itenirary.start_date} — {itenirary.end_date}
+                        {format(
+                            new Date(`${itenirary.start_date}T00:00:00`),
+                            "dd-MM-yy",
+                        )}{" "}
+                        —{" "}
+                        {format(
+                            new Date(`${itenirary.end_date}T00:00:00`),
+                            "dd-MM-yy",
+                        )}
                     </p>
                 </div>
 

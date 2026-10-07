@@ -30,6 +30,8 @@ export interface CalendarEvent {
     attendees?: number;
     color?: string;
     tripId?: number;
+    /** Read-only event (e.g. a trip date range) — not editable or deletable. */
+    locked?: boolean;
 }
 
 interface CalendarProps {
@@ -94,6 +96,8 @@ export default function Calendar({
     };
 
     const handleEventClick = (clickInfo: EventClickArg) => {
+        if (clickInfo.event.extendedProps.locked) return;
+
         const event: CalendarEvent = {
             id: clickInfo.event.id,
             title: clickInfo.event.title,
@@ -117,6 +121,8 @@ export default function Calendar({
     };
 
     const handleEventDrop = (dropInfo: any) => {
+        if (dropInfo.event.extendedProps.locked) return;
+
         const updatedEvent: CalendarEvent = {
             id: dropInfo.event.id,
             title: dropInfo.event.title,
@@ -134,6 +140,8 @@ export default function Calendar({
     };
 
     const handleEventResize = (resizeInfo: any) => {
+        if (resizeInfo.event.extendedProps.locked) return;
+
         const updatedEvent: CalendarEvent = {
             id: resizeInfo.event.id,
             title: resizeInfo.event.title,
@@ -199,12 +207,14 @@ export default function Calendar({
     };
 
     const formatEventsForCalendar = (): EventInput[] => {
+        const allowEdit = editable !== false;
         return events.map((event) => ({
             id: event.id,
             title: event.title,
             start: event.start,
             end: event.end,
             allDay: event.allDay,
+            editable: event.locked ? false : allowEdit,
             backgroundColor: event.color || "#eb662b",
             borderColor: event.color || "#eb662b",
             extendedProps: {
@@ -212,6 +222,7 @@ export default function Calendar({
                 location: event.location,
                 attendees: event.attendees,
                 tripId: event.tripId,
+                locked: event.locked,
             },
         }));
     };

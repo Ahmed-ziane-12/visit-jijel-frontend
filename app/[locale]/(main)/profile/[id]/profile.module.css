@@ -395,6 +395,129 @@
     margin-bottom: 0.5rem;
 }
 
+/* Trips tab */
+.tripsTab {
+    min-height: 300px;
+    border-radius: 0.75rem;
+    padding: 0.5rem;
+}
+
+.tripsHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.75rem 0.5rem;
+}
+
+.tripsHeader h2 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.createTripButton {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.55rem 1.1rem;
+    background-color: #eb662b;
+    color: white;
+    border: none;
+    border-radius: 0.625rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.createTripButton:hover {
+    background-color: #d9561e;
+}
+
+.tripsLoading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 260px;
+}
+
+.tripsList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.tripCard {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+    padding: 1rem 1.25rem;
+    text-align: left;
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tripCard:hover {
+    border-color: #eb662b;
+    box-shadow: 0 2px 10px rgba(235, 102, 43, 0.08);
+    transform: translateY(-1px);
+}
+
+.tripCardIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 46px;
+    height: 46px;
+    border-radius: 0.75rem;
+    background-color: #fef3ec;
+    color: #eb662b;
+}
+
+.tripCardInfo {
+    flex: 1;
+    min-width: 0;
+}
+
+.tripCardInfo h3 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tripCardInfo p {
+    margin: 0.2rem 0 0.25rem;
+    font-size: 0.8rem;
+    color: #64748b;
+}
+
+.tripCardInfo span {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #eb662b;
+}
+
+.tripCardArrow {
+    flex-shrink: 0;
+    color: #94a3b8;
+    transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.tripCard:hover .tripCardArrow {
+    color: #eb662b;
+    transform: translateX(2px);
+}
+
 /* ── Responsive ── */
 @media (max-width: 900px) {
     .contentGrid {

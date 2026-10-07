@@ -261,7 +261,11 @@
         "bio_label": "Bio",
         "cancel": "Cancel",
         "save_changes": "Save Changes",
-        "edit_profile": "Edit Profile"
+        "edit_profile": "Edit Profile",
+        "trips_title": "My Trips",
+        "create_trip": "Plan a Trip",
+        "trip_day_count": "{count} days",
+        "trip_activity_count": "{count} activities"
     },
     "trip": {
         "empty_trip": "This Trip Is Empty",

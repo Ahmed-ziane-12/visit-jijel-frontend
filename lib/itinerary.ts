@@ -53,6 +53,14 @@ export async function fetchTrip(id: string | number): Promise<Itenirary> {
     return data;
 }
 
+/** The authenticated client's itineraries (paginated response unwrapped). */
+export async function fetchMyTrips(): Promise<Itenirary[]> {
+    const { data } = await axios.get<
+        { data: Itenirary[] } | Itenirary[]
+    >("/api/v1/itineraries");
+    return Array.isArray(data) ? data : (data.data ?? []);
+}
+
 export async function fetchRecommendations(
     id: string | number,
     limit = 12,

@@ -261,7 +261,11 @@
         "bio_label": "نبذة",
         "cancel": "إلغاء",
         "save_changes": "حفظ التغييرات",
-        "edit_profile": "تعديل الملف الشخصي"
+        "edit_profile": "تعديل الملف الشخصي",
+        "trips_title": "رحلاتي",
+        "create_trip": "خطط لرحلة",
+        "trip_day_count": "{count} أيام",
+        "trip_activity_count": "{count} أنشطة"
     },
     "trip": {
         "empty_trip": "هذه الرحلة فارغة",
