@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { AnimatePresence, motion } from "framer-motion";
 import axios from "@/lib/axios";
 import { uploadToCloudinary } from "@/lib/upload";
 import { useAuth } from "@/context/AuthContext";
@@ -36,6 +37,20 @@ const TAB_ICONS: Record<Tab, React.ElementType> = {
     details: FileText,
     photos: ImageIcon,
     listings: LayoutList,
+};
+
+const TAB_PANEL = {
+    initial: { opacity: 0, y: 16 },
+    animate: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -12 },
+    transition: { duration: 0.22, ease: "easeOut" as const },
+};
+
+const COLLAPSE_PANEL = {
+    initial: { opacity: 0, height: 0 },
+    animate: { opacity: 1, height: "auto" },
+    exit: { opacity: 0, height: 0 },
+    transition: { duration: 0.25, ease: "easeInOut" as const },
 };
 
 const TYPE_OPTIONS: BusinessType[] = [
@@ -570,966 +585,1007 @@ export default function BusinessManagementPage() {
                         </p>
                     )}
 
-                    {tab === "details" && (
-                        <section className="space-y-6">
-                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                                <div>
-                                    <label
-                                        htmlFor="type"
-                                        className="mb-1.5 block text-sm font-medium"
-                                    >
-                                        {t("form_type")}
-                                    </label>
-                                    <select
-                                        id="type"
-                                        value={form.type}
-                                        onChange={(event) =>
-                                            updateField(
-                                                "type",
-                                                event.target.value as BusinessType,
-                                            )
-                                        }
-                                        className="w-full rounded-xl border border-(--border) bg-(--background) px-4 py-2.5 text-sm outline-none transition-all focus:border-(--primary-clr) focus:ring-2 focus:ring-(--primary-clr)/20"
-                                    >
-                                        <option value="">
-                                            {t("form_type_placeholder")}
-                                        </option>
-                                        {TYPE_OPTIONS.map((value) => (
-                                            <option key={value} value={value}>
-                                                {t(`type_${value}`)}
-                                            </option>
-                                        ))}
-                                    </select>
-
-                                    {form.type &&
-                                        business.type !== form.type && (
-                                            <p className="mt-1.5 text-xs text-amber-600">
-                                                {t("type_pending_change")}
-                                            </p>
-                                        )}
-                                </div>
-
-                                <div>
-                                    <label
-                                        htmlFor="name"
-                                        className="mb-1.5 block text-sm font-medium"
-                                    >
-                                        {t("form_name")}
-                                    </label>
-                                    <input
-                                        id="name"
-                                        type="text"
-                                        maxLength={150}
-                                        value={form.name}
-                                        onChange={(event) =>
-                                            updateField(
-                                                "name",
-                                                event.target.value,
-                                            )
-                                        }
-                                        placeholder={t("form_name_placeholder")}
-                                        className="w-full rounded-xl border border-(--border) px-4 py-2.5 text-sm outline-none transition-all focus:border-(--primary-clr) focus:ring-2 focus:ring-(--primary-clr)/20"
-                                    />
-                                </div>
-                            </div>
-
-                            <div>
-                                <label
-                                    htmlFor="description"
-                                    className="mb-1.5 block text-sm font-medium"
-                                >
-                                    {t("form_description")}
-                                </label>
-                                <textarea
-                                    id="description"
-                                    rows={4}
-                                    value={form.description}
-                                    onChange={(event) =>
-                                        updateField(
-                                            "description",
-                                            event.target.value,
-                                        )
-                                    }
-                                    placeholder={t(
-                                        "form_description_placeholder",
-                                    )}
-                                    className="w-full resize-y rounded-xl border border-(--border) px-4 py-2.5 text-sm outline-none transition-all focus:border-(--primary-clr) focus:ring-2 focus:ring-(--primary-clr)/20"
-                                />
-                            </div>
-
-                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                                <div>
-                                    <label
-                                        htmlFor="phone"
-                                        className="mb-1.5 block text-sm font-medium"
-                                    >
-                                        {t("form_phone")}
-                                    </label>
-                                    <input
-                                        id="phone"
-                                        type="tel"
-                                        maxLength={20}
-                                        value={form.phone}
-                                        onChange={(event) =>
-                                            updateField(
-                                                "phone",
-                                                event.target.value,
-                                            )
-                                        }
-                                        placeholder="+213 5X XX XX XX"
-                                        className="w-full rounded-xl border border-(--border) px-4 py-2.5 text-sm outline-none transition-all focus:border-(--primary-clr) focus:ring-2 focus:ring-(--primary-clr)/20"
-                                    />
-                                </div>
-
-                                <div>
-                                    <label
-                                        htmlFor="email"
-                                        className="mb-1.5 block text-sm font-medium"
-                                    >
-                                        {t("form_contact_email")}
-                                    </label>
-                                    <input
-                                        id="email"
-                                        type="email"
-                                        maxLength={150}
-                                        value={form.email}
-                                        onChange={(event) =>
-                                            updateField(
-                                                "email",
-                                                event.target.value,
-                                            )
-                                        }
-                                        placeholder="contact@example.com"
-                                        className="w-full rounded-xl border border-(--border) px-4 py-2.5 text-sm outline-none transition-all focus:border-(--primary-clr) focus:ring-2 focus:ring-(--primary-clr)/20"
-                                    />
-                                </div>
-
-                                <div>
-                                    <label
-                                        htmlFor="website"
-                                        className="mb-1.5 block text-sm font-medium"
-                                    >
-                                        {t("form_website")}
-                                    </label>
-                                    <input
-                                        id="website"
-                                        type="text"
-                                        maxLength={255}
-                                        value={form.website}
-                                        onChange={(event) =>
-                                            updateField(
-                                                "website",
-                                                event.target.value,
-                                            )
-                                        }
-                                        placeholder="https://example.com"
-                                        className="w-full rounded-xl border border-(--border) px-4 py-2.5 text-sm outline-none transition-all focus:border-(--primary-clr) focus:ring-2 focus:ring-(--primary-clr)/20"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="border-t border-(--border) pt-6">
-                                <h2 className="text-lg font-semibold">
-                                    {t("location")}
-                                </h2>
-
-                                <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                                    <div className="sm:col-span-2">
-                                        <label
-                                            htmlFor="address"
-                                            className="mb-1.5 block text-sm font-medium"
-                                        >
-                                            {t("form_address")}
-                                        </label>
-                                        <input
-                                            id="address"
-                                            type="text"
-                                            value={form.address}
-                                            onChange={(event) =>
-                                                updateField(
-                                                    "address",
-                                                    event.target.value,
-                                                )
-                                            }
-                                            placeholder={t(
-                                                "form_address_placeholder",
-                                            )}
-                                            className="w-full rounded-xl border border-(--border) px-4 py-2.5 text-sm outline-none transition-all focus:border-(--primary-clr) focus:ring-2 focus:ring-(--primary-clr)/20"
-                                        />
-                                    </div>
-
+                    <AnimatePresence mode="wait" initial={false}>
+                        {tab === "details" && (
+                            <motion.section
+                                key="details"
+                                className="space-y-6"
+                                initial={TAB_PANEL.initial}
+                                animate={TAB_PANEL.animate}
+                                exit={TAB_PANEL.exit}
+                                transition={TAB_PANEL.transition}
+                            >
+                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                     <div>
                                         <label
-                                            htmlFor="wilaya"
+                                            htmlFor="type"
                                             className="mb-1.5 block text-sm font-medium"
                                         >
-                                            {t("form_wilaya")}
-                                        </label>
-                                        <input
-                                            id="wilaya"
-                                            type="text"
-                                            maxLength={100}
-                                            value={form.wilaya}
-                                            onChange={(event) =>
-                                                updateField(
-                                                    "wilaya",
-                                                    event.target.value,
-                                                )
-                                            }
-                                            className="w-full rounded-xl border border-(--border) px-4 py-2.5 text-sm outline-none transition-all focus:border-(--primary-clr) focus:ring-2 focus:ring-(--primary-clr)/20"
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label
-                                            htmlFor="commune"
-                                            className="mb-1.5 block text-sm font-medium"
-                                        >
-                                            {t("form_commune")}
-                                        </label>
-                                        <input
-                                            id="commune"
-                                            type="text"
-                                            maxLength={100}
-                                            value={form.commune}
-                                            onChange={(event) =>
-                                                updateField(
-                                                    "commune",
-                                                    event.target.value,
-                                                )
-                                            }
-                                            placeholder={t(
-                                                "form_commune_placeholder",
-                                            )}
-                                            className="w-full rounded-xl border border-(--border) px-4 py-2.5 text-sm outline-none transition-all focus:border-(--primary-clr) focus:ring-2 focus:ring-(--primary-clr)/20"
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label
-                                            htmlFor="latitude"
-                                            className="mb-1.5 block text-sm font-medium"
-                                        >
-                                            {t("form_latitude")}
-                                        </label>
-                                        <input
-                                            id="latitude"
-                                            type="text"
-                                            inputMode="decimal"
-                                            value={form.latitude}
-                                            onChange={(event) =>
-                                                updateField(
-                                                    "latitude",
-                                                    event.target.value,
-                                                )
-                                            }
-                                            placeholder="36.820"
-                                            className="w-full rounded-xl border border-(--border) px-4 py-2.5 text-sm outline-none transition-all focus:border-(--primary-clr) focus:ring-2 focus:ring-(--primary-clr)/20"
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label
-                                            htmlFor="longitude"
-                                            className="mb-1.5 block text-sm font-medium"
-                                        >
-                                            {t("form_longitude")}
-                                        </label>
-                                        <input
-                                            id="longitude"
-                                            type="text"
-                                            inputMode="decimal"
-                                            value={form.longitude}
-                                            onChange={(event) =>
-                                                updateField(
-                                                    "longitude",
-                                                    event.target.value,
-                                                )
-                                            }
-                                            placeholder="5.766"
-                                            className="w-full rounded-xl border border-(--border) px-4 py-2.5 text-sm outline-none transition-all focus:border-(--primary-clr) focus:ring-2 focus:ring-(--primary-clr)/20"
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="mt-4">
-                                    <LocationMapPicker
-                                        latitude={form.latitude}
-                                        longitude={form.longitude}
-                                        hint={t("location_map_hint")}
-                                        onSelect={(lat, lng) => {
-                                            updateField("latitude", String(lat));
-                                            updateField(
-                                                "longitude",
-                                                String(lng),
-                                            );
-                                        }}
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="border-t border-(--border) pt-6">
-                                <h2 className="text-lg font-semibold">
-                                    {t("details")}
-                                </h2>
-
-                                <p className="mt-1 text-sm text-(--light-fg)">
-                                    {t("form_details_hint")}
-                                </p>
-
-                                <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                                    <div>
-                                        <label
-                                            htmlFor="average_price"
-                                            className="mb-1.5 block text-sm font-medium"
-                                        >
-                                            {t("form_average_price")}
-                                        </label>
-                                        <input
-                                            id="average_price"
-                                            type="number"
-                                            min={0}
-                                            step="0.01"
-                                            inputMode="decimal"
-                                            value={form.average_price}
-                                            onChange={(event) =>
-                                                updateField(
-                                                    "average_price",
-                                                    event.target.value,
-                                                )
-                                            }
-                                            placeholder={t(
-                                                "form_average_price_placeholder",
-                                            )}
-                                            className="w-full rounded-xl border border-(--border) px-4 py-2.5 text-sm outline-none transition-all focus:border-(--primary-clr) focus:ring-2 focus:ring-(--primary-clr)/20"
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label
-                                            htmlFor="price_unit"
-                                            className="mb-1.5 block text-sm font-medium"
-                                        >
-                                            {t("form_price_unit")}
+                                            {t("form_type")}
                                         </label>
                                         <select
-                                            id="price_unit"
-                                            value={form.price_unit}
+                                            id="type"
+                                            value={form.type}
                                             onChange={(event) =>
                                                 updateField(
-                                                    "price_unit",
-                                                    event.target
-                                                        .value as PriceUnit,
+                                                    "type",
+                                                    event.target.value as BusinessType,
                                                 )
                                             }
                                             className="w-full rounded-xl border border-(--border) bg-(--background) px-4 py-2.5 text-sm outline-none transition-all focus:border-(--primary-clr) focus:ring-2 focus:ring-(--primary-clr)/20"
                                         >
                                             <option value="">
-                                                {t("form_price_unit_none")}
+                                                {t("form_type_placeholder")}
                                             </option>
-                                            {PRICE_UNITS.map((unit) => (
-                                                <option
-                                                    key={unit}
-                                                    value={unit}
-                                                >
-                                                    {t(`price_unit_${unit}`)}
+                                            {TYPE_OPTIONS.map((value) => (
+                                                <option key={value} value={value}>
+                                                    {t(`type_${value}`)}
                                                 </option>
                                             ))}
                                         </select>
+
+                                        {form.type &&
+                                            business.type !== form.type && (
+                                                <p className="mt-1.5 text-xs text-amber-600">
+                                                    {t("type_pending_change")}
+                                                </p>
+                                            )}
+                                    </div>
+
+                                    <div>
+                                        <label
+                                            htmlFor="name"
+                                            className="mb-1.5 block text-sm font-medium"
+                                        >
+                                            {t("form_name")}
+                                        </label>
+                                        <input
+                                            id="name"
+                                            type="text"
+                                            maxLength={150}
+                                            value={form.name}
+                                            onChange={(event) =>
+                                                updateField(
+                                                    "name",
+                                                    event.target.value,
+                                                )
+                                            }
+                                            placeholder={t("form_name_placeholder")}
+                                            className="w-full rounded-xl border border-(--border) px-4 py-2.5 text-sm outline-none transition-all focus:border-(--primary-clr) focus:ring-2 focus:ring-(--primary-clr)/20"
+                                        />
                                     </div>
                                 </div>
 
-                                {form.type === "hotel" && (
+                                <div>
+                                    <label
+                                        htmlFor="description"
+                                        className="mb-1.5 block text-sm font-medium"
+                                    >
+                                        {t("form_description")}
+                                    </label>
+                                    <textarea
+                                        id="description"
+                                        rows={4}
+                                        value={form.description}
+                                        onChange={(event) =>
+                                            updateField(
+                                                "description",
+                                                event.target.value,
+                                            )
+                                        }
+                                        placeholder={t(
+                                            "form_description_placeholder",
+                                        )}
+                                        className="w-full resize-y rounded-xl border border-(--border) px-4 py-2.5 text-sm outline-none transition-all focus:border-(--primary-clr) focus:ring-2 focus:ring-(--primary-clr)/20"
+                                    />
+                                </div>
+
+                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                                    <div>
+                                        <label
+                                            htmlFor="phone"
+                                            className="mb-1.5 block text-sm font-medium"
+                                        >
+                                            {t("form_phone")}
+                                        </label>
+                                        <input
+                                            id="phone"
+                                            type="tel"
+                                            maxLength={20}
+                                            value={form.phone}
+                                            onChange={(event) =>
+                                                updateField(
+                                                    "phone",
+                                                    event.target.value,
+                                                )
+                                            }
+                                            placeholder="+213 5X XX XX XX"
+                                            className="w-full rounded-xl border border-(--border) px-4 py-2.5 text-sm outline-none transition-all focus:border-(--primary-clr) focus:ring-2 focus:ring-(--primary-clr)/20"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label
+                                            htmlFor="email"
+                                            className="mb-1.5 block text-sm font-medium"
+                                        >
+                                            {t("form_contact_email")}
+                                        </label>
+                                        <input
+                                            id="email"
+                                            type="email"
+                                            maxLength={150}
+                                            value={form.email}
+                                            onChange={(event) =>
+                                                updateField(
+                                                    "email",
+                                                    event.target.value,
+                                                )
+                                            }
+                                            placeholder="contact@example.com"
+                                            className="w-full rounded-xl border border-(--border) px-4 py-2.5 text-sm outline-none transition-all focus:border-(--primary-clr) focus:ring-2 focus:ring-(--primary-clr)/20"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label
+                                            htmlFor="website"
+                                            className="mb-1.5 block text-sm font-medium"
+                                        >
+                                            {t("form_website")}
+                                        </label>
+                                        <input
+                                            id="website"
+                                            type="text"
+                                            maxLength={255}
+                                            value={form.website}
+                                            onChange={(event) =>
+                                                updateField(
+                                                    "website",
+                                                    event.target.value,
+                                                )
+                                            }
+                                            placeholder="https://example.com"
+                                            className="w-full rounded-xl border border-(--border) px-4 py-2.5 text-sm outline-none transition-all focus:border-(--primary-clr) focus:ring-2 focus:ring-(--primary-clr)/20"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="border-t border-(--border) pt-6">
+                                    <h2 className="text-lg font-semibold">
+                                        {t("location")}
+                                    </h2>
+
                                     <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                                        <div>
+                                        <div className="sm:col-span-2">
                                             <label
-                                                htmlFor="number_of_rooms"
+                                                htmlFor="address"
                                                 className="mb-1.5 block text-sm font-medium"
                                             >
-                                                {t("form_number_of_rooms")}
+                                                {t("form_address")}
                                             </label>
                                             <input
-                                                id="number_of_rooms"
-                                                type="number"
-                                                min={0}
-                                                step="1"
-                                                inputMode="numeric"
-                                                value={form.number_of_rooms}
+                                                id="address"
+                                                type="text"
+                                                value={form.address}
                                                 onChange={(event) =>
                                                     updateField(
-                                                        "number_of_rooms",
+                                                        "address",
                                                         event.target.value,
                                                     )
                                                 }
-                                                placeholder="42"
+                                                placeholder={t(
+                                                    "form_address_placeholder",
+                                                )}
                                                 className="w-full rounded-xl border border-(--border) px-4 py-2.5 text-sm outline-none transition-all focus:border-(--primary-clr) focus:ring-2 focus:ring-(--primary-clr)/20"
                                             />
                                         </div>
 
                                         <div>
                                             <label
-                                                htmlFor="star_rating"
+                                                htmlFor="wilaya"
                                                 className="mb-1.5 block text-sm font-medium"
                                             >
-                                                {t("form_star_rating")}
-                                            </label>
-                                            <select
-                                                id="star_rating"
-                                                value={form.star_rating}
-                                                onChange={(event) =>
-                                                    updateField(
-                                                        "star_rating",
-                                                        event.target.value,
-                                                    )
-                                                }
-                                                className="w-full rounded-xl border border-(--border) bg-(--background) px-4 py-2.5 text-sm outline-none transition-all focus:border-(--primary-clr) focus:ring-2 focus:ring-(--primary-clr)/20"
-                                            >
-                                                <option value="">
-                                                    {t(
-                                                        "form_star_rating_none",
-                                                    )}
-                                                </option>
-                                                {[1, 2, 3, 4, 5].map(
-                                                    (stars) => (
-                                                        <option
-                                                            key={stars}
-                                                            value={stars}
-                                                        >
-                                                            {"★".repeat(stars)}
-                                                        </option>
-                                                    ),
-                                                )}
-                                            </select>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {form.type === "restaurant" && (
-                                    <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                                        <div>
-                                            <label
-                                                htmlFor="cuisine_type"
-                                                className="mb-1.5 block text-sm font-medium"
-                                            >
-                                                {t("form_cuisine_type")}
+                                                {t("form_wilaya")}
                                             </label>
                                             <input
-                                                id="cuisine_type"
+                                                id="wilaya"
                                                 type="text"
                                                 maxLength={100}
-                                                value={form.cuisine_type}
+                                                value={form.wilaya}
                                                 onChange={(event) =>
                                                     updateField(
-                                                        "cuisine_type",
+                                                        "wilaya",
                                                         event.target.value,
                                                     )
                                                 }
-                                                placeholder={t(
-                                                    "form_cuisine_type_placeholder",
-                                                )}
                                                 className="w-full rounded-xl border border-(--border) px-4 py-2.5 text-sm outline-none transition-all focus:border-(--primary-clr) focus:ring-2 focus:ring-(--primary-clr)/20"
                                             />
                                         </div>
 
                                         <div>
                                             <label
-                                                htmlFor="seating_capacity"
+                                                htmlFor="commune"
                                                 className="mb-1.5 block text-sm font-medium"
                                             >
-                                                {t("form_seating_capacity")}
+                                                {t("form_commune")}
                                             </label>
                                             <input
-                                                id="seating_capacity"
-                                                type="number"
-                                                min={0}
-                                                step="1"
-                                                inputMode="numeric"
-                                                value={form.seating_capacity}
-                                                onChange={(event) =>
-                                                    updateField(
-                                                        "seating_capacity",
-                                                        event.target.value,
-                                                    )
-                                                }
-                                                placeholder="80"
-                                                className="w-full rounded-xl border border-(--border) px-4 py-2.5 text-sm outline-none transition-all focus:border-(--primary-clr) focus:ring-2 focus:ring-(--primary-clr)/20"
-                                            />
-                                        </div>
-                                    </div>
-                                )}
-
-                                <div className="mt-4">
-                                    <label
-                                        htmlFor="amenities"
-                                        className="mb-1.5 block text-sm font-medium"
-                                    >
-                                        {t("form_amenities")}
-                                    </label>
-                                    <ChipInput
-                                        id="amenities"
-                                        value={form.amenities}
-                                        onChange={(value) =>
-                                            updateField("amenities", value)
-                                        }
-                                        placeholder={t(
-                                            "form_amenities_placeholder",
-                                        )}
-                                        suggestions={AMENITY_SUGGESTIONS}
-                                    />
-                                </div>
-
-                                <div className="mt-4">
-                                    <label
-                                        htmlFor="services"
-                                        className="mb-1.5 block text-sm font-medium"
-                                    >
-                                        {t("form_services")}
-                                    </label>
-                                    <ChipInput
-                                        id="services"
-                                        value={form.services}
-                                        onChange={(value) =>
-                                            updateField("services", value)
-                                        }
-                                        placeholder={t(
-                                            "form_services_placeholder",
-                                        )}
-                                        suggestions={SERVICE_SUGGESTIONS}
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="flex justify-end border-t border-(--border) pt-6">
-                                <button
-                                    onClick={handleSave}
-                                    disabled={saving}
-                                    className="inline-flex items-center gap-2 rounded-lg bg-(--primary-clr) px-6 py-3 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
-                                >
-                                    {saving ? (
-                                        <Loader2
-                                            size={16}
-                                            className="animate-spin"
-                                        />
-                                    ) : (
-                                        <Save size={16} />
-                                    )}
-                                    {saving ? t("saving") : t("save_changes")}
-                                </button>
-                            </div>
-                        </section>
-                    )}
-
-                    {tab === "photos" && (
-                        <section>
-                            <h2 className="mb-4 text-lg font-semibold">
-                                {t("tab_photos")}
-                            </h2>
-
-                            <MediaManager
-                                modelType="business"
-                                modelId={business.id}
-                                media={business.media ?? []}
-                                maxImages={5}
-                                onChange={(media) =>
-                                    setBusiness((prev) =>
-                                        prev ? { ...prev, media } : prev,
-                                    )
-                                }
-                            />
-                        </section>
-                    )}
-
-                    {tab === "listings" && (
-                        <section>
-                            <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-                                <div>
-                                    <h2 className="text-lg font-semibold">
-                                        {t("tab_listings")}
-                                    </h2>
-                                    <p className="mt-1 text-sm text-(--light-fg)">
-                                        {t("listings_hint")}
-                                    </p>
-                                </div>
-
-                                <button
-                                    onClick={() => setShowListingForm(true)}
-                                    className="inline-flex items-center gap-2 rounded-lg bg-(--primary-clr) px-4 py-2.5 text-sm font-medium text-white transition hover:brightness-110"
-                                >
-                                    <Plus size={16} />
-                                    {t("listing_new")}
-                                </button>
-                            </div>
-
-                            {showListingForm && (
-                                <div className="mb-6 rounded-xl border border-(--border) bg-(--background) p-5 shadow-sm">
-                                    <div className="mb-4 flex items-center justify-between">
-                                        <h3 className="font-semibold">
-                                            {t("listing_new")}
-                                        </h3>
-                                        <button
-                                            onClick={closeListingForm}
-                                            aria-label={t("close")}
-                                            className="text-(--light-fg) transition hover:text-(--foreground)"
-                                        >
-                                            ×
-                                        </button>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                                        <div className="sm:col-span-2">
-                                            <label
-                                                htmlFor="listing_title"
-                                                className="mb-1.5 block text-sm font-medium"
-                                            >
-                                                {t("listing_title")}
-                                            </label>
-                                            <input
-                                                id="listing_title"
+                                                id="commune"
                                                 type="text"
-                                                maxLength={200}
-                                                value={listingForm.title}
-                                                onChange={(event) => {
-                                                    setListingForm(
-                                                        (prev) => ({
-                                                            ...prev,
-                                                            title: event.target
-                                                                .value,
-                                                        }),
-                                                    );
-                                                    setError(null);
-                                                }}
-                                                className="w-full rounded-xl border border-(--border) px-4 py-2.5 text-sm outline-none transition-all focus:border-(--primary-clr) focus:ring-2 focus:ring-(--primary-clr)/20"
-                                            />
-                                        </div>
-
-                                        <div className="sm:col-span-2">
-                                            <label
-                                                htmlFor="listing_description"
-                                                className="mb-1.5 block text-sm font-medium"
-                                            >
-                                                {t("listing_description")}
-                                            </label>
-                                            <textarea
-                                                id="listing_description"
-                                                rows={3}
-                                                value={listingForm.description}
+                                                maxLength={100}
+                                                value={form.commune}
                                                 onChange={(event) =>
-                                                    setListingForm((prev) => ({
-                                                        ...prev,
-                                                        description:
-                                                            event.target.value,
-                                                    }))
-                                                }
-                                                className="w-full resize-y rounded-xl border border-(--border) px-4 py-2.5 text-sm outline-none transition-all focus:border-(--primary-clr) focus:ring-2 focus:ring-(--primary-clr)/20"
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <label
-                                                htmlFor="listing_price"
-                                                className="mb-1.5 block text-sm font-medium"
-                                            >
-                                                {t("listing_price")}
-                                            </label>
-                                            <input
-                                                id="listing_price"
-                                                type="number"
-                                                min={0}
-                                                step="0.01"
-                                                inputMode="decimal"
-                                                value={listingForm.price}
-                                                onChange={(event) =>
-                                                    setListingForm((prev) => ({
-                                                        ...prev,
-                                                        price: event.target
-                                                            .value,
-                                                    }))
-                                                }
-                                                className="w-full rounded-xl border border-(--border) px-4 py-2.5 text-sm outline-none transition-all focus:border-(--primary-clr) focus:ring-2 focus:ring-(--primary-clr)/20"
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <label
-                                                htmlFor="listing_currency"
-                                                className="mb-1.5 block text-sm font-medium"
-                                            >
-                                                {t("listing_currency")}
-                                            </label>
-                                            <select
-                                                id="listing_currency"
-                                                value={listingForm.currency}
-                                                onChange={(event) =>
-                                                    setListingForm((prev) => ({
-                                                        ...prev,
-                                                        currency:
-                                                            event.target.value,
-                                                    }))
-                                                }
-                                                className="w-full rounded-xl border border-(--border) bg-(--background) px-4 py-2.5 text-sm outline-none transition-all focus:border-(--primary-clr) focus:ring-2 focus:ring-(--primary-clr)/20"
-                                            >
-                                                {["DZD", "EUR", "USD", "GBP"].map(
-                                                    (code) => (
-                                                        <option
-                                                            key={code}
-                                                            value={code}
-                                                        >
-                                                            {code}
-                                                        </option>
-                                                    ),
-                                                )}
-                                            </select>
-                                        </div>
-
-                                        <div>
-                                            <label
-                                                htmlFor="listing_capacity"
-                                                className="mb-1.5 block text-sm font-medium"
-                                            >
-                                                {t("listing_capacity")}
-                                            </label>
-                                            <input
-                                                id="listing_capacity"
-                                                type="number"
-                                                min={1}
-                                                step="1"
-                                                inputMode="numeric"
-                                                value={listingForm.capacity}
-                                                onChange={(event) =>
-                                                    setListingForm((prev) => ({
-                                                        ...prev,
-                                                        capacity:
-                                                            event.target.value,
-                                                    }))
-                                                }
-                                                className="w-full rounded-xl border border-(--border) px-4 py-2.5 text-sm outline-none transition-all focus:border-(--primary-clr) focus:ring-2 focus:ring-(--primary-clr)/20"
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <label
-                                                htmlFor="listing_status"
-                                                className="mb-1.5 block text-sm font-medium"
-                                            >
-                                                {t("listing_status")}
-                                            </label>
-                                            <select
-                                                id="listing_status"
-                                                value={listingForm.status}
-                                                onChange={(event) =>
-                                                    setListingForm((prev) => ({
-                                                        ...prev,
-                                                        status: event.target
-                                                            .value as Listing[
-                                                            "status"
-                                                        ],
-                                                    }))
-                                                }
-                                                className="w-full rounded-xl border border-(--border) bg-(--background) px-4 py-2.5 text-sm outline-none transition-all focus:border-(--primary-clr) focus:ring-2 focus:ring-(--primary-clr)/20"
-                                            >
-                                                {STATUSES.map((status) => (
-                                                    <option
-                                                        key={status}
-                                                        value={status}
-                                                    >
-                                                        {t(
-                                                            `listing_status_${status}`,
-                                                        )}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        </div>
-
-                                        <div className="sm:col-span-2">
-                                            <label
-                                                htmlFor="listing_amenities"
-                                                className="mb-1.5 block text-sm font-medium"
-                                            >
-                                                {t("form_amenities")}
-                                            </label>
-                                            <ChipInput
-                                                id="listing_amenities"
-                                                value={listingForm.amenities}
-                                                onChange={(value) =>
-                                                    setListingForm((prev) => ({
-                                                        ...prev,
-                                                        amenities: value,
-                                                    }))
+                                                    updateField(
+                                                        "commune",
+                                                        event.target.value,
+                                                    )
                                                 }
                                                 placeholder={t(
-                                                    "form_amenities_placeholder",
+                                                    "form_commune_placeholder",
                                                 )}
-                                                suggestions={
-                                                    AMENITY_SUGGESTIONS
+                                                className="w-full rounded-xl border border-(--border) px-4 py-2.5 text-sm outline-none transition-all focus:border-(--primary-clr) focus:ring-2 focus:ring-(--primary-clr)/20"
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label
+                                                htmlFor="latitude"
+                                                className="mb-1.5 block text-sm font-medium"
+                                            >
+                                                {t("form_latitude")}
+                                            </label>
+                                            <input
+                                                id="latitude"
+                                                type="text"
+                                                inputMode="decimal"
+                                                value={form.latitude}
+                                                onChange={(event) =>
+                                                    updateField(
+                                                        "latitude",
+                                                        event.target.value,
+                                                    )
                                                 }
+                                                placeholder="36.820"
+                                                className="w-full rounded-xl border border-(--border) px-4 py-2.5 text-sm outline-none transition-all focus:border-(--primary-clr) focus:ring-2 focus:ring-(--primary-clr)/20"
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label
+                                                htmlFor="longitude"
+                                                className="mb-1.5 block text-sm font-medium"
+                                            >
+                                                {t("form_longitude")}
+                                            </label>
+                                            <input
+                                                id="longitude"
+                                                type="text"
+                                                inputMode="decimal"
+                                                value={form.longitude}
+                                                onChange={(event) =>
+                                                    updateField(
+                                                        "longitude",
+                                                        event.target.value,
+                                                    )
+                                                }
+                                                placeholder="5.766"
+                                                className="w-full rounded-xl border border-(--border) px-4 py-2.5 text-sm outline-none transition-all focus:border-(--primary-clr) focus:ring-2 focus:ring-(--primary-clr)/20"
                                             />
                                         </div>
                                     </div>
 
                                     <div className="mt-4">
-                                        <p className="mb-2 text-sm font-medium">
-                                            {t("photos_add")}
-                                        </p>
-
-                                        <div className="flex flex-wrap gap-3">
-                                            {listingPreviews.map(
-                                                (preview, index) => (
-                                                    <div
-                                                        key={preview}
-                                                        className="relative h-24 w-32 overflow-hidden rounded-lg border border-(--border)"
-                                                    >
-                                                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                                                        <img
-                                                            src={preview}
-                                                            alt=""
-                                                            className="h-full w-full object-cover"
-                                                        />
-                                                        <button
-                                                            onClick={() =>
-                                                                removeListingFile(
-                                                                    index,
-                                                                )
-                                                            }
-                                                            aria-label={t(
-                                                                "photos_remove",
-                                                            )}
-                                                            className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white transition hover:bg-black/80"
-                                                        >
-                                                            ×
-                                                        </button>
-                                                    </div>
-                                                ),
-                                            )}
-
-                                            {listingPreviews.length < 5 && (
-                                                <button
-                                                    onClick={() =>
-                                                        listingFileRef.current?.click()
-                                                    }
-                                                    className="flex h-24 w-32 flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-(--border) text-xs text-(--light-fg) transition hover:border-(--primary-clr) hover:text-(--primary-clr)"
-                                                >
-                                                    <Plus size={18} />
-                                                    {t("photos_add")}
-                                                </button>
-                                            )}
-                                        </div>
-
-                                        <input
-                                            ref={listingFileRef}
-                                            type="file"
-                                            accept="image/*"
-                                            multiple
-                                            className="hidden"
-                                            onChange={(event) => {
-                                                if (event.target.files) {
-                                                    addListingFiles(
-                                                        event.target.files,
-                                                    );
-                                                }
-                                                event.target.value = "";
+                                        <LocationMapPicker
+                                            latitude={form.latitude}
+                                            longitude={form.longitude}
+                                            hint={t("location_map_hint")}
+                                            onSelect={(lat, lng) => {
+                                                updateField("latitude", String(lat));
+                                                updateField(
+                                                    "longitude",
+                                                    String(lng),
+                                                );
                                             }}
                                         />
                                     </div>
+                                </div>
 
-                                    <div className="mt-5 flex justify-end gap-3">
-                                        <button
-                                            onClick={closeListingForm}
-                                            disabled={creatingListing}
-                                            className="rounded-lg border border-(--border) px-5 py-2.5 text-sm font-medium transition hover:bg-(--dim-bg)"
-                                        >
-                                            {t("cancel")}
-                                        </button>
-                                        <button
-                                            onClick={() => void createListing()}
-                                            disabled={creatingListing}
-                                            className="inline-flex items-center gap-2 rounded-lg bg-(--primary-clr) px-5 py-2.5 text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-60"
-                                        >
-                                            {creatingListing && (
-                                                <Loader2
-                                                    size={15}
-                                                    className="animate-spin"
+                                <div className="border-t border-(--border) pt-6">
+                                    <h2 className="text-lg font-semibold">
+                                        {t("details")}
+                                    </h2>
+
+                                    <p className="mt-1 text-sm text-(--light-fg)">
+                                        {t("form_details_hint")}
+                                    </p>
+
+                                    <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                        <div>
+                                            <label
+                                                htmlFor="average_price"
+                                                className="mb-1.5 block text-sm font-medium"
+                                            >
+                                                {t("form_average_price")}
+                                            </label>
+                                            <input
+                                                id="average_price"
+                                                type="number"
+                                                min={0}
+                                                step="0.01"
+                                                inputMode="decimal"
+                                                value={form.average_price}
+                                                onChange={(event) =>
+                                                    updateField(
+                                                        "average_price",
+                                                        event.target.value,
+                                                    )
+                                                }
+                                                placeholder={t(
+                                                    "form_average_price_placeholder",
+                                                )}
+                                                className="w-full rounded-xl border border-(--border) px-4 py-2.5 text-sm outline-none transition-all focus:border-(--primary-clr) focus:ring-2 focus:ring-(--primary-clr)/20"
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label
+                                                htmlFor="price_unit"
+                                                className="mb-1.5 block text-sm font-medium"
+                                            >
+                                                {t("form_price_unit")}
+                                            </label>
+                                            <select
+                                                id="price_unit"
+                                                value={form.price_unit}
+                                                onChange={(event) =>
+                                                    updateField(
+                                                        "price_unit",
+                                                        event.target
+                                                            .value as PriceUnit,
+                                                    )
+                                                }
+                                                className="w-full rounded-xl border border-(--border) bg-(--background) px-4 py-2.5 text-sm outline-none transition-all focus:border-(--primary-clr) focus:ring-2 focus:ring-(--primary-clr)/20"
+                                            >
+                                                <option value="">
+                                                    {t("form_price_unit_none")}
+                                                </option>
+                                                {PRICE_UNITS.map((unit) => (
+                                                    <option
+                                                        key={unit}
+                                                        value={unit}
+                                                    >
+                                                        {t(`price_unit_${unit}`)}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    {form.type === "hotel" && (
+                                        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                            <div>
+                                                <label
+                                                    htmlFor="number_of_rooms"
+                                                    className="mb-1.5 block text-sm font-medium"
+                                                >
+                                                    {t("form_number_of_rooms")}
+                                                </label>
+                                                <input
+                                                    id="number_of_rooms"
+                                                    type="number"
+                                                    min={0}
+                                                    step="1"
+                                                    inputMode="numeric"
+                                                    value={form.number_of_rooms}
+                                                    onChange={(event) =>
+                                                        updateField(
+                                                            "number_of_rooms",
+                                                            event.target.value,
+                                                        )
+                                                    }
+                                                    placeholder="42"
+                                                    className="w-full rounded-xl border border-(--border) px-4 py-2.5 text-sm outline-none transition-all focus:border-(--primary-clr) focus:ring-2 focus:ring-(--primary-clr)/20"
                                                 />
+                                            </div>
+
+                                            <div>
+                                                <label
+                                                    htmlFor="star_rating"
+                                                    className="mb-1.5 block text-sm font-medium"
+                                                >
+                                                    {t("form_star_rating")}
+                                                </label>
+                                                <select
+                                                    id="star_rating"
+                                                    value={form.star_rating}
+                                                    onChange={(event) =>
+                                                        updateField(
+                                                            "star_rating",
+                                                            event.target.value,
+                                                        )
+                                                    }
+                                                    className="w-full rounded-xl border border-(--border) bg-(--background) px-4 py-2.5 text-sm outline-none transition-all focus:border-(--primary-clr) focus:ring-2 focus:ring-(--primary-clr)/20"
+                                                >
+                                                    <option value="">
+                                                        {t(
+                                                            "form_star_rating_none",
+                                                        )}
+                                                    </option>
+                                                    {[1, 2, 3, 4, 5].map(
+                                                        (stars) => (
+                                                            <option
+                                                                key={stars}
+                                                                value={stars}
+                                                            >
+                                                                {"★".repeat(stars)}
+                                                            </option>
+                                                        ),
+                                                    )}
+                                                </select>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {form.type === "restaurant" && (
+                                        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                            <div>
+                                                <label
+                                                    htmlFor="cuisine_type"
+                                                    className="mb-1.5 block text-sm font-medium"
+                                                >
+                                                    {t("form_cuisine_type")}
+                                                </label>
+                                                <input
+                                                    id="cuisine_type"
+                                                    type="text"
+                                                    maxLength={100}
+                                                    value={form.cuisine_type}
+                                                    onChange={(event) =>
+                                                        updateField(
+                                                            "cuisine_type",
+                                                            event.target.value,
+                                                        )
+                                                    }
+                                                    placeholder={t(
+                                                        "form_cuisine_type_placeholder",
+                                                    )}
+                                                    className="w-full rounded-xl border border-(--border) px-4 py-2.5 text-sm outline-none transition-all focus:border-(--primary-clr) focus:ring-2 focus:ring-(--primary-clr)/20"
+                                                />
+                                            </div>
+
+                                            <div>
+                                                <label
+                                                    htmlFor="seating_capacity"
+                                                    className="mb-1.5 block text-sm font-medium"
+                                                >
+                                                    {t("form_seating_capacity")}
+                                                </label>
+                                                <input
+                                                    id="seating_capacity"
+                                                    type="number"
+                                                    min={0}
+                                                    step="1"
+                                                    inputMode="numeric"
+                                                    value={form.seating_capacity}
+                                                    onChange={(event) =>
+                                                        updateField(
+                                                            "seating_capacity",
+                                                            event.target.value,
+                                                        )
+                                                    }
+                                                    placeholder="80"
+                                                    className="w-full rounded-xl border border-(--border) px-4 py-2.5 text-sm outline-none transition-all focus:border-(--primary-clr) focus:ring-2 focus:ring-(--primary-clr)/20"
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <div className="mt-4">
+                                        <label
+                                            htmlFor="amenities"
+                                            className="mb-1.5 block text-sm font-medium"
+                                        >
+                                            {t("form_amenities")}
+                                        </label>
+                                        <ChipInput
+                                            id="amenities"
+                                            value={form.amenities}
+                                            onChange={(value) =>
+                                                updateField("amenities", value)
+                                            }
+                                            placeholder={t(
+                                                "form_amenities_placeholder",
                                             )}
-                                            {t("listing_create")}
-                                        </button>
+                                            suggestions={AMENITY_SUGGESTIONS}
+                                        />
+                                    </div>
+
+                                    <div className="mt-4">
+                                        <label
+                                            htmlFor="services"
+                                            className="mb-1.5 block text-sm font-medium"
+                                        >
+                                            {t("form_services")}
+                                        </label>
+                                        <ChipInput
+                                            id="services"
+                                            value={form.services}
+                                            onChange={(value) =>
+                                                updateField("services", value)
+                                            }
+                                            placeholder={t(
+                                                "form_services_placeholder",
+                                            )}
+                                            suggestions={SERVICE_SUGGESTIONS}
+                                        />
                                     </div>
                                 </div>
-                            )}
 
-                            {listings.length === 0 ? (
-                                <div className="flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-(--border) py-14 text-center">
-                                    <LayoutList
-                                        size={38}
-                                        className="text-(--light-fg)"
-                                    />
-                                    <p className="text-sm text-(--light-fg)">
-                                        {t("listings_empty")}
-                                    </p>
+                                <div className="flex justify-end border-t border-(--border) pt-6">
+                                    <button
+                                        onClick={handleSave}
+                                        disabled={saving}
+                                        className="inline-flex items-center gap-2 rounded-lg bg-(--primary-clr) px-6 py-3 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+                                    >
+                                        {saving ? (
+                                            <Loader2
+                                                size={16}
+                                                className="animate-spin"
+                                            />
+                                        ) : (
+                                            <Save size={16} />
+                                        )}
+                                        {saving ? t("saving") : t("save_changes")}
+                                    </button>
                                 </div>
-                            ) : (
-                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                                    {listings.map((listing) => (
-                                        <button
-                                            key={listing.id}
-                                            onClick={() =>
-                                                router.push(
-                                                    `/${locale}/dashboard/businesses/${id}/listings/${listing.id}`,
-                                                )
-                                            }
-                                            className="flex gap-4 rounded-xl border border-(--border) p-4 text-start transition hover:-translate-y-0.5 hover:shadow-md"
-                                        >
-                                            <div className="h-24 w-28 shrink-0 overflow-hidden rounded-lg bg-(--dim-bg)">
-                                                {listing.media?.[0] && (
-                                                    /* eslint-disable-next-line @next/next/no-img-element */
-                                                    <img
-                                                        src={
-                                                            listing.media[0]
-                                                                .secure_url
-                                                        }
-                                                        alt=""
-                                                        className="h-full w-full object-cover"
-                                                    />
-                                                )}
-                                            </div>
+                            </motion.section>
+                        )}
 
-                                            <div className="min-w-0 flex-1">
-                                                <div className="flex items-start justify-between gap-2">
-                                                    <h3 className="truncate font-semibold">
-                                                        {listing.title}
+                        {tab === "photos" && (
+                            <motion.section
+                                key="photos"
+                                initial={TAB_PANEL.initial}
+                                animate={TAB_PANEL.animate}
+                                exit={TAB_PANEL.exit}
+                                transition={TAB_PANEL.transition}
+                            >
+                                <h2 className="mb-4 text-lg font-semibold">
+                                    {t("tab_photos")}
+                                </h2>
+
+                                <MediaManager
+                                    modelType="business"
+                                    modelId={business.id}
+                                    media={business.media ?? []}
+                                    maxImages={5}
+                                    onChange={(media) =>
+                                        setBusiness((prev) =>
+                                            prev ? { ...prev, media } : prev,
+                                        )
+                                    }
+                                />
+                            </motion.section>
+                        )}
+
+                        {tab === "listings" && (
+                            <motion.section
+                                key="listings"
+                                initial={TAB_PANEL.initial}
+                                animate={TAB_PANEL.animate}
+                                exit={TAB_PANEL.exit}
+                                transition={TAB_PANEL.transition}
+                            >
+                                <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+                                    <div>
+                                        <h2 className="text-lg font-semibold">
+                                            {t("tab_listings")}
+                                        </h2>
+                                        <p className="mt-1 text-sm text-(--light-fg)">
+                                            {t("listings_hint")}
+                                        </p>
+                                    </div>
+
+                                    <motion.button
+                                        onClick={() => setShowListingForm(true)}
+                                        whileTap={{ scale: 0.96 }}
+                                        className="inline-flex items-center gap-2 rounded-lg bg-(--primary-clr) px-4 py-2.5 text-sm font-medium text-white transition hover:brightness-110"
+                                    >
+                                        <Plus size={16} />
+                                        {t("listing_new")}
+                                    </motion.button>
+                                </div>
+
+                                <AnimatePresence initial={false}>
+                                    {showListingForm && (
+                                        <motion.div
+                                            key="listing-form"
+                                            className="mb-6 overflow-hidden"
+                                            initial={COLLAPSE_PANEL.initial}
+                                            animate={COLLAPSE_PANEL.animate}
+                                            exit={COLLAPSE_PANEL.exit}
+                                            transition={COLLAPSE_PANEL.transition}
+                                        >
+                                            <div className="rounded-xl border border-(--border) bg-(--background) p-5 shadow-sm">
+                                                <div className="mb-4 flex items-center justify-between">
+                                                    <h3 className="font-semibold">
+                                                        {t("listing_new")}
                                                     </h3>
-                                                    <span
-                                                        className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium ${
-                                                            listing.status ===
-                                                            "published"
-                                                                ? "bg-green-100 text-green-700"
-                                                                : "bg-gray-100 text-gray-500"
-                                                        }`}
+                                                    <button
+                                                        onClick={closeListingForm}
+                                                        aria-label={t("close")}
+                                                        className="text-(--light-fg) transition hover:text-(--foreground)"
                                                     >
-                                                        {t(
-                                                            `listing_status_${listing.status}`,
-                                                        )}
-                                                    </span>
+                                                        ×
+                                                    </button>
                                                 </div>
 
-                                                <p className="mt-1 text-sm font-medium text-(--primary-clr)">
-                                                    {listing.price
-                                                        ? `${listing.price} ${listing.currency}`
-                                                        : t("listing_no_price")}
-                                                </p>
+                                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                                    <div className="sm:col-span-2">
+                                                        <label
+                                                            htmlFor="listing_title"
+                                                            className="mb-1.5 block text-sm font-medium"
+                                                        >
+                                                            {t("listing_title")}
+                                                        </label>
+                                                        <input
+                                                            id="listing_title"
+                                                            type="text"
+                                                            maxLength={200}
+                                                            value={listingForm.title}
+                                                            onChange={(event) => {
+                                                                setListingForm(
+                                                                    (prev) => ({
+                                                                        ...prev,
+                                                                        title: event.target
+                                                                            .value,
+                                                                    }),
+                                                                );
+                                                                setError(null);
+                                                            }}
+                                                            className="w-full rounded-xl border border-(--border) px-4 py-2.5 text-sm outline-none transition-all focus:border-(--primary-clr) focus:ring-2 focus:ring-(--primary-clr)/20"
+                                                        />
+                                                    </div>
 
-                                                <p className="mt-1 line-clamp-2 text-xs text-(--light-fg)">
-                                                    {listing.description ??
-                                                        t(
-                                                            "listing_no_description",
+                                                    <div className="sm:col-span-2">
+                                                        <label
+                                                            htmlFor="listing_description"
+                                                            className="mb-1.5 block text-sm font-medium"
+                                                        >
+                                                            {t("listing_description")}
+                                                        </label>
+                                                        <textarea
+                                                            id="listing_description"
+                                                            rows={3}
+                                                            value={listingForm.description}
+                                                            onChange={(event) =>
+                                                                setListingForm((prev) => ({
+                                                                    ...prev,
+                                                                    description:
+                                                                        event.target.value,
+                                                                }))
+                                                            }
+                                                            className="w-full resize-y rounded-xl border border-(--border) px-4 py-2.5 text-sm outline-none transition-all focus:border-(--primary-clr) focus:ring-2 focus:ring-(--primary-clr)/20"
+                                                        />
+                                                    </div>
+
+                                                    <div>
+                                                        <label
+                                                            htmlFor="listing_price"
+                                                            className="mb-1.5 block text-sm font-medium"
+                                                        >
+                                                            {t("listing_price")}
+                                                        </label>
+                                                        <input
+                                                            id="listing_price"
+                                                            type="number"
+                                                            min={0}
+                                                            step="0.01"
+                                                            inputMode="decimal"
+                                                            value={listingForm.price}
+                                                            onChange={(event) =>
+                                                                setListingForm((prev) => ({
+                                                                    ...prev,
+                                                                    price: event.target
+                                                                        .value,
+                                                                }))
+                                                            }
+                                                            className="w-full rounded-xl border border-(--border) px-4 py-2.5 text-sm outline-none transition-all focus:border-(--primary-clr) focus:ring-2 focus:ring-(--primary-clr)/20"
+                                                        />
+                                                    </div>
+
+                                                    <div>
+                                                        <label
+                                                            htmlFor="listing_currency"
+                                                            className="mb-1.5 block text-sm font-medium"
+                                                        >
+                                                            {t("listing_currency")}
+                                                        </label>
+                                                        <select
+                                                            id="listing_currency"
+                                                            value={listingForm.currency}
+                                                            onChange={(event) =>
+                                                                setListingForm((prev) => ({
+                                                                    ...prev,
+                                                                    currency:
+                                                                        event.target.value,
+                                                                }))
+                                                            }
+                                                            className="w-full rounded-xl border border-(--border) bg-(--background) px-4 py-2.5 text-sm outline-none transition-all focus:border-(--primary-clr) focus:ring-2 focus:ring-(--primary-clr)/20"
+                                                        >
+                                                            {["DZD", "EUR", "USD", "GBP"].map(
+                                                                (code) => (
+                                                                    <option
+                                                                        key={code}
+                                                                        value={code}
+                                                                    >
+                                                                        {code}
+                                                                    </option>
+                                                                ),
+                                                            )}
+                                                        </select>
+                                                    </div>
+
+                                                    <div>
+                                                        <label
+                                                            htmlFor="listing_capacity"
+                                                            className="mb-1.5 block text-sm font-medium"
+                                                        >
+                                                            {t("listing_capacity")}
+                                                        </label>
+                                                        <input
+                                                            id="listing_capacity"
+                                                            type="number"
+                                                            min={1}
+                                                            step="1"
+                                                            inputMode="numeric"
+                                                            value={listingForm.capacity}
+                                                            onChange={(event) =>
+                                                                setListingForm((prev) => ({
+                                                                    ...prev,
+                                                                    capacity:
+                                                                        event.target.value,
+                                                                }))
+                                                            }
+                                                            className="w-full rounded-xl border border-(--border) px-4 py-2.5 text-sm outline-none transition-all focus:border-(--primary-clr) focus:ring-2 focus:ring-(--primary-clr)/20"
+                                                        />
+                                                    </div>
+
+                                                    <div>
+                                                        <label
+                                                            htmlFor="listing_status"
+                                                            className="mb-1.5 block text-sm font-medium"
+                                                        >
+                                                            {t("listing_status")}
+                                                        </label>
+                                                        <select
+                                                            id="listing_status"
+                                                            value={listingForm.status}
+                                                            onChange={(event) =>
+                                                                setListingForm((prev) => ({
+                                                                    ...prev,
+                                                                    status: event.target
+                                                                        .value as Listing[
+                                                                        "status"
+                                                                    ],
+                                                                }))
+                                                            }
+                                                            className="w-full rounded-xl border border-(--border) bg-(--background) px-4 py-2.5 text-sm outline-none transition-all focus:border-(--primary-clr) focus:ring-2 focus:ring-(--primary-clr)/20"
+                                                        >
+                                                            {STATUSES.map((status) => (
+                                                                <option
+                                                                    key={status}
+                                                                    value={status}
+                                                                >
+                                                                    {t(
+                                                                        `listing_status_${status}`,
+                                                                    )}
+                                                                </option>
+                                                            ))}
+                                                        </select>
+                                                    </div>
+
+                                                    <div className="sm:col-span-2">
+                                                        <label
+                                                            htmlFor="listing_amenities"
+                                                            className="mb-1.5 block text-sm font-medium"
+                                                        >
+                                                            {t("form_amenities")}
+                                                        </label>
+                                                        <ChipInput
+                                                            id="listing_amenities"
+                                                            value={listingForm.amenities}
+                                                            onChange={(value) =>
+                                                                setListingForm((prev) => ({
+                                                                    ...prev,
+                                                                    amenities: value,
+                                                                }))
+                                                            }
+                                                            placeholder={t(
+                                                                "form_amenities_placeholder",
+                                                            )}
+                                                            suggestions={
+                                                                AMENITY_SUGGESTIONS
+                                                            }
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <div className="mt-4">
+                                                    <p className="mb-2 text-sm font-medium">
+                                                        {t("photos_add")}
+                                                    </p>
+
+                                                    <div className="flex flex-wrap gap-3">
+                                                        {listingPreviews.map(
+                                                            (preview, index) => (
+                                                                <div
+                                                                    key={preview}
+                                                                    className="relative h-24 w-32 overflow-hidden rounded-lg border border-(--border)"
+                                                                >
+                                                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                                    <img
+                                                                        src={preview}
+                                                                        alt=""
+                                                                        className="h-full w-full object-cover"
+                                                                    />
+                                                                    <button
+                                                                        onClick={() =>
+                                                                            removeListingFile(
+                                                                                index,
+                                                                            )
+                                                                        }
+                                                                        aria-label={t(
+                                                                            "photos_remove",
+                                                                        )}
+                                                                        className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white transition hover:bg-black/80"
+                                                                    >
+                                                                        ×
+                                                                    </button>
+                                                                </div>
+                                                            ),
                                                         )}
-                                                </p>
+
+                                                        {listingPreviews.length < 5 && (
+                                                            <button
+                                                                onClick={() =>
+                                                                    listingFileRef.current?.click()
+                                                                }
+                                                                className="flex h-24 w-32 flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-(--border) text-xs text-(--light-fg) transition hover:border-(--primary-clr) hover:text-(--primary-clr)"
+                                                            >
+                                                                <Plus size={18} />
+                                                                {t("photos_add")}
+                                                            </button>
+                                                        )}
+                                                    </div>
+
+                                                    <input
+                                                        ref={listingFileRef}
+                                                        type="file"
+                                                        accept="image/*"
+                                                        multiple
+                                                        className="hidden"
+                                                        onChange={(event) => {
+                                                            if (event.target.files) {
+                                                                addListingFiles(
+                                                                    event.target.files,
+                                                                );
+                                                            }
+                                                            event.target.value = "";
+                                                        }}
+                                                    />
+                                                </div>
+
+                                                <div className="mt-5 flex justify-end gap-3">
+                                                    <button
+                                                        onClick={closeListingForm}
+                                                        disabled={creatingListing}
+                                                        className="rounded-lg border border-(--border) px-5 py-2.5 text-sm font-medium transition hover:bg-(--dim-bg)"
+                                                    >
+                                                        {t("cancel")}
+                                                    </button>
+                                                    <motion.button
+                                                        onClick={() => void createListing()}
+                                                        disabled={creatingListing}
+                                                        whileTap={{ scale: 0.96 }}
+                                                        className="inline-flex items-center gap-2 rounded-lg bg-(--primary-clr) px-5 py-2.5 text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-60"
+                                                    >
+                                                        {creatingListing && (
+                                                            <Loader2
+                                                                size={15}
+                                                                className="animate-spin"
+                                                            />
+                                                        )}
+                                                        {t("listing_create")}
+                                                    </motion.button>
+                                                    </div>
                                             </div>
-                                        </button>
-                                    ))}
-                                </div>
-                            )}
-                        </section>
-                    )}
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+
+                                {listings.length === 0 ? (
+                                    <div className="flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-(--border) py-14 text-center">
+                                        <LayoutList
+                                            size={38}
+                                            className="text-(--light-fg)"
+                                        />
+                                        <p className="text-sm text-(--light-fg)">
+                                            {t("listings_empty")}
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                        {listings.map((listing, index) => (
+                                            <motion.button
+                                                key={listing.id}
+                                                initial={{ opacity: 0, y: 12 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                transition={{
+                                                    duration: 0.25,
+                                                    delay: Math.min(index * 0.05, 0.3),
+                                                }}
+                                                layout
+                                                onClick={() =>
+                                                    router.push(
+                                                        `/${locale}/dashboard/businesses/${id}/listings/${listing.id}`,
+                                                    )
+                                                }
+                                                className="flex gap-4 rounded-xl border border-(--border) p-4 text-start transition hover:-translate-y-0.5 hover:shadow-md"
+                                            >
+                                                <div className="h-24 w-28 shrink-0 overflow-hidden rounded-lg bg-(--dim-bg)">
+                                                    {listing.media?.[0] && (
+                                                        /* eslint-disable-next-line @next/next/no-img-element */
+                                                        <img
+                                                            src={
+                                                                listing.media[0]
+                                                                    .secure_url
+                                                            }
+                                                            alt=""
+                                                            className="h-full w-full object-cover"
+                                                        />
+                                                    )}
+                                                </div>
+
+                                                <div className="min-w-0 flex-1">
+                                                    <div className="flex items-start justify-between gap-2">
+                                                        <h3 className="truncate font-semibold">
+                                                            {listing.title}
+                                                        </h3>
+                                                        <span
+                                                            className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium ${
+                                                                listing.status ===
+                                                                "published"
+                                                                    ? "bg-green-100 text-green-700"
+                                                                    : "bg-gray-100 text-gray-500"
+                                                            }`}
+                                                        >
+                                                            {t(
+                                                                `listing_status_${listing.status}`,
+                                                            )}
+                                                        </span>
+                                                    </div>
+
+                                                    <p className="mt-1 text-sm font-medium text-(--primary-clr)">
+                                                        {listing.price
+                                                            ? `${listing.price} ${listing.currency}`
+                                                            : t("listing_no_price")}
+                                                    </p>
+
+                                                    <p className="mt-1 line-clamp-2 text-xs text-(--light-fg)">
+                                                        {listing.description ??
+                                                            t(
+                                                                "listing_no_description",
+                                                            )}
+                                                    </p>
+                                                </div>
+                                            </motion.button>
+                                        ))}
+                                    </div>
+                                )}
+                            </motion.section>
+                        )}
+                    </AnimatePresence>
                 </>
             )}
 
