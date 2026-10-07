@@ -1,7 +1,7 @@
-import { Landmark, MountainSnow, Utensils, Volleyball } from 'lucide-react';
-import { useTranslations } from 'next-intl';
-import VibeCard from '../../VibeCard/VibeCard';
-import type { VibeId } from '@/types/quiz';
+import { Landmark, MountainSnow, Utensils, Volleyball } from "lucide-react";
+import { useTranslations } from "next-intl";
+import VibeCard from "../../VibeCard/VibeCard";
+import type { VibeId } from "@/types/quiz";
 
 interface VibeProps {
     value: VibeId[];
@@ -10,42 +10,46 @@ interface VibeProps {
 
 const Vibe = ({ value, onChange }: VibeProps) => {
     const t = useTranslations("quiz.vibe");
-    const VIBES: { id: VibeId; title: string; description: string; icon: React.ReactNode; imageUrl: string }[] = [
+    const VIBES: {
+        id: VibeId;
+        title: string;
+        description: string;
+        icon: React.ReactNode;
+        imageUrl: string;
+    }[] = [
         {
-            id: 'beach',
+            id: "beach",
             title: t("beach_title"),
             description: t("beach_desc"),
             icon: <Volleyball className="text-white" />,
-            imageUrl: '/p4.jpg',
+            imageUrl: "/p4.jpg",
         },
         {
-            id: 'mountain',
+            id: "mountain",
             title: t("mountain_title"),
             description: t("mountain_desc"),
             icon: <MountainSnow className="text-white" />,
-            imageUrl: '/p2.jpg',
+            imageUrl: "/mountain.jpg",
         },
         {
-            id: 'food',
+            id: "food",
             title: t("food_title"),
             description: t("food_desc"),
             icon: <Utensils className="text-white" />,
-            imageUrl: '/p6.heic',
+            imageUrl: "/food.jpg",
         },
         {
-            id: 'history',
+            id: "history",
             title: t("history_title"),
             description: t("history_desc"),
             icon: <Landmark className="text-white" />,
-            imageUrl: '/p4.jpg',
+            imageUrl: "/history.webp",
         },
     ];
 
     const toggle = (id: VibeId) => {
         onChange(
-            value.includes(id)
-                ? value.filter((v) => v !== id)
-                : [...value, id],
+            value.includes(id) ? value.filter((v) => v !== id) : [...value, id],
         );
     };
     return (
