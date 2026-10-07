@@ -242,7 +242,7 @@
     font-size: 0.8rem;
     font-weight: 600;
     color: var(--light-fg);
-
+    max-width: 100%;
     &:last-child {
         padding-block: 0.5rem;
         font-size: 0.9rem;
