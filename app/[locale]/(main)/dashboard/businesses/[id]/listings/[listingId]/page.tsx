@@ -247,14 +247,6 @@ export default function ListingDetailPage() {
                 <>
                     <header className="flex flex-wrap items-start justify-between gap-4">
                         <div>
-                            <button
-                                onClick={() => router.push(backHref)}
-                                className="mb-2 inline-flex items-center gap-1.5 text-sm text-(--light-fg) transition hover:text-(--primary-clr)"
-                            >
-                                <ArrowLeft size={15} />
-                                {t("back_to_business")}
-                            </button>
-
                             <div className="flex flex-wrap items-center gap-3">
                                 <h1 className="text-[1.8rem] font-bold">
                                     {listing.title}
@@ -446,7 +438,8 @@ export default function ListingDetailPage() {
                                     onChange={(event) =>
                                         updateField(
                                             "status",
-                                            event.target.value as Listing["status"],
+                                            event.target
+                                                .value as Listing["status"],
                                         )
                                     }
                                     className="w-full rounded-xl border border-(--border) bg-(--background) px-4 py-2.5 text-sm outline-none transition-all focus:border-(--primary-clr) focus:ring-2 focus:ring-(--primary-clr)/20 disabled:bg-(--dim-bg) disabled:text-(--light-fg)"
@@ -472,7 +465,9 @@ export default function ListingDetailPage() {
                                     onChange={(value) =>
                                         updateField("amenities", value)
                                     }
-                                    placeholder={t("form_amenities_placeholder")}
+                                    placeholder={t(
+                                        "form_amenities_placeholder",
+                                    )}
                                     suggestions={AMENITY_SUGGESTIONS}
                                 />
                                 {!editing && (

@@ -180,9 +180,7 @@ function formFromBusiness(business: Business): FormState {
         number_of_rooms: detail ? numberString(detail.number_of_rooms) : "",
         star_rating: detail ? numberString(detail.star_rating) : "",
         cuisine_type: firstString(detail?.cuisine_type),
-        seating_capacity: detail
-            ? numberString(detail.seating_capacity)
-            : "",
+        seating_capacity: detail ? numberString(detail.seating_capacity) : "",
         amenities: detail?.amenities ?? [],
         services: detail?.services ?? [],
     };
@@ -276,7 +274,10 @@ export default function BusinessManagementPage() {
         if (tab === "listings" && business) void loadListings();
     }, [tab, business, loadListings]);
 
-    const updateField = <K extends keyof FormState>(key: K, value: FormState[K]) => {
+    const updateField = <K extends keyof FormState>(
+        key: K,
+        value: FormState[K],
+    ) => {
         setForm((prev) => ({ ...prev, [key]: value }));
         setError(null);
         setSaved(false);
@@ -316,7 +317,9 @@ export default function BusinessManagementPage() {
         const sanitizeUrl = (url: string) => {
             const trimmed = url.trim();
             if (!trimmed) return null;
-            return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+            return /^https?:\/\//i.test(trimmed)
+                ? trimmed
+                : `https://${trimmed}`;
         };
 
         return {
@@ -349,7 +352,12 @@ export default function BusinessManagementPage() {
             flashSaved();
         } catch (err) {
             const response = err as {
-                response?: { data?: { errors?: Record<string, string[]>; message?: string } };
+                response?: {
+                    data?: {
+                        errors?: Record<string, string[]>;
+                        message?: string;
+                    };
+                };
             };
             const errors = response.response?.data?.errors;
             setError(
@@ -468,7 +476,12 @@ export default function BusinessManagementPage() {
             flashSaved();
         } catch (err) {
             const response = err as {
-                response?: { data?: { errors?: Record<string, string[]>; message?: string } };
+                response?: {
+                    data?: {
+                        errors?: Record<string, string[]>;
+                        message?: string;
+                    };
+                };
             };
             const errors = response.response?.data?.errors;
             setError(
@@ -525,16 +538,6 @@ export default function BusinessManagementPage() {
                 <>
                     <header className="flex flex-wrap items-start justify-between gap-4">
                         <div>
-                            <button
-                                onClick={() =>
-                                    router.push(`/${locale}/dashboard`)
-                                }
-                                className="mb-2 inline-flex items-center gap-1.5 text-sm text-(--light-fg) transition hover:text-(--primary-clr)"
-                            >
-                                <ArrowLeft size={15} />
-                                {t("back_to_dashboard")}
-                            </button>
-
                             <h1 className="text-[1.8rem] font-bold">
                                 {business.name}
                             </h1>
@@ -609,7 +612,8 @@ export default function BusinessManagementPage() {
                                             onChange={(event) =>
                                                 updateField(
                                                     "type",
-                                                    event.target.value as BusinessType,
+                                                    event.target
+                                                        .value as BusinessType,
                                                 )
                                             }
                                             className="w-full rounded-xl border border-(--border) bg-(--background) px-4 py-2.5 text-sm outline-none transition-all focus:border-(--primary-clr) focus:ring-2 focus:ring-(--primary-clr)/20"
@@ -618,7 +622,10 @@ export default function BusinessManagementPage() {
                                                 {t("form_type_placeholder")}
                                             </option>
                                             {TYPE_OPTIONS.map((value) => (
-                                                <option key={value} value={value}>
+                                                <option
+                                                    key={value}
+                                                    value={value}
+                                                >
                                                     {t(`type_${value}`)}
                                                 </option>
                                             ))}
@@ -650,7 +657,9 @@ export default function BusinessManagementPage() {
                                                     event.target.value,
                                                 )
                                             }
-                                            placeholder={t("form_name_placeholder")}
+                                            placeholder={t(
+                                                "form_name_placeholder",
+                                            )}
                                             className="w-full rounded-xl border border-(--border) px-4 py-2.5 text-sm outline-none transition-all focus:border-(--primary-clr) focus:ring-2 focus:ring-(--primary-clr)/20"
                                         />
                                     </div>
@@ -881,7 +890,10 @@ export default function BusinessManagementPage() {
                                             longitude={form.longitude}
                                             hint={t("location_map_hint")}
                                             onSelect={(lat, lng) => {
-                                                updateField("latitude", String(lat));
+                                                updateField(
+                                                    "latitude",
+                                                    String(lat),
+                                                );
                                                 updateField(
                                                     "longitude",
                                                     String(lng),
@@ -955,7 +967,9 @@ export default function BusinessManagementPage() {
                                                         key={unit}
                                                         value={unit}
                                                     >
-                                                        {t(`price_unit_${unit}`)}
+                                                        {t(
+                                                            `price_unit_${unit}`,
+                                                        )}
                                                     </option>
                                                 ))}
                                             </select>
@@ -1018,7 +1032,9 @@ export default function BusinessManagementPage() {
                                                                 key={stars}
                                                                 value={stars}
                                                             >
-                                                                {"★".repeat(stars)}
+                                                                {"★".repeat(
+                                                                    stars,
+                                                                )}
                                                             </option>
                                                         ),
                                                     )}
@@ -1067,7 +1083,9 @@ export default function BusinessManagementPage() {
                                                     min={0}
                                                     step="1"
                                                     inputMode="numeric"
-                                                    value={form.seating_capacity}
+                                                    value={
+                                                        form.seating_capacity
+                                                    }
                                                     onChange={(event) =>
                                                         updateField(
                                                             "seating_capacity",
@@ -1136,7 +1154,9 @@ export default function BusinessManagementPage() {
                                         ) : (
                                             <Save size={16} />
                                         )}
-                                        {saving ? t("saving") : t("save_changes")}
+                                        {saving
+                                            ? t("saving")
+                                            : t("save_changes")}
                                     </button>
                                 </div>
                             </motion.section>
@@ -1204,7 +1224,9 @@ export default function BusinessManagementPage() {
                                             initial={COLLAPSE_PANEL.initial}
                                             animate={COLLAPSE_PANEL.animate}
                                             exit={COLLAPSE_PANEL.exit}
-                                            transition={COLLAPSE_PANEL.transition}
+                                            transition={
+                                                COLLAPSE_PANEL.transition
+                                            }
                                         >
                                             <div className="rounded-xl border border-(--border) bg-(--background) p-5 shadow-sm">
                                                 <div className="mb-4 flex items-center justify-between">
@@ -1212,7 +1234,9 @@ export default function BusinessManagementPage() {
                                                         {t("listing_new")}
                                                     </h3>
                                                     <button
-                                                        onClick={closeListingForm}
+                                                        onClick={
+                                                            closeListingForm
+                                                        }
                                                         aria-label={t("close")}
                                                         className="text-(--light-fg) transition hover:text-(--foreground)"
                                                     >
@@ -1232,12 +1256,17 @@ export default function BusinessManagementPage() {
                                                             id="listing_title"
                                                             type="text"
                                                             maxLength={200}
-                                                            value={listingForm.title}
-                                                            onChange={(event) => {
+                                                            value={
+                                                                listingForm.title
+                                                            }
+                                                            onChange={(
+                                                                event,
+                                                            ) => {
                                                                 setListingForm(
                                                                     (prev) => ({
                                                                         ...prev,
-                                                                        title: event.target
+                                                                        title: event
+                                                                            .target
                                                                             .value,
                                                                     }),
                                                                 );
@@ -1252,18 +1281,26 @@ export default function BusinessManagementPage() {
                                                             htmlFor="listing_description"
                                                             className="mb-1.5 block text-sm font-medium"
                                                         >
-                                                            {t("listing_description")}
+                                                            {t(
+                                                                "listing_description",
+                                                            )}
                                                         </label>
                                                         <textarea
                                                             id="listing_description"
                                                             rows={3}
-                                                            value={listingForm.description}
+                                                            value={
+                                                                listingForm.description
+                                                            }
                                                             onChange={(event) =>
-                                                                setListingForm((prev) => ({
-                                                                    ...prev,
-                                                                    description:
-                                                                        event.target.value,
-                                                                }))
+                                                                setListingForm(
+                                                                    (prev) => ({
+                                                                        ...prev,
+                                                                        description:
+                                                                            event
+                                                                                .target
+                                                                                .value,
+                                                                    }),
+                                                                )
                                                             }
                                                             className="w-full resize-y rounded-xl border border-(--border) px-4 py-2.5 text-sm outline-none transition-all focus:border-(--primary-clr) focus:ring-2 focus:ring-(--primary-clr)/20"
                                                         />
@@ -1282,13 +1319,18 @@ export default function BusinessManagementPage() {
                                                             min={0}
                                                             step="0.01"
                                                             inputMode="decimal"
-                                                            value={listingForm.price}
+                                                            value={
+                                                                listingForm.price
+                                                            }
                                                             onChange={(event) =>
-                                                                setListingForm((prev) => ({
-                                                                    ...prev,
-                                                                    price: event.target
-                                                                        .value,
-                                                                }))
+                                                                setListingForm(
+                                                                    (prev) => ({
+                                                                        ...prev,
+                                                                        price: event
+                                                                            .target
+                                                                            .value,
+                                                                    }),
+                                                                )
                                                             }
                                                             className="w-full rounded-xl border border-(--border) px-4 py-2.5 text-sm outline-none transition-all focus:border-(--primary-clr) focus:ring-2 focus:ring-(--primary-clr)/20"
                                                         />
@@ -1299,30 +1341,41 @@ export default function BusinessManagementPage() {
                                                             htmlFor="listing_currency"
                                                             className="mb-1.5 block text-sm font-medium"
                                                         >
-                                                            {t("listing_currency")}
+                                                            {t(
+                                                                "listing_currency",
+                                                            )}
                                                         </label>
                                                         <select
                                                             id="listing_currency"
-                                                            value={listingForm.currency}
+                                                            value={
+                                                                listingForm.currency
+                                                            }
                                                             onChange={(event) =>
-                                                                setListingForm((prev) => ({
-                                                                    ...prev,
-                                                                    currency:
-                                                                        event.target.value,
-                                                                }))
+                                                                setListingForm(
+                                                                    (prev) => ({
+                                                                        ...prev,
+                                                                        currency:
+                                                                            event
+                                                                                .target
+                                                                                .value,
+                                                                    }),
+                                                                )
                                                             }
                                                             className="w-full rounded-xl border border-(--border) bg-(--background) px-4 py-2.5 text-sm outline-none transition-all focus:border-(--primary-clr) focus:ring-2 focus:ring-(--primary-clr)/20"
                                                         >
-                                                            {["DZD", "EUR", "USD", "GBP"].map(
-                                                                (code) => (
-                                                                    <option
-                                                                        key={code}
-                                                                        value={code}
-                                                                    >
-                                                                        {code}
-                                                                    </option>
-                                                                ),
-                                                            )}
+                                                            {[
+                                                                "DZD",
+                                                                "EUR",
+                                                                "USD",
+                                                                "GBP",
+                                                            ].map((code) => (
+                                                                <option
+                                                                    key={code}
+                                                                    value={code}
+                                                                >
+                                                                    {code}
+                                                                </option>
+                                                            ))}
                                                         </select>
                                                     </div>
 
@@ -1331,7 +1384,9 @@ export default function BusinessManagementPage() {
                                                             htmlFor="listing_capacity"
                                                             className="mb-1.5 block text-sm font-medium"
                                                         >
-                                                            {t("listing_capacity")}
+                                                            {t(
+                                                                "listing_capacity",
+                                                            )}
                                                         </label>
                                                         <input
                                                             id="listing_capacity"
@@ -1339,13 +1394,19 @@ export default function BusinessManagementPage() {
                                                             min={1}
                                                             step="1"
                                                             inputMode="numeric"
-                                                            value={listingForm.capacity}
+                                                            value={
+                                                                listingForm.capacity
+                                                            }
                                                             onChange={(event) =>
-                                                                setListingForm((prev) => ({
-                                                                    ...prev,
-                                                                    capacity:
-                                                                        event.target.value,
-                                                                }))
+                                                                setListingForm(
+                                                                    (prev) => ({
+                                                                        ...prev,
+                                                                        capacity:
+                                                                            event
+                                                                                .target
+                                                                                .value,
+                                                                    }),
+                                                                )
                                                             }
                                                             className="w-full rounded-xl border border-(--border) px-4 py-2.5 text-sm outline-none transition-all focus:border-(--primary-clr) focus:ring-2 focus:ring-(--primary-clr)/20"
                                                         />
@@ -1356,32 +1417,43 @@ export default function BusinessManagementPage() {
                                                             htmlFor="listing_status"
                                                             className="mb-1.5 block text-sm font-medium"
                                                         >
-                                                            {t("listing_status")}
+                                                            {t(
+                                                                "listing_status",
+                                                            )}
                                                         </label>
                                                         <select
                                                             id="listing_status"
-                                                            value={listingForm.status}
+                                                            value={
+                                                                listingForm.status
+                                                            }
                                                             onChange={(event) =>
-                                                                setListingForm((prev) => ({
-                                                                    ...prev,
-                                                                    status: event.target
-                                                                        .value as Listing[
-                                                                        "status"
-                                                                    ],
-                                                                }))
+                                                                setListingForm(
+                                                                    (prev) => ({
+                                                                        ...prev,
+                                                                        status: event
+                                                                            .target
+                                                                            .value as Listing["status"],
+                                                                    }),
+                                                                )
                                                             }
                                                             className="w-full rounded-xl border border-(--border) bg-(--background) px-4 py-2.5 text-sm outline-none transition-all focus:border-(--primary-clr) focus:ring-2 focus:ring-(--primary-clr)/20"
                                                         >
-                                                            {STATUSES.map((status) => (
-                                                                <option
-                                                                    key={status}
-                                                                    value={status}
-                                                                >
-                                                                    {t(
-                                                                        `listing_status_${status}`,
-                                                                    )}
-                                                                </option>
-                                                            ))}
+                                                            {STATUSES.map(
+                                                                (status) => (
+                                                                    <option
+                                                                        key={
+                                                                            status
+                                                                        }
+                                                                        value={
+                                                                            status
+                                                                        }
+                                                                    >
+                                                                        {t(
+                                                                            `listing_status_${status}`,
+                                                                        )}
+                                                                    </option>
+                                                                ),
+                                                            )}
                                                         </select>
                                                     </div>
 
@@ -1390,16 +1462,23 @@ export default function BusinessManagementPage() {
                                                             htmlFor="listing_amenities"
                                                             className="mb-1.5 block text-sm font-medium"
                                                         >
-                                                            {t("form_amenities")}
+                                                            {t(
+                                                                "form_amenities",
+                                                            )}
                                                         </label>
                                                         <ChipInput
                                                             id="listing_amenities"
-                                                            value={listingForm.amenities}
+                                                            value={
+                                                                listingForm.amenities
+                                                            }
                                                             onChange={(value) =>
-                                                                setListingForm((prev) => ({
-                                                                    ...prev,
-                                                                    amenities: value,
-                                                                }))
+                                                                setListingForm(
+                                                                    (prev) => ({
+                                                                        ...prev,
+                                                                        amenities:
+                                                                            value,
+                                                                    }),
+                                                                )
                                                             }
                                                             placeholder={t(
                                                                 "form_amenities_placeholder",
@@ -1418,14 +1497,21 @@ export default function BusinessManagementPage() {
 
                                                     <div className="flex flex-wrap gap-3">
                                                         {listingPreviews.map(
-                                                            (preview, index) => (
+                                                            (
+                                                                preview,
+                                                                index,
+                                                            ) => (
                                                                 <div
-                                                                    key={preview}
+                                                                    key={
+                                                                        preview
+                                                                    }
                                                                     className="relative h-24 w-32 overflow-hidden rounded-lg border border-(--border)"
                                                                 >
                                                                     {/* eslint-disable-next-line @next/next/no-img-element */}
                                                                     <img
-                                                                        src={preview}
+                                                                        src={
+                                                                            preview
+                                                                        }
                                                                         alt=""
                                                                         className="h-full w-full object-cover"
                                                                     />
@@ -1446,15 +1532,20 @@ export default function BusinessManagementPage() {
                                                             ),
                                                         )}
 
-                                                        {listingPreviews.length < 5 && (
+                                                        {listingPreviews.length <
+                                                            5 && (
                                                             <button
                                                                 onClick={() =>
                                                                     listingFileRef.current?.click()
                                                                 }
                                                                 className="flex h-24 w-32 flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-(--border) text-xs text-(--light-fg) transition hover:border-(--primary-clr) hover:text-(--primary-clr)"
                                                             >
-                                                                <Plus size={18} />
-                                                                {t("photos_add")}
+                                                                <Plus
+                                                                    size={18}
+                                                                />
+                                                                {t(
+                                                                    "photos_add",
+                                                                )}
                                                             </button>
                                                         )}
                                                     </div>
@@ -1466,28 +1557,43 @@ export default function BusinessManagementPage() {
                                                         multiple
                                                         className="hidden"
                                                         onChange={(event) => {
-                                                            if (event.target.files) {
+                                                            if (
+                                                                event.target
+                                                                    .files
+                                                            ) {
                                                                 addListingFiles(
-                                                                    event.target.files,
+                                                                    event.target
+                                                                        .files,
                                                                 );
                                                             }
-                                                            event.target.value = "";
+                                                            event.target.value =
+                                                                "";
                                                         }}
                                                     />
                                                 </div>
 
                                                 <div className="mt-5 flex justify-end gap-3">
                                                     <button
-                                                        onClick={closeListingForm}
-                                                        disabled={creatingListing}
+                                                        onClick={
+                                                            closeListingForm
+                                                        }
+                                                        disabled={
+                                                            creatingListing
+                                                        }
                                                         className="rounded-lg border border-(--border) px-5 py-2.5 text-sm font-medium transition hover:bg-(--dim-bg)"
                                                     >
                                                         {t("cancel")}
                                                     </button>
                                                     <motion.button
-                                                        onClick={() => void createListing()}
-                                                        disabled={creatingListing}
-                                                        whileTap={{ scale: 0.96 }}
+                                                        onClick={() =>
+                                                            void createListing()
+                                                        }
+                                                        disabled={
+                                                            creatingListing
+                                                        }
+                                                        whileTap={{
+                                                            scale: 0.96,
+                                                        }}
                                                         className="inline-flex items-center gap-2 rounded-lg bg-(--primary-clr) px-5 py-2.5 text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-60"
                                                     >
                                                         {creatingListing && (
@@ -1498,7 +1604,7 @@ export default function BusinessManagementPage() {
                                                         )}
                                                         {t("listing_create")}
                                                     </motion.button>
-                                                    </div>
+                                                </div>
                                             </div>
                                         </motion.div>
                                     )}
@@ -1523,7 +1629,10 @@ export default function BusinessManagementPage() {
                                                 animate={{ opacity: 1, y: 0 }}
                                                 transition={{
                                                     duration: 0.25,
-                                                    delay: Math.min(index * 0.05, 0.3),
+                                                    delay: Math.min(
+                                                        index * 0.05,
+                                                        0.3,
+                                                    ),
                                                 }}
                                                 layout
                                                 onClick={() =>
@@ -1569,7 +1678,9 @@ export default function BusinessManagementPage() {
                                                     <p className="mt-1 text-sm font-medium text-(--primary-clr)">
                                                         {listing.price
                                                             ? `${listing.price} ${listing.currency}`
-                                                            : t("listing_no_price")}
+                                                            : t(
+                                                                  "listing_no_price",
+                                                              )}
                                                     </p>
 
                                                     <p className="mt-1 line-clamp-2 text-xs text-(--light-fg)">

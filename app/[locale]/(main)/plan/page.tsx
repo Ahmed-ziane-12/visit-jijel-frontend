@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import QuizLayout from "../../components/Quiz/QuizLayout";
 import styles from "./plan.module.css";
@@ -11,6 +11,11 @@ import Budget from "../../components/Quiz/Steps/Budget";
 import PreviewStep from "../../components/Quiz/Steps/PreviewStep";
 import { PlanState } from "@/types/quiz";
 import { useRouter } from "next/navigation";
+import { AxiosError } from "axios";
+import { format } from "date-fns";
+import { useAuth } from "@/context/AuthContext";
+import { createTrip, TripPayload } from "@/lib/itinerary";
+import ConfirmDialog from "@/app/[locale]/components/ConfirmDialog/ConfirmDialog";
 
 const INITIAL_PLAN: PlanState = {
     dates: undefined,
@@ -30,13 +35,98 @@ export default function PlanPage() {
     const [currentStep, setCurrentStep] = useState(0);
     const [plan, setPlan] = useState<PlanState>(INITIAL_PLAN);
     const [nextError, setNextError] = useState<string | null>(null);
+    const [submitting, setSubmitting] = useState(false);
+    const [loginDialogOpen, setLoginDialogOpen] = useState(false);
+    const resumeRef = useRef(false);
     const router = useRouter();
     const t = useTranslations("plan");
+    const { user, loading: authLoading } = useAuth();
 
     const updatePlan = (partial: Partial<PlanState>) => {
         setPlan((prev) => ({ ...prev, ...partial }));
         setNextError(null);
     };
+
+    const toPayload = (planState: PlanState): TripPayload => {
+        const from = planState.dates?.from as Date;
+        const to = planState.dates?.to ?? from;
+
+        return {
+            start_date: format(from, "yyyy-MM-dd"),
+            end_date: format(to, "yyyy-MM-dd"),
+            adults: planState.adults,
+            children: planState.children,
+            vibes: planState.vibes,
+            preferences: planState.preferences,
+            accommodation: planState.accommodation,
+            budget: {
+                budgetType: planState.budget.budgetType,
+                customBudget:
+                    planState.budget.budgetType === "custom"
+                        ? planState.budget.customBudget
+                        : undefined,
+                customBudgetType: planState.budget.customBudgetType,
+            },
+            status: "draft",
+        };
+    };
+
+    const submitPlan = async (planState: PlanState): Promise<void> => {
+        if (!planState.dates?.from) return;
+
+        setSubmitting(true);
+        setNextError(null);
+
+        try {
+            const trip = await createTrip(toPayload(planState));
+            sessionStorage.removeItem("plan");
+            sessionStorage.removeItem("pending_plan");
+            router.push(`/trip/${trip.id}`);
+        } catch (err) {
+            const error = err as AxiosError<{ message?: string }>;
+            setNextError(error.response?.data?.message ?? t("create_error"));
+            setSubmitting(false);
+        }
+    };
+
+    // Resume after login: the plan was stashed in sessionStorage before redirecting.
+    useEffect(() => {
+        if (authLoading || resumeRef.current) return;
+
+        const raw = sessionStorage.getItem("plan");
+        const pending = sessionStorage.getItem("pending_plan");
+
+        if (!raw || !pending) return;
+
+        if (!user) {
+            sessionStorage.removeItem("plan");
+            sessionStorage.removeItem("pending_plan");
+            return;
+        }
+
+        let planState: PlanState;
+        try {
+            planState = JSON.parse(raw) as PlanState;
+        } catch {
+            sessionStorage.removeItem("plan");
+            sessionStorage.removeItem("pending_plan");
+            return;
+        }
+
+        if (!planState.dates?.from) {
+            sessionStorage.removeItem("plan");
+            sessionStorage.removeItem("pending_plan");
+            return;
+        }
+
+        resumeRef.current = true;
+        // Deferred so the effect itself does not trigger a cascading render.
+        const timer = window.setTimeout(() => {
+            void submitPlan(planState);
+        }, 0);
+        return () => window.clearTimeout(timer);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [authLoading, user]);
 
     const steps = [
         {
@@ -79,8 +169,17 @@ export default function PlanPage() {
                 setNextError(t("preview.dates_required"));
                 return;
             }
-            sessionStorage.setItem("plan", JSON.stringify(plan));
-            router.push("/trip/1");
+            if (authLoading || submitting) return;
+
+            if (!user) {
+                // Keep the answers while the user signs in, then resume.
+                sessionStorage.setItem("plan", JSON.stringify(plan));
+                sessionStorage.setItem("pending_plan", "1");
+                setLoginDialogOpen(true);
+                return;
+            }
+
+            void submitPlan(plan);
             return;
         }
         if (currentStep >= steps.length - 1) return;
@@ -103,12 +202,12 @@ export default function PlanPage() {
             title={t(activeStep.title)}
             description={t(activeStep.description)}
             progress={progress}
-            nextLabel={t(activeStep.nextLabel)}
+            nextLabel={submitting ? t("creating") : t(activeStep.nextLabel)}
             canGoBack={currentStep > 0}
             isLastStep={isLastStep}
             onNext={goNext}
             onBack={goBack}
-            nextDisabled={datesMissing}
+            nextDisabled={datesMissing || submitting || authLoading}
             nextErrorMessage={nextError}
         >
             <div className={styles.stepContainer}>
@@ -157,6 +256,23 @@ export default function PlanPage() {
                     </motion.div>
                 </AnimatePresence>
             </div>
+
+            <ConfirmDialog
+                open={loginDialogOpen}
+                theme="info"
+                title={t("login_required.title")}
+                message={t("login_required.message")}
+                confirmLabel={t("login_required.confirm")}
+                onConfirm={() => {
+                    setLoginDialogOpen(false);
+                    router.push("/login?next=/plan");
+                }}
+                onCancel={() => {
+                    setLoginDialogOpen(false);
+                    sessionStorage.removeItem("plan");
+                    sessionStorage.removeItem("pending_plan");
+                }}
+            />
         </QuizLayout>
     );
 }

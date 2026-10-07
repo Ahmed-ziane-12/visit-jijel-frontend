@@ -2,16 +2,23 @@
 import { useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
 import styles from "./trip.module.css";
-import type { Itenirary, IteneraryItem, IteneraryDay, Destination } from "@/types/map";
-import { useEffect, useMemo, useRef, useState } from "react";
+import type {
+    Itenirary,
+    IteneraryItem,
+    IteneraryDay,
+    TripCandidate,
+} from "@/types/map";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
     AlarmClock,
     CalendarDays,
+    Check,
     GripVertical,
     Lightbulb,
     Loader2,
     Map,
     Plus,
+    Save,
     Share2,
     X,
 } from "lucide-react";
@@ -34,35 +41,35 @@ import {
     arrayMove,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { addDays, differenceInDays, format } from "date-fns";
-import axios from "@/lib/axios";
+import { addDays, format } from "date-fns";
+import { AxiosError } from "axios";
+import {
+    SLOTS as TIME_SLOTS,
+    TripItemPayload,
+    addTripDay,
+    addTripItem,
+    deleteTripDay,
+    deleteTripItem,
+    fetchRecommendations,
+    fetchTrip,
+    saveTrip,
+    updateTripItem,
+} from "@/lib/itinerary";
+import ConfirmDialog from "@/app/[locale]/components/ConfirmDialog/ConfirmDialog";
 
-const STORAGE_PREFIX = "trip_";
+const MotionLoader = motion(Loader2);
 
-const TIME_SLOTS = [
-    { start: "08:30", end: "10:30" },
-    { start: "11:00", end: "13:00" },
-    { start: "13:30", end: "15:30" },
-];
+type ConfirmTarget =
+    | { kind: "day"; dayId: number }
+    | { kind: "item"; dayId: number; itemId: number };
 
-function haversineKm(
-    lat1: number,
-    lng1: number,
-    lat2: number,
-    lng2: number,
-): number {
-    const R = 6371;
-    const dLat = ((lat2 - lat1) * Math.PI) / 180;
-    const dLng = ((lng2 - lng1) * Math.PI) / 180;
-    const a =
-        Math.sin(dLat / 2) ** 2 +
-        Math.cos((lat1 * Math.PI) / 180) *
-            Math.cos((lat2 * Math.PI) / 180) *
-            Math.sin(dLng / 2) ** 2;
-    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
-
-function SortableItem({ item }: { item: IteneraryItem }) {
+function SortableItem({
+    item,
+    onRemove,
+}: {
+    item: IteneraryItem;
+    onRemove: () => void;
+}) {
     const {
         attributes,
         listeners,
@@ -106,6 +113,14 @@ function SortableItem({ item }: { item: IteneraryItem }) {
                 <h3>{item.title}</h3>
                 <p>{item.description}</p>
             </div>
+
+            <button
+                className={styles.itemRemove}
+                aria-label="Remove activity"
+                onClick={onRemove}
+            >
+                <X size={16} />
+            </button>
         </div>
     );
 }
@@ -255,158 +270,78 @@ const TripPage = () => {
     const t = useTranslations("trip");
     const params = useParams();
     const tripId = params.id as string;
-    const storageKey = STORAGE_PREFIX + tripId;
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [itenirary, setItenirary] = useState<Itenirary | null>(null);
-    const [saving, setSaving] = useState(false);
     const [selectedDayId, setSelectedDayId] = useState<number | null>(null);
     const [showMap, setShowMap] = useState(false);
+    const [actionError, setActionError] = useState<string | null>(null);
 
-    useEffect(() => {
-        // 1. Try localStorage first
-        const stored = localStorage.getItem(storageKey);
-        if (stored) {
-            try {
-                const parsed: Itenirary = JSON.parse(stored);
-                setItenirary(parsed);
-                setLoading(false);
-                return;
-            } catch {
-                localStorage.removeItem(storageKey);
-            }
-        }
+    const [savingDraft, setSavingDraft] = useState(false);
+    const [draftSaved, setDraftSaved] = useState(false);
+    const [addingDay, setAddingDay] = useState(false);
+    const [addingItemId, setAddingItemId] = useState<number | null>(null);
+    const [deleting, setDeleting] = useState(false);
+    const [confirm, setConfirm] = useState<ConfirmTarget | null>(null);
 
-        // 2. Try sessionStorage (fresh from plan page)
-        const raw = sessionStorage.getItem("plan");
-        if (!raw) {
-            setError("Trip not found");
-            setLoading(false);
-            return;
-        }
-
-        sessionStorage.removeItem("plan");
-        setSaving(true);
-
-        const build = async () => {
-            try {
-                const plan = JSON.parse(raw);
-                const from = new Date(plan.dates.from);
-                const to = plan.dates.to ? new Date(plan.dates.to) : from;
-                const numDays = differenceInDays(to, from) + 1;
-
-                const destRes = await axios.get<Destination[]>("/api/v1/destinations");
-                const allDests = destRes.data.filter(
-                    (d) => d.latitude != null && d.longitude != null,
-                );
-
-                if (allDests.length < 3) {
-                    setError("Not enough destinations with coordinates.");
-                    setLoading(false);
-                    return;
-                }
-
-                const used = new Set<number>();
-                const days: IteneraryDay[] = [];
-
-                for (let i = 0; i < numDays; i++) {
-                    const available = allDests.filter((d) => !used.has(d.id));
-                    if (available.length < 3) break;
-
-                    const firstIdx = Math.floor(Math.random() * available.length);
-                    const first = available[firstIdx];
-                    used.add(first.id);
-
-                    const sorted = available
-                        .filter((d) => d.id !== first.id)
-                        .map((d) => ({
-                            dest: d,
-                            dist: haversineKm(
-                                first.latitude!,
-                                first.longitude!,
-                                d.latitude!,
-                                d.longitude!,
-                            ),
-                        }))
-                        .sort((a, b) => a.dist - b.dist);
-
-                    const second = sorted[0].dest;
-                    const third = sorted[1].dest;
-                    used.add(second.id);
-                    used.add(third.id);
-
-                    const dateStr = format(addDays(from, i), "yyyy-MM-dd");
-                    const dayId = -(i + 1);
-                    const baseItemId = i * 3;
-
-                    const dests = [first, second, third];
-                    days.push({
-                        id: dayId,
-                        itinerary_id: Number(tripId),
-                        day_date: dateStr,
-                        day_number: i + 1,
-                        items: dests.map((d, idx) => ({
-                            id: -(baseItemId + idx + 1),
-                            itinerary_day_id: dayId,
-                            destination_id: d.id,
-                            title: d.name,
-                            description: d.description,
-                            start_time: TIME_SLOTS[idx].start,
-                            end_time: TIME_SLOTS[idx].end,
-                            item_type: "destination",
-                            image_url: d.media?.[0]?.secure_url,
-                            latitude: d.latitude,
-                            longitude: d.longitude,
-                        })),
-                    });
-                }
-
-                const itinerary: Itenirary = {
-                    id: Number(tripId),
-                    user_id: 0,
-                    title: plan.title || "My Trip",
-                    notes: "",
-                    start_date: format(from, "yyyy-MM-dd"),
-                    end_date: format(to, "yyyy-MM-dd"),
-                    visibility: "private",
-                    created_at: new Date().toISOString(),
-                    days,
-                };
-
-                localStorage.setItem(storageKey, JSON.stringify(itinerary));
-                setItenirary(itinerary);
-            } catch (err) {
-                console.error("Failed to build itinerary:", err);
-                setError("Failed to generate itinerary. Please try again.");
-            } finally {
-                setLoading(false);
-                setSaving(false);
-            }
-        };
-
-        build();
-    }, [tripId, storageKey]);
-
-    const selectedDay = useMemo(() => {
-        if (!itenirary?.days) return null;
-        return itenirary.days.find((day) => day.id === selectedDayId) ?? itenirary.days[0];
-    }, [itenirary?.days, selectedDayId]);
-
-    useEffect(() => {
-        if (itenirary?.days?.length && selectedDayId === null) {
-            setSelectedDayId(itenirary.days[0].id);
-        }
-    }, [itenirary, selectedDayId]);
+    const [candidates, setCandidates] = useState<TripCandidate[]>([]);
+    const [recsLoading, setRecsLoading] = useState(true);
 
     const sensors = useSensors(
         useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     );
 
+    useEffect(() => {
+        let cancelled = false;
+
+        const load = async () => {
+            try {
+                const data = await fetchTrip(tripId);
+                if (cancelled) return;
+                setItenirary(data);
+                setLoading(false);
+            } catch (err) {
+                if (cancelled) return;
+                const status = (err as AxiosError).response?.status;
+                setError(status === 401 || status === 403 ? "login_required" : "not_found");
+                setLoading(false);
+            }
+        };
+
+        void load();
+        return () => {
+            cancelled = true;
+        };
+    }, [tripId]);
+
+    const selectedDay = itenirary?.days
+        ? (itenirary.days.find((day) => day.id === selectedDayId) ??
+          itenirary.days[0])
+        : null;
+
+    const loadRecommendations = useCallback(async () => {
+        try {
+            const data = await fetchRecommendations(tripId, 10);
+            setCandidates(data);
+        } catch {
+            setCandidates([]);
+        } finally {
+            setRecsLoading(false);
+        }
+    }, [tripId]);
+
+    useEffect(() => {
+        // Deferred so the effect itself does not trigger a cascading render.
+        const timer = window.setTimeout(() => {
+            void loadRecommendations();
+        }, 0);
+        return () => window.clearTimeout(timer);
+    }, [loadRecommendations]);
+
     const [activeItem, setActiveItem] = useState<IteneraryItem | null>(null);
 
     if (loading) {
-        const MotionLoader = motion(Loader2);
         return (
             <div className={styles.fullLoader}>
                 <MotionLoader
@@ -420,7 +355,7 @@ const TripPage = () => {
                     }}
                 />
                 <p className="mt-4 text-(--light-fg) font-medium">
-                    {saving ? t("building") : "Loading..."}
+                    {t("loading")}
                 </p>
             </div>
         );
@@ -429,10 +364,34 @@ const TripPage = () => {
     if (error || !itenirary) {
         return (
             <div className={styles.fullLoader}>
-                <p className="text-(--light-fg)">{error || "Trip not found"}</p>
+                <p className="text-(--light-fg)">
+                    {error ? t(error) : t("not_found")}
+                </p>
             </div>
         );
     }
+
+    const persistOrder = async (dayId: number, items: IteneraryItem[]) => {
+        try {
+            await Promise.all(
+                items.map((item, idx) =>
+                    updateTripItem(tripId, dayId, item.id, {
+                        sort_order: idx,
+                        start_time: TIME_SLOTS[idx].start,
+                        end_time: TIME_SLOTS[idx].end,
+                    }),
+                ),
+            );
+        } catch {
+            setActionError(t("action_failed"));
+            try {
+                const fresh = await fetchTrip(tripId);
+                setItenirary(fresh);
+            } catch {
+                /* ignore */
+            }
+        }
+    };
 
     const handleDragStart = (event: DragStartEvent) => {
         const item = selectedDay?.items?.find((i) => i.id === event.active.id);
@@ -443,29 +402,200 @@ const TripPage = () => {
         setActiveItem(null);
         const { active, over } = event;
         if (!over || active.id === over.id) return;
+        if (!selectedDay?.items) return;
 
-        setItenirary((prev) => {
-            if (!prev?.days) return prev;
-            const updatedDays = prev.days.map((day) => {
-                if (day.id !== selectedDayId || !day.items) return day;
-                const oldIndex = day.items.findIndex((i) => i.id === active.id);
-                const newIndex = day.items.findIndex((i) => i.id === over.id);
-                if (oldIndex === -1 || newIndex === -1) return day;
-                const reordered = arrayMove(day.items, oldIndex, newIndex);
+        const oldIndex = selectedDay.items.findIndex((i) => i.id === active.id);
+        const newIndex = selectedDay.items.findIndex((i) => i.id === over.id);
+        if (oldIndex === -1 || newIndex === -1) return;
+
+        const reordered = arrayMove(selectedDay.items, oldIndex, newIndex).map(
+            (item, idx) => ({
+                ...item,
+                start_time: TIME_SLOTS[idx].start,
+                end_time: TIME_SLOTS[idx].end,
+                sort_order: idx,
+            }),
+        );
+
+        setItenirary((prev) =>
+            prev
+                ? {
+                      ...prev,
+                      days: (prev.days ?? []).map((d) =>
+                          d.id === selectedDay.id
+                              ? { ...d, items: reordered }
+                              : d,
+                      ),
+                  }
+                : prev,
+        );
+
+        void persistOrder(selectedDay.id, reordered);
+    };
+
+    const handleAddDay = async () => {
+        if (!itenirary) return;
+        setAddingDay(true);
+        setActionError(null);
+        try {
+            const days = itenirary.days ?? [];
+            const last = days[days.length - 1];
+            const nextDate = last
+                ? addDays(new Date(last.day_date + "T00:00:00"), 1)
+                : new Date();
+            const dateStr = format(nextDate, "yyyy-MM-dd");
+            const nextNumber =
+                days.reduce((max, d) => Math.max(max, d.day_number), 0) + 1;
+
+            const day = await addTripDay(tripId, {
+                day_date: dateStr,
+                day_number: nextNumber,
+            });
+
+            setItenirary((prev) => {
+                if (!prev) return prev;
+                const extended = dateStr > prev.end_date;
+                if (extended) {
+                    void saveTrip(tripId, {
+                        start_date: prev.start_date,
+                        end_date: dateStr,
+                    });
+                }
                 return {
-                    ...day,
-                    items: reordered.map((item, idx) => ({
-                        ...item,
-                        start_time: TIME_SLOTS[idx].start,
-                        end_time: TIME_SLOTS[idx].end,
-                    })),
+                    ...prev,
+                    end_date: extended ? dateStr : prev.end_date,
+                    days: [...(prev.days ?? []), { ...day, items: [] }],
                 };
             });
-            const updated = { ...prev, days: updatedDays };
-            localStorage.setItem(storageKey, JSON.stringify(updated));
-            return updated;
-        });
+            setSelectedDayId(day.id);
+        } catch {
+            setActionError(t("action_failed"));
+        } finally {
+            setAddingDay(false);
+        }
     };
+
+    const handleAddActivity = async (candidate: TripCandidate) => {
+        if (!selectedDay) return;
+        const items = selectedDay.items ?? [];
+        if (items.length >= TIME_SLOTS.length) {
+            setActionError(t("day_full"));
+            return;
+        }
+
+        setActionError(null);
+        setAddingItemId(candidate.id);
+        try {
+            const slot = items.length;
+            const payload: TripItemPayload = {
+                item_type: candidate.item_type,
+                destination_id:
+                    candidate.item_type === "destination"
+                        ? candidate.id
+                        : undefined,
+                listing_id:
+                    candidate.item_type === "listing" ? candidate.id : undefined,
+                event_id:
+                    candidate.item_type === "event" ? candidate.id : undefined,
+                title: candidate.title,
+                notes: candidate.description ?? undefined,
+                start_time: TIME_SLOTS[slot].start,
+                end_time: TIME_SLOTS[slot].end,
+                sort_order: slot,
+            };
+
+            const created = await addTripItem(tripId, selectedDay.id, payload);
+
+            setItenirary((prev) =>
+                prev
+                    ? {
+                          ...prev,
+                          days: (prev.days ?? []).map((d) =>
+                              d.id === selectedDay.id
+                                  ? { ...d, items: [...(d.items ?? []), created] }
+                                  : d,
+                          ),
+                      }
+                    : prev,
+            );
+            setCandidates((prev) =>
+                prev.filter(
+                    (c) =>
+                        !(
+                            c.item_type === candidate.item_type &&
+                            c.id === candidate.id
+                        ),
+                ),
+            );
+        } catch {
+            setActionError(t("action_failed"));
+        } finally {
+            setAddingItemId(null);
+        }
+    };
+
+    const handleConfirmDelete = async () => {
+        if (!confirm) return;
+        setDeleting(true);
+        setActionError(null);
+        try {
+            if (confirm.kind === "day") {
+                await deleteTripDay(tripId, confirm.dayId);
+                setItenirary((prev) =>
+                    prev
+                        ? {
+                              ...prev,
+                              days: (prev.days ?? [])
+                                  .filter((d) => d.id !== confirm.dayId)
+                                  .map((d, i) => ({ ...d, day_number: i + 1 })),
+                          }
+                        : prev,
+                );
+            } else {
+                await deleteTripItem(tripId, confirm.dayId, confirm.itemId);
+                setItenirary((prev) =>
+                    prev
+                        ? {
+                              ...prev,
+                              days: (prev.days ?? []).map((d) =>
+                                  d.id === confirm.dayId
+                                      ? {
+                                            ...d,
+                                            items: (d.items ?? []).filter(
+                                                (i) => i.id !== confirm.itemId,
+                                            ),
+                                        }
+                                      : d,
+                              ),
+                          }
+                        : prev,
+                );
+                void loadRecommendations();
+            }
+        } catch {
+            setActionError(t("action_failed"));
+        } finally {
+            setDeleting(false);
+            setConfirm(null);
+        }
+    };
+
+    const handleSaveDraft = async () => {
+        setSavingDraft(true);
+        setActionError(null);
+        try {
+            await saveTrip(tripId, { status: "draft" });
+            setDraftSaved(true);
+            window.setTimeout(() => setDraftSaved(false), 2500);
+        } catch {
+            setActionError(t("action_failed"));
+        } finally {
+            setSavingDraft(false);
+        }
+    };
+
+    const selectedItems = selectedDay?.items ?? [];
+    const dayFull = selectedItems.length >= TIME_SLOTS.length;
 
     return (
         <motion.div
@@ -495,8 +625,19 @@ const TripPage = () => {
                         <Share2 />
                         {t("share_trip")}
                     </button>
+
+                    <button onClick={handleSaveDraft} disabled={savingDraft}>
+                        {draftSaved ? <Check size={16} /> : <Save size={16} />}
+                        {draftSaved ? t("saved") : t("save_draft")}
+                    </button>
                 </div>
             </div>
+
+            {actionError && (
+                <p className={styles.actionError} role="alert">
+                    {actionError}
+                </p>
+            )}
 
             <div className={styles.main}>
                 <div className={styles.start}>
@@ -506,7 +647,7 @@ const TripPage = () => {
                                 key={day.id}
                                 onClick={() => setSelectedDayId(day.id)}
                                 className={`${styles.day} ${
-                                    selectedDayId === day.id ? styles.active : ""
+                                    selectedDay?.id === day.id ? styles.active : ""
                                 }`}
                             >
                                 <h3>
@@ -516,12 +657,40 @@ const TripPage = () => {
                                 </h3>
 
                                 <p>{t("day_label")}</p>
+
+                                {selectedDay?.id === day.id && (
+                                    <button
+                                        className={styles.dayDelete}
+                                        aria-label={t("delete_day_title")}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setConfirm({
+                                                kind: "day",
+                                                dayId: day.id,
+                                            });
+                                        }}
+                                    >
+                                        <X size={12} />
+                                    </button>
+                                )}
                             </div>
                         ))}
 
-                        <div className={styles.day}>
-                            <Plus />
-                        </div>
+                        <button
+                            className={styles.day}
+                            aria-label={t("add_day")}
+                            onClick={handleAddDay}
+                            disabled={addingDay}
+                        >
+                            {addingDay ? (
+                                <Loader2
+                                    size={20}
+                                    className="animate-spin text-(--light-fg)"
+                                />
+                            ) : (
+                                <Plus />
+                            )}
+                        </button>
                     </div>
 
                     <AnimatePresence mode="wait">
@@ -554,6 +723,13 @@ const TripPage = () => {
                                             <SortableItem
                                                 key={item.id}
                                                 item={item}
+                                                onRemove={() =>
+                                                    setConfirm({
+                                                        kind: "item",
+                                                        dayId: selectedDay.id,
+                                                        itemId: item.id,
+                                                    })
+                                                }
                                             />
                                         ))}
                                     </SortableContext>
@@ -569,7 +745,10 @@ const TripPage = () => {
                                                     }
                                                 >
                                                     <Image
-                                                        src={"/p2.jpg"}
+                                                        src={
+                                                            activeItem.image_url ||
+                                                            "/p2.jpg"
+                                                        }
                                                         alt={activeItem.title}
                                                         width={0}
                                                         height={0}
@@ -582,7 +761,9 @@ const TripPage = () => {
                                                 </div>
                                                 <div className={styles.details}>
                                                     <p className="flex items-center justify-start gap-2">
-                                                        <AlarmClock size={16} />
+                                                        <AlarmClock
+                                                            size={16}
+                                                        />
                                                         {
                                                             activeItem.start_time
                                                         }{" "}
@@ -616,9 +797,86 @@ const TripPage = () => {
                     </h1>
 
                     <div className={styles.recoms}>
-                        <p className="text-center">
-                            {t("no_recommendations")}
-                        </p>
+                        {recsLoading ? (
+                            <Loader2
+                                size={28}
+                                className="mx-auto animate-spin text-(--light-fg)"
+                            />
+                        ) : candidates.length === 0 ? (
+                            <p className={styles.recomEmpty}>
+                                {t("no_recommendations")}
+                            </p>
+                        ) : (
+                            candidates.map((c) => {
+                                const busy = addingItemId !== null;
+                                return (
+                                    <div
+                                        key={`${c.item_type}-${c.id}`}
+                                        className={styles.recomCard}
+                                    >
+                                        <div className={styles.recomThumb}>
+                                            {c.image_url ? (
+                                                <Image
+                                                    src={c.image_url}
+                                                    alt={c.title}
+                                                    fill
+                                                    sizes="56px"
+                                                    style={{
+                                                        objectFit: "cover",
+                                                    }}
+                                                />
+                                            ) : (
+                                                <div
+                                                    className={
+                                                        styles.recomThumbFallback
+                                                    }
+                                                />
+                                            )}
+                                        </div>
+
+                                        <div className={styles.recomInfo}>
+                                            <h4>{c.title}</h4>
+                                            {c.description ? (
+                                                <p>{c.description}</p>
+                                            ) : null}
+                                            {c.rating !== undefined && (
+                                                <span
+                                                    className={styles.recomMeta}
+                                                >
+                                                    ★ {c.rating.toFixed(1)}
+                                                    {c.price !== null &&
+                                                        c.price !== undefined &&
+                                                        ` · ${c.price.toLocaleString()} DZD`}
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        <button
+                                            className={styles.recomAdd}
+                                            aria-label={t("add_activity")}
+                                            title={
+                                                dayFull
+                                                    ? t("day_full")
+                                                    : t("add_activity")
+                                            }
+                                            disabled={dayFull || busy}
+                                            onClick={() =>
+                                                void handleAddActivity(c)
+                                            }
+                                        >
+                                            {addingItemId === c.id ? (
+                                                <Loader2
+                                                    size={16}
+                                                    className="animate-spin"
+                                                />
+                                            ) : (
+                                                <Plus size={16} />
+                                            )}
+                                        </button>
+                                    </div>
+                                );
+                            })
+                        )}
                     </div>
                 </div>
             </div>
@@ -627,6 +885,27 @@ const TripPage = () => {
                 <MapViewPopup
                     days={itenirary.days}
                     onClose={() => setShowMap(false)}
+                />
+            )}
+
+            {confirm && (
+                <ConfirmDialog
+                    open
+                    theme="danger"
+                    title={
+                        confirm.kind === "day"
+                            ? t("delete_day_title")
+                            : t("delete_item_title")
+                    }
+                    message={
+                        confirm.kind === "day"
+                            ? t("delete_day_message")
+                            : t("delete_item_message")
+                    }
+                    confirmLabel={t("delete_confirm")}
+                    loading={deleting}
+                    onConfirm={() => void handleConfirmDelete()}
+                    onCancel={() => setConfirm(null)}
                 />
             )}
         </motion.div>

@@ -69,6 +69,8 @@ export interface Itenirary {
     start_date: string;
     end_date: string;
     visibility: "private" | "public" | "shared";
+    status?: "draft" | "published";
+    preferences?: Record<string, unknown>;
     created_at: string;
     days?: IteneraryDay[];
 }
@@ -91,8 +93,23 @@ export interface IteneraryItem {
     description?: string;
     start_time: string;
     end_time: string;
+    sort_order?: number;
     item_type: "destination" | "listing" | "event" | (string & {});
     image_url?: string;
     latitude?: number;
     longitude?: number;
+}
+
+/** A scored candidate returned by GET /api/v1/trips/{id}/recommendations. */
+export interface TripCandidate {
+    item_type: "destination" | "listing" | "event";
+    id: number;
+    title: string;
+    description?: string | null;
+    latitude?: number | null;
+    longitude?: number | null;
+    price?: number | null;
+    rating?: number;
+    score: number;
+    image_url?: string | null;
 }

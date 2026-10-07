@@ -131,7 +131,17 @@
             }
         },
         "save_btn": "Enregistrer pour plus tard",
-        "back_btn": "Retour"
+        "back_btn": "Retour",
+        "preview": {
+            "dates_required": "Veuillez d'abord choisir vos dates de voyage."
+        },
+        "creating": "Création de votre voyage...",
+        "create_error": "Impossible de créer votre voyage. Veuillez réessayer.",
+        "login_required": {
+            "title": "Connectez-vous pour enregistrer votre voyage",
+            "message": "Vous devez avoir un compte pour générer votre itinéraire. Vos réponses sont conservées : vous pourrez reprendre juste après la connexion.",
+            "confirm": "Se connecter"
+        }
     },
     "auth": {
         "login": {
@@ -262,7 +272,21 @@
         "map_view": "Vue carte",
         "share_trip": "Partager le voyage",
         "day_label": "Jour",
-        "building": "Génération de votre itinéraire..."
+        "building": "Génération de votre itinéraire...",
+        "loading": "Chargement de votre voyage...",
+        "not_found": "Ce voyage n'existe pas ou vous n'y avez pas accès.",
+        "login_required": "Connectez-vous pour consulter ce voyage.",
+        "action_failed": "Une erreur est survenue. Veuillez réessayer.",
+        "day_full": "Cette journée compte déjà 4 activités. Retirez-en une pour en ajouter une autre.",
+        "add_activity": "Ajouter l'activité",
+        "add_day": "Ajouter une journée",
+        "save_draft": "Enregistrer le brouillon",
+        "saved": "Enregistré",
+        "delete_day_title": "Supprimer cette journée ?",
+        "delete_day_message": "Cela supprime la journée et toutes ses activités. Cette action est irréversible.",
+        "delete_item_title": "Retirer cette activité ?",
+        "delete_item_message": "Cela retire l'activité de votre itinéraire.",
+        "delete_confirm": "Supprimer"
     },
     "dashboard": {
         "title": "Tableau de bord",

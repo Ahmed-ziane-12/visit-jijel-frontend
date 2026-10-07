@@ -81,7 +81,15 @@ export default function LoginForm() {
                 sessionStorage.setItem("show_verify_alert", "1");
             }
 
-            if (data.role === "business_owner") {
+            const next = new URLSearchParams(window.location.search).get("next");
+            const safeNext =
+                next && next.startsWith("/") && !next.startsWith("//")
+                    ? next
+                    : null;
+
+            if (safeNext) {
+                router.push(safeNext);
+            } else if (data.role === "business_owner") {
                 router.push("/dashboard/");
             } else {
                 router.push("/");

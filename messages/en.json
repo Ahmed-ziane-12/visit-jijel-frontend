@@ -131,7 +131,17 @@
             }
         },
         "save_btn": "Save For Later",
-        "back_btn": "Back"
+        "back_btn": "Back",
+        "preview": {
+            "dates_required": "Please choose your travel dates first."
+        },
+        "creating": "Creating your trip...",
+        "create_error": "We couldn't create your trip. Please try again.",
+        "login_required": {
+            "title": "Sign in to save your trip",
+            "message": "You'll need an account to generate your itinerary. Your answers are saved, so you can continue right after signing in.",
+            "confirm": "Sign in"
+        }
     },
     "auth": {
         "login": {
@@ -262,7 +272,21 @@
         "map_view": "Map View",
         "share_trip": "Share Trip",
         "day_label": "Day",
-        "building": "Building your itinerary..."
+        "building": "Building your itinerary...",
+        "loading": "Loading your trip...",
+        "not_found": "This trip doesn't exist or you don't have access to it.",
+        "login_required": "Please sign in to view this trip.",
+        "action_failed": "Something went wrong. Please try again.",
+        "day_full": "This day already has 4 activities. Remove one to add another.",
+        "add_activity": "Add activity",
+        "add_day": "Add day",
+        "save_draft": "Save Draft",
+        "saved": "Saved",
+        "delete_day_title": "Delete this day?",
+        "delete_day_message": "This removes the day and all its activities. This action cannot be undone.",
+        "delete_item_title": "Remove this activity?",
+        "delete_item_message": "This removes the activity from your itinerary.",
+        "delete_confirm": "Delete"
     },
     "dashboard": {
         "title": "Dashboard",
