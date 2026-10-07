@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { notFound, useParams } from "next/navigation";
+import { notFound, useParams, useRouter } from "next/navigation";
 import axios from "@/lib/axios";
 import styles from "./page.module.css";
 import Map from "@/app/[locale]/components/Map/Map";
@@ -10,13 +10,12 @@ import Image from "next/image";
 import {
     BadgeInfo,
     CirclePlus,
-    Clock,
-    Landmark,
+    Loader2,
     MapPin,
-    Phone,
     Play,
     Share2,
     Tag,
+    X,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -51,6 +50,11 @@ export default function ExplorePage() {
     const { user, isAuthenticated } = useAuth();
     const [showcaseOpen, setShowcaseOpen] = useState(false);
     const [showcaseIndex, setShowcaseIndex] = useState(0);
+    const [shareOpen, setShareOpen] = useState(false);
+    const [shareBody, setShareBody] = useState("");
+    const [sharing, setSharing] = useState(false);
+    const [feedbackTitle, setFeedbackTitle] = useState(t("review_title"));
+    const router = useRouter();
 
     const showcaseItems = useMemo(
         () =>
@@ -102,6 +106,37 @@ export default function ExplorePage() {
     const openShowcaseAt = (index: number) => {
         setShowcaseIndex(index);
         setShowcaseOpen(true);
+    };
+
+    const handleShare = async () => {
+        if (!isAuthenticated || !user) {
+            router.push(`/login?next=/explore/${id}`);
+            return;
+        }
+        if (!destination || sharing) return;
+
+        setSharing(true);
+        try {
+            await axios.post("/api/v1/posts", {
+                body: shareBody.trim() || undefined,
+                shareable_type: "destination",
+                shareable_id: destination.id,
+            });
+            setShareOpen(false);
+            setShareBody("");
+            setFeedbackTitle(t("share_title"));
+            setfeedbackTheme("success");
+            setfeedback(t("share_success"));
+            setfeedbackOpen(true);
+        } catch (error) {
+            console.error("Failed to share destination:", error);
+            setFeedbackTitle(t("share_title"));
+            setfeedbackTheme("warning");
+            setfeedback(t("share_error"));
+            setfeedbackOpen(true);
+        } finally {
+            setSharing(false);
+        }
     };
 
     const handleAddReview = async (rating: number, body: string) => {
@@ -248,7 +283,7 @@ export default function ExplorePage() {
             <ConfirmDialog
                 open={feedbackOpen}
                 theme={feedbackTheme}
-                title={t("review_title")}
+                title={feedbackTitle}
                 message={feedback}
                 confirmLabel={t("review_confirm")}
                 cancelLabel={t("review_cancel")}
@@ -262,6 +297,57 @@ export default function ExplorePage() {
                 open={showcaseOpen}
                 onClose={() => setShowcaseOpen(false)}
             />
+            {shareOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+                    <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl">
+                        <div className="mb-3 flex items-center justify-between">
+                            <h2 className="text-lg font-semibold">
+                                {t("share_title")}
+                            </h2>
+                            <button
+                                onClick={() => setShareOpen(false)}
+                                aria-label={t("review_cancel")}
+                                className="flex h-8 w-8 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100"
+                            >
+                                <X size={18} />
+                            </button>
+                        </div>
+                        <p className="mb-3 text-sm font-medium text-gray-700">
+                            {localized?.name}
+                        </p>
+                        <textarea
+                            value={shareBody}
+                            onChange={(e) => setShareBody(e.target.value)}
+                            placeholder={t("share_placeholder")}
+                            rows={4}
+                            className="w-full resize-none rounded-xl border border-(--border) p-3 text-sm outline-none focus:border-(--primary-clr)"
+                        />
+                        <div className="mt-4 flex justify-end gap-2">
+                            <button
+                                onClick={() => setShareOpen(false)}
+                                className="rounded-full border border-(--border) px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50"
+                            >
+                                {t("review_cancel")}
+                            </button>
+                            <button
+                                onClick={handleShare}
+                                disabled={sharing}
+                                className="flex items-center gap-2 rounded-full bg-(--primary-clr) px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
+                            >
+                                {sharing ? (
+                                    <Loader2
+                                        size={16}
+                                        className="animate-spin"
+                                    />
+                                ) : (
+                                    <Share2 size={16} />
+                                )}
+                                {t("share")}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
             {loading ? (
                 <div className="flex items-center justify-center min-h-screen">
                     <div className="text-center">
@@ -368,47 +454,14 @@ export default function ExplorePage() {
                                 />
                             </div>
                             <div className={styles.additional}>
-                                <div className={styles.info}>
-                                    <div className={styles.icon}>
-                                        <Clock className="text-(--light-fg) w-6 h-6" />
-                                    </div>
-                                    <div>
-                                        <h1>{t("opening_hours")}</h1>
-                                        <p className="text-[0.9rem] font-bold">
-                                            {t("opening_hours_value")}
-                                        </p>
-                                    </div>
-                                </div>
-                                <div className={styles.info}>
-                                    <div className={styles.icon}>
-                                        <Phone
-                                            className="text-(--light-fg)"
-                                            size={24}
-                                        />
-                                    </div>
-                                    <div>
-                                        <h1>{t("contact")}</h1>
-                                        <p className="text-[0.9rem] font-bold">
-                                            {t("contact_value")}
-                                        </p>
-                                    </div>
-                                </div>
-                                <div className={styles.info}>
-                                    <div className={styles.icon}>
-                                        <Landmark className="text-(--light-fg) w-6 h-6" />
-                                    </div>
-                                    <div>
-                                        <h1>{t("facilities")}</h1>
-                                        <p className="text-[0.9rem] font-bold">
-                                            {t("facilities_value")}
-                                        </p>
-                                    </div>
-                                </div>
                                 <button className="p-4 flex justify-center items-center gap-4 w-full bg-(--primary-clr) text-white rounded-full">
                                     <CirclePlus />
                                     {t("add_to_trip")}
                                 </button>
-                                <button className="p-4 flex justify-center items-center gap-4 w-full text-(--light-fg) bg-[#00000015] rounded-full">
+                                <button
+                                    onClick={() => setShareOpen(true)}
+                                    className="p-4 flex justify-center items-center gap-4 w-full text-(--light-fg) bg-[#00000015] rounded-full"
+                                >
                                     <Share2 className="text-(--light-fg) w-6 h-6" />{" "}
                                     {t("share")}
                                 </button>
