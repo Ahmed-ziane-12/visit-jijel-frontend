@@ -19,6 +19,7 @@ import {
     Pencil,
 } from "lucide-react";
 import axios from "@/lib/axios";
+import Link from "next/link";
 import { getEcho } from "@/lib/broadcast";
 import { useAuth } from "@/context/AuthContext";
 import { Post, Comment, PaginatedResponse } from "@/types/social";
@@ -316,6 +317,78 @@ function ShareModal({
     );
 }
 
+// ── Shared Item Card ───────────────────────────────────────
+function ShareableCard({
+    shareable,
+    type,
+}: {
+    shareable: Post["shareable"];
+    type: string | null;
+}) {
+    if (!shareable) return null;
+
+    const href =
+        type === "destination"
+            ? `/explore/${shareable.id}`
+            : type === "business"
+              ? `/businesses/${shareable.id}`
+              : null;
+
+    const images = shareable.media ?? [];
+    const cover =
+        images.find((m) => m.is_cover)?.secure_url ?? images[0]?.secure_url;
+
+    const content = (
+        <>
+            <div className="flex items-start gap-3">
+                <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg border border-(--border) bg-white">
+                    {cover ? (
+                        <img
+                            src={cover}
+                            alt=""
+                            className="h-full w-full object-cover"
+                        />
+                    ) : (
+                        <div className="flex h-full w-full items-center justify-center bg-(--dim-bg) text-[var(--light-fg)]">
+                            <MapPin size={20} />
+                        </div>
+                    )}
+                </div>
+                <div className="min-w-0 flex-1">
+                    <p className="text-xs font-medium text-[var(--primary-clr)]">
+                        Shared {type ?? "item"}
+                    </p>
+                    <p className="mt-0.5 truncate text-sm font-bold">
+                        {shareable.name ?? "Untitled"}
+                    </p>
+                    {shareable.description && (
+                        <p className="line-clamp-2 text-xs text-[var(--light-fg)]">
+                            {shareable.description}
+                        </p>
+                    )}
+                </div>
+            </div>
+        </>
+    );
+
+    if (!href) {
+        return (
+            <div className="mt-3 rounded-lg border border-(--border) bg-(--dim-bg) p-3">
+                {content}
+            </div>
+        );
+    }
+
+    return (
+        <Link
+            href={href}
+            className="mt-3 block rounded-lg border border-(--border) bg-(--dim-bg) p-3 transition-colors hover:border-(--primary-clr)"
+        >
+            {content}
+        </Link>
+    );
+}
+
 // ── Post Card ──────────────────────────────────────────────
 function PostCard({
     post,
@@ -581,19 +654,10 @@ function PostCard({
 
                 {/* Shared item */}
                 {post.shareable && (
-                    <div className="mt-3 rounded-lg border border-(--border) bg-(--dim-bg) p-3">
-                        <p className="text-xs font-medium text-[var(--primary-clr)]">
-                            Shared {post.shareable_type}
-                        </p>
-                        <p className="mt-1 text-sm font-bold">
-                            {post.shareable.name ?? "Untitled"}
-                        </p>
-                        {post.shareable.description && (
-                            <p className="mt-0.5 text-xs text-[var(--light-fg)] line-clamp-2">
-                                {post.shareable.description}
-                            </p>
-                        )}
-                    </div>
+                    <ShareableCard
+                        shareable={post.shareable}
+                        type={post.shareable_type}
+                    />
                 )}
 
                 {/* Shared post */}

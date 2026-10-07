@@ -44,6 +44,7 @@ export interface Post {
         name?: string;
         description?: string;
         secure_url?: string;
+        media?: Media[];
         [key: string]: unknown;
     };
 }
