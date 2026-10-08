@@ -137,7 +137,7 @@ function ShareModal({
             onClick={onClose}
         >
             <div
-                className="w-full max-w-md rounded-xl bg-white shadow-xl"
+                className="w-full max-w-md rounded-xl bg-(--background) shadow-xl"
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="border-b border-(--border) p-4">
@@ -341,7 +341,7 @@ function ShareableCard({
     const content = (
         <>
             <div className="flex items-start gap-3">
-                <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg border border-(--border) bg-white">
+                <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg border border-(--border) bg-(--background)">
                     {cover ? (
                         <img
                             src={cover}
@@ -569,7 +569,7 @@ function PostCard({
                                 <Ellipsis size={14} />
                             </button>
                             {showMenu && (
-                                <div className="absolute right-0 top-8 z-10 w-36 rounded-lg border border-(--border) bg-white py-1 shadow-lg">
+                                <div className="absolute right-0 top-8 z-10 w-36 rounded-lg border border-(--border) bg-(--background) py-1 shadow-lg">
                                     <button
                                         onClick={() => {
                                             setShowMenu(false);
@@ -857,7 +857,7 @@ function CommentItem({
                             onKeyDown={(e) =>
                                 e.key === "Enter" && handleReply()
                             }
-                            className="flex-1 rounded-full border border-(--border) bg-white px-3 py-1.5 text-[11px] outline-none focus:border-(--primary-clr)"
+                            className="flex-1 rounded-full border border-(--border) bg-(--background) px-3 py-1.5 text-[11px] outline-none focus:border-(--primary-clr)"
                         />
                         <button
                             onClick={handleReply}
@@ -1174,7 +1174,7 @@ export default function PostsTab({
 
             {/* Empty */}
             {!loading && posts.length === 0 && (
-                <div className="rounded-xl border border-(--border) bg-white py-12 text-center text-sm text-[var(--light-fg)]">
+                <div className="rounded-xl border border-(--border) bg-(--background) py-12 text-center text-sm text-[var(--light-fg)]">
                     No posts yet.
                 </div>
             )}
