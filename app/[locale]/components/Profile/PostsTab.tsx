@@ -417,7 +417,9 @@ function PostCard({
     const menuRef = useRef<HTMLDivElement>(null);
 
     const isOwner = currentUserId === post.user_id;
-    const likesCount = (post.likes ?? []).filter((l) => l.type === "like").length;
+    const likesCount = (post.likes ?? []).filter(
+        (l) => l.type === "like",
+    ).length;
     const dislikesCount = (post.likes ?? []).filter(
         (l) => l.type === "dislike",
     ).length;
@@ -441,9 +443,7 @@ function PostCard({
                               type: "like" as const,
                           },
                       ]
-                    : post.likes.filter(
-                          (l) => l.user_id !== currentUserId,
-                      ),
+                    : post.likes.filter((l) => l.user_id !== currentUserId),
             );
         } catch {
             /* empty */
@@ -452,9 +452,7 @@ function PostCard({
 
     const handleDislike = async () => {
         try {
-            const res = await axios.post(
-                `/api/v1/posts/${post.id}/dislike`,
-            );
+            const res = await axios.post(`/api/v1/posts/${post.id}/dislike`);
             onLikeToggled(
                 post.id,
                 res.data.disliked !== false
@@ -470,9 +468,7 @@ function PostCard({
                               type: "dislike" as const,
                           },
                       ]
-                    : post.likes.filter(
-                          (l) => l.user_id !== currentUserId,
-                      ),
+                    : post.likes.filter((l) => l.user_id !== currentUserId),
             );
         } catch {
             /* empty */
@@ -483,10 +479,9 @@ function PostCard({
         if (!commentText.trim() || submitting) return;
         setSubmitting(true);
         try {
-            const res = await axios.post(
-                `/api/v1/posts/${post.id}/comments`,
-                { body: commentText },
-            );
+            const res = await axios.post(`/api/v1/posts/${post.id}/comments`, {
+                body: commentText,
+            });
             onCommentAdded(post.id, res.data);
             setCommentText("");
             setShowComments(true);
@@ -511,7 +506,10 @@ function PostCard({
     useEffect(() => {
         if (!showMenu) return;
         const handleClick = (e: MouseEvent) => {
-            if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+            if (
+                menuRef.current &&
+                !menuRef.current.contains(e.target as Node)
+            ) {
                 setShowMenu(false);
             }
         };
@@ -544,7 +542,7 @@ function PostCard({
 
     return (
         <>
-            <div className="rounded-xl border border-(--border) bg-white p-4">
+            <div className="rounded-xl border border-(--border) bg-(--background) p-4">
                 {/* Post header */}
                 <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
@@ -624,9 +622,7 @@ function PostCard({
                         </div>
                     </div>
                 ) : post.body ? (
-                    <p className="mt-3 text-sm leading-relaxed">
-                        {post.body}
-                    </p>
+                    <p className="mt-3 text-sm leading-relaxed">{post.body}</p>
                 ) : null}
 
                 {/* Post media */}
@@ -705,7 +701,8 @@ function PostCard({
                         className="flex items-center gap-1 text-xs font-medium text-[var(--light-fg)] transition-colors hover:text-(--primary-clr)"
                     >
                         <MessageCircle size={14} />
-                        {(post.comments ?? []).length > 0 && (post.comments ?? []).length}
+                        {(post.comments ?? []).length > 0 &&
+                            (post.comments ?? []).length}
                     </button>
                     <button
                         onClick={() => setShowShareModal(true)}
@@ -756,10 +753,12 @@ function PostCard({
                 <ShareModal
                     onClose={() => setShowShareModal(false)}
                     onShareItem={(type, id, name, description) => {
-                        axios.post("/api/v1/posts", {
-                            shareable_type: type,
-                            shareable_id: id,
-                        }).then((res) => onReShareCreated(res.data));
+                        axios
+                            .post("/api/v1/posts", {
+                                shareable_type: type,
+                                shareable_id: id,
+                            })
+                            .then((res) => onReShareCreated(res.data));
                     }}
                     onReShare={handleReShare}
                 />
@@ -778,9 +777,7 @@ function CommentItem({
 }) {
     const [replyText, setReplyText] = useState("");
     const [showReply, setShowReply] = useState(false);
-    const [replies, setReplies] = useState<Comment[]>(
-        comment.replies ?? [],
-    );
+    const [replies, setReplies] = useState<Comment[]>(comment.replies ?? []);
     const [submitting, setSubmitting] = useState(false);
 
     const likesCount = (comment.likes ?? []).filter(
@@ -875,10 +872,7 @@ function CommentItem({
                 {replies.length > 0 && (
                     <div className="mt-2 flex flex-col gap-2">
                         {replies.map((r) => (
-                            <div
-                                key={r.id}
-                                className="ml-4 flex gap-2"
-                            >
+                            <div key={r.id} className="ml-4 flex gap-2">
                                 <img
                                     src={userAvatar(r.user)}
                                     alt=""
@@ -940,9 +934,7 @@ export default function PostsTab({
                 } else {
                     setPosts((prev) => [...prev, ...res.data.data]);
                 }
-                setHasMore(
-                    res.data.current_page < res.data.last_page,
-                );
+                setHasMore(res.data.current_page < res.data.last_page);
             } catch {
                 /* empty */
             } finally {
@@ -1065,9 +1057,7 @@ export default function PostsTab({
     };
 
     const handleLikeToggled = (postId: number, likes: Post["likes"]) => {
-        setPosts(
-            posts.map((p) => (p.id === postId ? { ...p, likes } : p)),
-        );
+        setPosts(posts.map((p) => (p.id === postId ? { ...p, likes } : p)));
     };
 
     const handleReShareCreated = (post: Post) => {
@@ -1095,15 +1085,14 @@ export default function PostsTab({
     };
 
     const currentUserAvatar =
-        user?.profile?.media?.find(
-            (m: Media) => m.collection === "profiles",
-        )?.secure_url ?? "https://placehold.net/avatar-5.png";
+        user?.profile?.media?.find((m: Media) => m.collection === "profiles")
+            ?.secure_url ?? "https://placehold.net/avatar-5.png";
 
     return (
         <div className="flex flex-col gap-4">
             {/* Composer (own profile only) */}
             {isOwnProfile && (
-                <div className="rounded-xl border border-(--border) bg-white p-4">
+                <div className="rounded-xl border border-(--border) bg-(--background) p-4">
                     <div className="flex items-center gap-3">
                         <img
                             src={currentUserAvatar}
@@ -1114,12 +1103,8 @@ export default function PostsTab({
                             type="text"
                             placeholder="Share your thoughts..."
                             value={composerText}
-                            onChange={(e) =>
-                                setComposerText(e.target.value)
-                            }
-                            onKeyDown={(e) =>
-                                e.key === "Enter" && handlePost()
-                            }
+                            onChange={(e) => setComposerText(e.target.value)}
+                            onKeyDown={(e) => e.key === "Enter" && handlePost()}
                             className="flex-1 rounded-full border border-(--border) bg-(--dim-bg) px-4 py-2.5 text-sm outline-none focus:border-(--primary-clr)"
                         />
                     </div>
