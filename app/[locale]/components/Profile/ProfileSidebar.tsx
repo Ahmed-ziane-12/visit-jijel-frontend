@@ -39,7 +39,7 @@ export default function ProfileSidebar({
     return (
         <div className="flex flex-col gap-4">
             {/* About Card */}
-            <div className="rounded-xl border border-(--border) bg-white p-5">
+            <div className="rounded-xl border border-(--border) bg-(--background) p-5">
                 <h3 className="mb-4 text-base font-bold">About</h3>
 
                 {bio && (
@@ -98,7 +98,7 @@ export default function ProfileSidebar({
 
             {/* Photos Card */}
             {photos.length > 0 && (
-                <div className="rounded-xl border border-(--border) bg-white p-5">
+                <div className="rounded-xl border border-(--border) bg-(--background) p-5">
                     <div className="mb-4 flex items-center justify-between">
                         <h3 className="text-base font-bold">Photos</h3>
                         <button className="text-xs font-medium text-(--primary-clr) hover:underline">
