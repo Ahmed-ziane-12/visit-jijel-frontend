@@ -18,7 +18,7 @@ const springScale = {
     initial: { scale: 0 },
     animate: { scale: 1 },
     transition: { type: "spring" as const, stiffness: 200, damping: 10 },
-};
+} as const;
 
 export default function VerifyEmailPage() {
     const searchParams = useSearchParams();
@@ -93,7 +93,7 @@ export default function VerifyEmailPage() {
                             width: 48,
                             height: 48,
                             margin: "0 auto 1.25rem",
-                            color: "var(--primary-clr)",
+                            color: var(--primary-clr),
                         }}
                     >
                         <Loader2 size={48} />
@@ -101,14 +101,14 @@ export default function VerifyEmailPage() {
                     <p
                         style={{
                             fontSize: "0.9rem",
-                            color: "var(--foreground)",
+                            color: var(--foreground),
                             lineHeight: 1.6,
                             margin: 0,
                         }}
                     >
                         {t("verifying")}
                         <br />
-                        <span style={{ fontSize: "0.82rem", color: "var(--light-fg)" }}>
+                        <span style={{ fontSize: "0.82rem", color: var(--light-fg) }}>
                             {t("please_wait")}
                         </span>
                     </p>
@@ -130,7 +130,7 @@ export default function VerifyEmailPage() {
                     <p
                         style={{
                             fontSize: "0.9rem",
-                            color: "var(--foreground)",
+                            color: var(--foreground),
                             lineHeight: 1.6,
                             marginBottom: "1.5rem",
                         }}
@@ -201,7 +201,7 @@ export default function VerifyEmailPage() {
                             className={styles.btnSubmit}
                             style={{
                                 background: "transparent",
-                                color: "var(--primary-clr)",
+                                color: var(--primary-clr),
                                 border: "1.5px solid var(--primary-clr)",
                             }}
                         >

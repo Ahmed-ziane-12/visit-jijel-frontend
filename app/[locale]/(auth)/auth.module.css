@@ -5,6 +5,8 @@
 .container {
     display: flex;
     height: 100vh;
+    background: var(--background);
+    color: var(--foreground);
 }
 
 /* LEFT */
@@ -24,7 +26,7 @@
     color: white;
     font-size: 1.5rem;
     text-align: center;
-    background: #e9934463;
+    background: rgba(235, 102, 43, 0.39);
     backdrop-filter: blur(5px);
 }
 
@@ -53,7 +55,7 @@
 
 .subtitle {
     margin-bottom: 1.5rem;
-    color: #666;
+    color: var(--light-fg);
 }
 
 .roleSwitch {
@@ -66,13 +68,14 @@
     flex: 1;
     padding: 10px;
     border-radius: 8px;
-    border: 1px solid #ccc;
+    border: 1px solid var(--border);
     cursor: pointer;
-    background: white;
+    background: var(--background);
+    color: var(--foreground);
 }
 
 .active {
-    background: #ff6b2c;
+    background: var(--primary-clr);
     color: white;
     border: none;
 }
@@ -82,13 +85,13 @@
     padding: 12px;
     margin-bottom: 1rem;
     border-radius: 8px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--border);
 }
 
 .button {
     width: 100%;
     padding: 12px;
-    background: #ff6b2c;
+    background: var(--primary-clr);
     color: white;
     border: none;
     border-radius: 8px;
@@ -111,7 +114,7 @@
     left: 0;
     right: 0;
     height: 3px;
-    background: linear-gradient(90deg, #eb662b, #f08455);
+    background: linear-gradient(90deg, var(--primary-clr), #f08455);
     border-radius: 2px 2px 0 0;
 }
 
@@ -125,20 +128,20 @@
     font-weight: 500;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: #eb662b;
+    color: var(--primary-clr);
     margin-bottom: 0.5rem;
 }
 
 .title {
     font-size: 1.8rem;
     font-weight: 700;
-    color: #1a1714;
+    color: var(--foreground);
     line-height: 1.2;
 }
 
 .title em {
     font-style: italic;
-    color: #eb662b;
+    color: var(--primary-clr);
 }
 
 /* Alert */
@@ -196,7 +199,7 @@
     font-weight: 500;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: #4a4540;
+    color: var(--light-fg);
     margin-bottom: 0.45rem;
 }
 
@@ -206,13 +209,13 @@
     padding: 0 1rem;
     font-family: inherit;
     font-size: 0.95rem;
-    color: #1a1714;
+    color: var(--foreground);
     outline: none;
 }
 
 .field:focus-within {
     border-color: var(--primary-clr);
-    background: #ffffff;
+    background: var(--background);
 }
 
 .inputError {
@@ -235,9 +238,9 @@
 
 .forgot a {
     font-size: 0.75rem;
-    color: #4a4540;
+    color: var(--light-fg);
     text-decoration: none;
-    border-bottom: 1px solid #d4ccbc;
+    border-bottom: 1px solid var(--border);
     padding-bottom: 1px;
     transition:
         color 0.2s,
@@ -245,8 +248,8 @@
 }
 
 .forgot a:hover {
-    color: #eb662b;
-    border-color: #eb662b;
+    color: var(--primary-clr);
+    border-color: var(--primary-clr);
 }
 
 /* Role selector */
@@ -261,7 +264,7 @@
     font-weight: 500;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: #4a4540;
+    color: var(--light-fg);
     margin-bottom: 0.6rem;
     display: block;
 }
@@ -277,11 +280,11 @@
     flex-direction: column;
     align-items: center;
     text-align: center;
-    border: 1.5px solid #d4ccbc;
+    border: 1.5px solid var(--border);
     border-radius: 8px;
     padding: 0.85rem 0.75rem;
     cursor: pointer;
-    background: #f5f0e8;
+    background: var(--dim-bg);
     transition:
         border-color 0.2s,
         background 0.2s;
@@ -289,12 +292,12 @@
 }
 
 .roleCard:hover {
-    border-color: #b9b5b0;
+    border-color: color-mix(in srgb, var(--border) 70%, black);
 }
 
 .roleCardActive {
-    border-color: #eb662b !important;
-    background: #fff3ee;
+    border-color: var(--primary-clr) !important;
+    background: var(--lighter-primary);
 }
 
 .roleRadio {
@@ -312,12 +315,12 @@
 .roleName {
     font-size: 0.8rem;
     font-weight: 500;
-    color: #1a1714;
+    color: var(--foreground);
 }
 
 .roleDesc {
     font-size: 0.7rem;
-    color: #4a4540;
+    color: var(--light-fg);
     margin-top: 0.15rem;
     line-height: 1.4;
 }
@@ -332,8 +335,8 @@
     height: 48px;
     border: none;
     border-radius: 8px;
-    background: #1a1714;
-    color: #ffffff;
+    background: var(--foreground);
+    color: var(--background);
     font-family: inherit;
     font-size: 0.85rem;
     font-weight: 500;
@@ -347,7 +350,7 @@
 }
 
 .btnSubmit:hover {
-    background: #2d2820;
+    background: color-mix(in srgb, var(--foreground) 90%, black);
 }
 .btnSubmit:active {
     transform: scale(0.99);
@@ -362,11 +365,11 @@
     text-align: center;
     margin-top: 1.5rem;
     font-size: 0.8rem;
-    color: #4a4540;
+    color: var(--light-fg);
 }
 
 .note a {
-    color: #eb662b;
+    color: var(--primary-clr);
     text-decoration: none;
     font-weight: 500;
 }
@@ -398,9 +401,9 @@
     width: 16px;
     height: 16px;
     min-width: 16px;
-    border: 1.5px solid #d4ccbc;
+    border: 1.5px solid var(--border);
     border-radius: 2px;
-    background: #f5f0e8;
+    background: var(--dim-bg);
     cursor: pointer;
     transition:
         border-color 0.2s,
@@ -409,8 +412,8 @@
 }
 
 .rememberCheckbox:checked {
-    background: #eb662b;
-    border-color: #eb662b;
+    background: var(--primary-clr);
+    border-color: var(--primary-clr);
 }
 
 /* Checkmark */
@@ -421,34 +424,34 @@
     left: 4px;
     width: 5px;
     height: 9px;
-    border: 2px solid #ffffff;
+    border: 2px solid var(--background);
     border-top: none;
     border-left: none;
     transform: rotate(45deg);
 }
 
 .rememberCheckbox:focus-visible {
-    outline: 2px solid #eb662b;
+    outline: 2px solid var(--primary-clr);
     outline-offset: 2px;
 }
 
 .rememberText {
     font-size: 0.82rem;
-    color: #4a4540;
+    color: var(--light-fg);
     transition: color 0.2s;
 }
 
 .rememberLabel:has(.rememberCheckbox:checked) .rememberText {
-    color: #eb662b;
+    color: var(--primary-clr);
 }
 
 .rememberNote {
     font-size: 0.72rem;
-    color: #4a4540;
+    color: var(--light-fg);
     margin-top: -0.85rem;
     margin-bottom: 1.25rem;
     padding-left: 1.5rem;
-    border-left: 2px solid #eb662b;
+    border-left: 2px solid var(--primary-clr);
     line-height: 1.5;
 }
 
@@ -477,13 +480,13 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #6b7280;
+    color: var(--light-fg);
     transition: color 0.2s ease;
     border-radius: 0.375rem;
 }
 
 .eyeButton:hover {
-    color: #374151;
+    color: var(--foreground);
 }
 
 .eyeButton:focus {
