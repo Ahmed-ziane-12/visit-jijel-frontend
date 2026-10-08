@@ -511,7 +511,235 @@ export default function ProfilePage() {
                     <div className={styles.tabContent}>
                         <div className={styles.settingsContainer}>
                             <h2>{t("settings_title")}</h2>
-                            <p>{t("settings_desc")}</p>
+                            <div
+                                style={{
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    gap: "1rem",
+                                    marginTop: "1.5rem",
+                                    alignItems: "flex-start",
+                                    width: "100%",
+                                    maxWidth: "600px",
+                                }}
+                            >
+                                <div
+                                    style={{
+                                        display: "flex",
+                                        justifyContent: "space-between",
+                                        alignItems: "center",
+                                        width: "100%",
+                                        padding: "1rem",
+                                        backgroundColor: "var(--background)",
+                                        border: "1px solid var(--border)",
+                                        borderRadius: "0.75rem",
+                                    }}
+                                >
+                                    <div>
+                                        <h3
+                                            style={{
+                                                fontSize: "0.95rem",
+                                                fontWeight: 600,
+                                                color: "var(--foreground)",
+                                                margin: 0,
+                                            }}
+                                        >
+                                            {t("name_label")}
+                                        </h3>
+                                        <p
+                                            style={{
+                                                fontSize: "0.85rem",
+                                                color: "var(--light-fg)",
+                                                margin: "0.25rem 0 0",
+                                            }}
+                                        >
+                                            {profile?.name}
+                                        </p>
+                                    </div>
+                                    <button
+                                        className={styles.editButton}
+                                        onClick={() => setIsEditing(true)}
+                                    >
+                                        <User size={16} />
+                                        {t("edit_profile")}
+                                    </button>
+                                </div>
+
+                                <div
+                                    style={{
+                                        display: "flex",
+                                        justifyContent: "space-between",
+                                        alignItems: "center",
+                                        width: "100%",
+                                        padding: "1rem",
+                                        backgroundColor: "var(--background)",
+                                        border: "1px solid var(--border)",
+                                        borderRadius: "0.75rem",
+                                    }}
+                                >
+                                    <div>
+                                        <h3
+                                            style={{
+                                                fontSize: "0.95rem",
+                                                fontWeight: 600,
+                                                color: "var(--foreground)",
+                                                margin: 0,
+                                            }}
+                                        >
+                                            {t("email_label")}
+                                        </h3>
+                                        <p
+                                            style={{
+                                                fontSize: "0.85rem",
+                                                color: "var(--light-fg)",
+                                                margin: "0.25rem 0 0",
+                                            }}
+                                        >
+                                            {profile?.email}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {profile?.phone && (
+                                    <div
+                                        style={{
+                                            display: "flex",
+                                            justifyContent: "space-between",
+                                            alignItems: "center",
+                                            width: "100%",
+                                            padding: "1rem",
+                                            backgroundColor: "var(--background)",
+                                            border: "1px solid var(--border)",
+                                            borderRadius: "0.75rem",
+                                        }}
+                                    >
+                                        <div>
+                                            <h3
+                                                style={{
+                                                    fontSize: "0.95rem",
+                                                    fontWeight: 600,
+                                                    color: "var(--foreground)",
+                                                    margin: 0,
+                                                }}
+                                            >
+                                                {t("phone_label")}
+                                            </h3>
+                                            <p
+                                                style={{
+                                                    fontSize: "0.85rem",
+                                                    color: "var(--light-fg)",
+                                                    margin: "0.25rem 0 0",
+                                                }}
+                                            >
+                                                {profile?.phone}
+                                            </p>
+                                        </div>
+                                        <button
+                                            className={styles.editButton}
+                                            onClick={() => setIsEditing(true)}
+                                        >
+                                            <User size={16} />
+                                            {t("edit_profile")}
+                                        </button>
+                                    </div>
+                                )}
+
+                                {profile?.bio && (
+                                    <div
+                                        style={{
+                                            display: "flex",
+                                            flexDirection: "column",
+                                            gap: "0.5rem",
+                                            width: "100%",
+                                            padding: "1rem",
+                                            backgroundColor: "var(--background)",
+                                            border: "1px solid var(--border)",
+                                            borderRadius: "0.75rem",
+                                        }}
+                                    >
+                                        <h3
+                                            style={{
+                                                fontSize: "0.95rem",
+                                                fontWeight: 600,
+                                                color: "var(--foreground)",
+                                                margin: 0,
+                                            }}
+                                        >
+                                            {t("bio_label")}
+                                        </h3>
+                                        <p
+                                            style={{
+                                                fontSize: "0.85rem",
+                                                color: "var(--light-fg)",
+                                                margin: 0,
+                                                lineHeight: 1.6,
+                                            }}
+                                        >
+                                            {profile?.bio}
+                                        </p>
+                                    </div>
+                                )}
+
+                                {user?.profile?.role && (
+                                    <div
+                                        style={{
+                                            display: "flex",
+                                            justifyContent: "space-between",
+                                            alignItems: "center",
+                                            width: "100%",
+                                            padding: "1rem",
+                                            backgroundColor: "var(--background)",
+                                            border: "1px solid var(--border)",
+                                            borderRadius: "0.75rem",
+                                        }}
+                                    >
+                                        <div>
+                                            <h3
+                                                style={{
+                                                    fontSize: "0.95rem",
+                                                    fontWeight: 600,
+                                                    color: "var(--foreground)",
+                                                    margin: 0,
+                                                }}
+                                            >
+                                                Role
+                                            </h3>
+                                            <p
+                                                style={{
+                                                    fontSize: "0.85rem",
+                                                    color: "var(--light-fg)",
+                                                    margin: "0.25rem 0 0",
+                                                }}
+                                            >
+                                                {user.profile.role ===
+                                                "business_owner"
+                                                    ? "Business Owner"
+                                                    : "Traveler"}
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div
+                                    style={{
+                                        marginTop: "0.5rem",
+                                        padding: "1rem",
+                                        backgroundColor: "var(--dim-bg)",
+                                        border: "1px solid var(--border)",
+                                        borderRadius: "0.75rem",
+                                        width: "100%",
+                                    }}
+                                >
+                                    <p
+                                        style={{
+                                            fontSize: "0.85rem",
+                                            color: "var(--light-fg)",
+                                            margin: 0,
+                                        }}
+                                    >
+                                        {t("settings_desc")}
+                                    </p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 );
