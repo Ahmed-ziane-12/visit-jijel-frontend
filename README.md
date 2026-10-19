@@ -61,7 +61,7 @@ The platform brings tourism information together in one place and helps users or
 Clone the repository:
 
 ```bash
-git clone https://github.com/Ahmed-ziane-12/visit-jijel-frontend
+git clone https://github.com/Ahmed-ziane-12/visit-jijel-frontend.git
 cd visit-jijel-frontend
 npm install
 ```
