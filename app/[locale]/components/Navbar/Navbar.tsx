@@ -24,6 +24,9 @@ const Navbar = () => {
 
     const isExploreRoute = pathname.startsWith("/explore");
 
+    const isHomeRoute =
+        pathname === "/" || pathname === "/fr" || pathname === "/ar";
+
     const isAuthRoute =
         pathname.startsWith("/login") || pathname.startsWith("/register");
 
@@ -55,7 +58,7 @@ const Navbar = () => {
 
     return (
         <header
-            className={`${styles.container} ${isScrolled || isExploreRoute ? styles.scrolled : ""}`}
+            className={`${styles.container} ${isScrolled || isExploreRoute ? styles.scrolled : ""} ${isHomeRoute && !isScrolled ? styles.onHero : ""}`}
         >
             <Link className={styles.logo} href={"/"}>
                 <Image

@@ -20,6 +20,47 @@
     }
 }
 
+/* Transparent navbar over the home hero photo */
+.onHero {
+    color: #fff;
+}
+
+.onHero .themeToggle {
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(10px);
+}
+
+.onHero .themeToggle:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.55);
+}
+
+.onHero .links li:hover,
+.onHero .links li.active {
+    color: #fff;
+}
+
+.onHero .links li::after {
+    background: #fff;
+}
+
+.onHero .searchWrapper > div {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.26);
+    backdrop-filter: blur(10px);
+}
+
+.onHero .searchWrapper input {
+    color: #fff;
+}
+
+.onHero .searchWrapper input::placeholder {
+    color: rgba(255, 255, 255, 0.72);
+}
+
 .logo {
     height: 100%;
     width: 10vw;

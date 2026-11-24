@@ -16,6 +16,16 @@ interface UploadOptions {
     isCover?: boolean;
 }
 
+// Must stay in sync with config/cloudinary.php on the backend.
+const FOLDER_BY_MODEL: Record<string, string> = {
+    destination: "jijel/destinations",
+    business: "jijel/businesses",
+    listing: "jijel/listings",
+    event: "jijel/events",
+    profile: "jijel/profiles",
+    post: "jijel/posts",
+};
+
 export async function uploadToCloudinary({
     file,
     modelType,
@@ -23,9 +33,15 @@ export async function uploadToCloudinary({
     collection,
     isCover = false,
 }: UploadOptions) {
+    const folder = FOLDER_BY_MODEL[modelType];
+
+    if (!folder) {
+        throw new Error(`Unsupported media model type: ${modelType}`);
+    }
+
     // Step 1 — get signature from Laravel
     const { data: sig } = await axios.post<CloudinarySignature>('/api/v1/media/signature', {
-        folder: `jijel/${modelType}s`,
+        folder,
     });
 
     // Step 2 — upload directly to Cloudinary
