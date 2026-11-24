@@ -332,6 +332,7 @@
     bottom: -1px;
     height: clamp(90px, 13vw, 150px);
     pointer-events: none;
+    direction: ltr;
 }
 
 .waveTrack {
@@ -502,6 +503,7 @@
 .phone {
     position: relative;
     width: min(19rem, 82vw);
+    aspect-ratio: 9/17;
     border-radius: 2.6rem;
     padding: 0.62rem;
     background: linear-gradient(160deg, #23262c, #0b0d10);
@@ -527,6 +529,7 @@
     border-radius: 2.05rem;
     overflow: hidden;
     background: #f7f5f2;
+    height: 100%;
 }
 
 .phoneHead {

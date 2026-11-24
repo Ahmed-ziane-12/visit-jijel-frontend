@@ -36,10 +36,9 @@ export function Hero() {
 
     return (
         <section className={styles.hero}>
-            {/* Slow drifting coastal photo */}
             <div className={styles.heroMedia}>
                 <Image
-                    src="/p2.jpg"
+                    src="/coast.jpg"
                     alt=""
                     fill
                     preload

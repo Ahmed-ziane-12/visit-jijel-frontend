@@ -66,8 +66,6 @@ export function MobileSoon() {
                                 onSubmit={(event) => {
                                     event.preventDefault();
                                     if (!email.trim()) return;
-                                    // No newsletter endpoint exists yet; keep the
-                                    // confirmation local until one is available.
                                     setSent(true);
                                 }}
                             >
